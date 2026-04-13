@@ -101,8 +101,11 @@ export default async function DashboardPage() {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {dogs.map(dog => (
-                  <tr key={dog.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 font-medium text-gray-900">{dog.name ?? '—'}</td>
+                  <tr key={dog.id} className="hover:bg-gray-50 cursor-pointer relative">
+                    <td className="px-6 py-4 font-medium text-gray-900">
+                      <Link href={`/dashboard/dogs/${dog.id}`} className="absolute inset-0" />
+                      {dog.name ?? '—'}
+                    </td>
                     <td className="px-6 py-4 text-gray-600">{dog.breed ?? '—'}{dog.mix ? ' mix' : ''}</td>
                     <td className="px-6 py-4 text-gray-600">{dog.age_years ? `${dog.age_years}y` : '—'}</td>
                     <td className="px-6 py-4 text-gray-600">{dog.weight_lbs ? `${dog.weight_lbs} lbs` : '—'}</td>
