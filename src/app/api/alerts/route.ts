@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
 
       // Send email via Resend
       await resend.emails.send({
-        from: 'DOGSRUN <alerts@dogsrun.vercel.app>',
+        from: 'DOGSRUN <onboarding@resend.dev>',
         to: org.email,
         subject: `New dog match: ${dog.name ?? 'Unnamed'} (${dog.breed ?? 'Unknown breed'})`,
         html: `
