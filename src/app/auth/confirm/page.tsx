@@ -21,15 +21,13 @@ export default function AuthConfirmPage() {
       const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
         if (event === 'SIGNED_IN' && session?.user) {
           try {
-            setStatus('Loading your dashboard...');
+            setStatus('Loading your dashboard...')
             
-            const { data: org, error } = await supabase
+            const { data: org } = await supabase
               .from('organizations')
               .select('type')
               .eq('email', session.user.email)
-              .single()
-
-            if (error) throw error
+              .maybeSingle()
 
             if (org?.type === 'rescue') {
               router.push('/dashboard/rescue')
@@ -52,7 +50,7 @@ export default function AuthConfirmPage() {
           .from('organizations')
           .select('type')
           .eq('email', session.user.email)
-          .single()
+          .maybeSingle()
         
         if (org?.type === 'rescue') {
           router.push('/dashboard/rescue')
