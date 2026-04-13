@@ -26,9 +26,12 @@ export default function RegisterPage() {
 
     // 1. Sign up the user
     const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+  email,
+  password,
+  options: {
+    emailRedirectTo: `${window.location.origin}/auth/callback`,
+  },
+});
 
     if (authError) {
       setError(authError.message);

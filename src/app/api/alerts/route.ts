@@ -82,8 +82,8 @@ export async function POST(req: NextRequest) {
 
       // Send email via Resend
       await resend.emails.send({
-        from: 'DOGSRUN <onboarding@resend.dev>',
-        to: 'abelprasad4@gmail.com',
+        from: 'DOGSRUN Alerts <alerts@dogsrun.net>',
+        to: org.email,
         subject: `New dog match: ${dog.name ?? 'Unnamed'} (${dog.breed ?? 'Unknown breed'})`,
         html: `
           <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
