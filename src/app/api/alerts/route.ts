@@ -86,24 +86,68 @@ export async function POST(req: NextRequest) {
         to: org.email,
         subject: `New dog match: ${dog.name ?? 'Unnamed'} (${dog.breed ?? 'Unknown breed'})`,
         html: `
-          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-            <h1 style="color: #1a2744;">New Dog Match — DOGSRUN</h1>
-            <p>A dog matching your rescue criteria is available:</p>
-            <table style="width:100%; border-collapse: collapse; margin: 20px 0;">
-              <tr><td style="padding: 8px; border-bottom: 1px solid #eee; color: #666;">Name</td><td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;">${dog.name ?? '—'}</td></tr>
-              <tr><td style="padding: 8px; border-bottom: 1px solid #eee; color: #666;">Breed</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${dog.breed ?? '—'}${dog.mix ? ' mix' : ''}</td></tr>
-              <tr><td style="padding: 8px; border-bottom: 1px solid #eee; color: #666;">Age</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${dog.age_years ? `${dog.age_years} years` : '—'}</td></tr>
-              <tr><td style="padding: 8px; border-bottom: 1px solid #eee; color: #666;">Weight</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${dog.weight_lbs ? `${dog.weight_lbs} lbs` : '—'}</td></tr>
-              <tr><td style="padding: 8px; border-bottom: 1px solid #eee; color: #666;">Sex</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${dog.sex ?? '—'}</td></tr>
-              <tr><td style="padding: 8px; border-bottom: 1px solid #eee; color: #666;">Shelter</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${shelter?.name ?? '—'}, ${shelter?.city ?? ''} ${shelter?.state ?? ''}</td></tr>
-            </table>
-            <a href="https://dogsrun.vercel.app/dashboard" 
-               style="background: #2563eb; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; display: inline-block;">
-              View on DOGSRUN
-            </a>
-            <p style="color: #999; font-size: 12px; margin-top: 32px;">
-              You received this because your rescue org has active matching criteria on DOGSRUN.
-            </p>
+          <div style="background-color: #f9fafb; padding: 32px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+              <!-- Header -->
+              <div style="background-color: #f59e0b; padding: 24px; text-align: center;">
+                <span style="color: #ffffff; font-size: 24px; font-weight: 800; letter-spacing: -0.025em;">DOGSRUN</span>
+              </div>
+              
+              <!-- Content -->
+              <div style="padding: 32px 40px;">
+                <h1 style="color: #111827; font-size: 20px; font-weight: 700; margin-bottom: 24px; text-align: center;">
+                  A dog matching your criteria is available
+                </h1>
+                
+                <p style="color: #4b5563; font-size: 16px; line-height: 24px; margin-bottom: 32px; text-align: center;">
+                  A new dog has just been listed by a shelter that matches your rescue organization's saved matching criteria.
+                </p>
+                
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 32px; border-radius: 8px; overflow: hidden; background-color: #fdfaf5;">
+                  <tr>
+                    <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #6b7280; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; width: 35%;">Name</td>
+                    <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #111827; font-size: 16px; font-weight: 700;">${dog.name ?? '—'}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #6b7280; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Breed</td>
+                    <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #111827; font-size: 16px;">${dog.breed ?? '—'}${dog.mix ? ' mix' : ''}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #6b7280; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Age</td>
+                    <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #111827; font-size: 16px;">${dog.age_years ? `${dog.age_years} years` : '—'}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #6b7280; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Weight</td>
+                    <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #111827; font-size: 16px;">${dog.weight_lbs ? `${dog.weight_lbs} lbs` : '—'}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #6b7280; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Sex</td>
+                    <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #111827; font-size: 16px;">${dog.sex ?? '—'}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 12px 16px; color: #6b7280; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Shelter</td>
+                    <td style="padding: 12px 16px; color: #111827; font-size: 16px;">${shelter?.name ?? '—'}, ${shelter?.city ?? ''} ${shelter?.state ?? ''}</td>
+                  </tr>
+                </table>
+                
+                <div style="text-align: center;">
+                  <a href="https://dogsrun.vercel.app/dashboard/rescue" 
+                     style="background-color: #f59e0b; color: #ffffff; padding: 16px 32px; border-radius: 12px; text-decoration: none; display: inline-block; font-weight: 700; font-size: 16px; box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.4);">
+                    View on DOGSRUN
+                  </a>
+                </div>
+              </div>
+              
+              <!-- Footer -->
+              <div style="background-color: #f9fafb; padding: 24px 40px; border-top: 1px solid #e5e7eb; text-align: center;">
+                <p style="color: #9ca3af; font-size: 12px; line-height: 18px; margin: 0;">
+                  You received this alert because your rescue organization has active matching criteria on DOGSRUN. To update your criteria, <a href="https://dogsrun.vercel.app/dashboard/rescue" style="color: #f59e0b; text-decoration: underline;">log in to your rescue portal</a>.
+                </p>
+              </div>
+            </div>
+            <div style="text-align: center; margin-top: 24px;">
+              <p style="color: #d1d5db; font-size: 12px;">&copy; ${new Date().getFullYear()} DOGSRUN. All rights reserved.</p>
+            </div>
           </div>
         `,
       })

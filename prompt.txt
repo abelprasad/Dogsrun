@@ -1,29 +1,29 @@
-Fix the following issues in the DOGSRUN app:
+Redesign the alert email template in src/app/api/alerts/route.ts. Replace the current plain HTML email with a beautiful, professional transactional email that matches the DOGSRUN brand.
 
-## 1. Interested/Pass buttons (src/app/dashboard/rescue/alert-actions.tsx)
-The Interested and Pass buttons should update the alert status in the database when clicked.
-- "Interested" → set status to 'responded'
-- "Pass" → set status to 'declined'
-- Use the Supabase browser client from '@/lib/supabase'
-- After updating, refresh the page using router.refresh() from next/navigation
-- Show a loading state while updating
-- Once actioned, replace the buttons with a status label: green "Interested ✓" or gray "Passed"
+## Design Requirements
+- Max width: 600px, centered
+- White background with subtle gray border
+- Header: amber #f59e0b background with "DOGSRUN" in white bold text
+- Clean table layout for dog details
+- Amber CTA button "View on DOGSRUN" linking to https://dogsrun.vercel.app/dashboard/rescue
+- Footer with unsubscribe note in gray
 
-## 2. View Full Profile page (src/app/dashboard/dogs/[id]/page.tsx)
-The "View Full Profile →" link from the rescue portal goes to /dashboard/dogs/[id]. This page currently only works for shelter users. Make it accessible to both shelter and rescue users — remove any redirect that blocks rescue orgs from viewing dog profiles.
+## Content Structure
+1. Header bar — amber background, DOGSRUN logo text in white
+2. Headline — "A dog matching your criteria is available"
+3. Dog details table — clean rows with gray labels and bold values:
+   - Name
+   - Breed  
+   - Age
+   - Weight
+   - Sex
+   - Shelter name and location
+4. CTA button — amber #f59e0b, white text, "View on DOGSRUN", rounded corners, full inline styles
+5. Footer — small gray text: "You received this alert because your rescue organization has active matching criteria on DOGSRUN. To update your criteria, log in to your rescue portal."
 
-## 3. Matching Criteria page (src/app/dashboard/criteria/page.tsx)
-Create this page at src/app/dashboard/criteria/page.tsx. It should:
-- Be a server component that fetches the rescue org's criteria from rescue_criteria table (lookup org by user email)
-- Display current criteria: breeds, max age, max weight, sex preference, accepts mixes, states served
-- Have an "Edit" button that links to /dashboard/criteria/edit (deferred — just show the data for now)
-- If no criteria exist, show a message with a prompt to contact support to set up criteria
-- Use the DOGSRUN design system: white background, amber #f59e0b accent, gray-900 headings, gray-500 body, rounded-xl cards
-
-## 4. Add Dog form styling (src/app/dashboard/dogs/new/page.tsx)
-- Change the submit button from blue (bg-blue-600) to amber (bg-[#f59e0b] hover:bg-[#d97706])
-- Add text-gray-900 placeholder-gray-400 to ALL input fields and the textarea and select
-- Add text-gray-900 to the select element as well
-
-## 5. Homepage split CTA check (src/app/page.tsx)
-Verify the homepage has the two-card split CTA section with shelter and rescue cards linking to /register?type=shelter and /register?type=rescue. If it's missing or broken, rebuild it matching the existing design system.
+## Technical Requirements
+- All styles must be inline (no external CSS, no <style> tags) for email client compatibility
+- Use only web-safe fonts with fallbacks: font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif
+- No images or external assets
+- Must render correctly in Gmail, Outlook, and Apple Mail
+- Keep all existing template variables: dog.name, dog.breed, dog.age_years, dog.weight_lbs, dog.sex, shelter name/city/state

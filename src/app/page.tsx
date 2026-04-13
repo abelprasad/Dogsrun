@@ -29,7 +29,10 @@ export default function Home() {
           The fastest way for animal shelters to find specialized rescues for their most urgent dogs. 
           Real-time matching, instant alerts, and seamless communication.
         </p>
-        <div className="flex justify-center">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Link href="/register" className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-lg font-medium rounded-xl shadow-lg text-white bg-[#f59e0b] hover:bg-[#d97706] transform transition hover:scale-105 active:scale-95">
+            Get Started
+          </Link>
           <Link href="#join" className="inline-flex items-center justify-center px-8 py-4 border border-gray-200 text-lg font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-colors shadow-sm">
             Learn More
           </Link>
@@ -71,7 +74,7 @@ export default function Home() {
             <p className="text-gray-500 mb-10 leading-relaxed">
               Set your criteria once. Get alerted automatically when matching dogs are available.
             </p>
-            <Link href="/register?type=rescue" className="inline-flex items-center justify-center w-full px-6 py-4 border border-gray-200 text-base font-bold rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-all transform active:scale-95 shadow-sm">
+            <Link href="/register?type=rescue" className="inline-flex items-center justify-center w-full px-6 py-4 border border-transparent text-base font-bold rounded-xl text-white bg-[#f59e0b] hover:bg-[#d97706] transition-all transform active:scale-95 shadow-lg shadow-amber-200">
               Get Started as a Rescue
             </Link>
           </div>
