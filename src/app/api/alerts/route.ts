@@ -114,6 +114,7 @@ export async function POST(req: NextRequest) {
         rescue_id: org.id,
         criteria_id: criteria.id,
         status: 'sent',
+        sent_at: new Date().toISOString(),
       })
     })
   )

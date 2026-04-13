@@ -52,7 +52,7 @@ export default async function RescuePortalPage() {
     .from('alerts')
     .select('*, dogs(*, organizations(name, city, state))')
     .eq('rescue_id', org.id)
-    .order('sent_at', { ascending: false })
+    .order('sent_at', { ascending: false, nullsFirst: false })
 
   return (
     <div className="min-h-screen bg-white text-gray-900 font-sans antialiased">
