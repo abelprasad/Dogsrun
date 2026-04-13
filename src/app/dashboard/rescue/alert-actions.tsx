@@ -32,38 +32,40 @@ export default function AlertActions({ alertId, currentStatus }: AlertActionsPro
     setLoading(false);
   }
 
-  if (status === 'interested') {
+  if (status === 'responded') {
     return (
       <div className="flex items-center gap-2 text-green-600 font-bold text-sm bg-green-50 px-4 py-2 rounded-xl border border-green-100">
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
           <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
         </svg>
-        Interest Sent
+        Interested ✓
       </div>
     );
   }
 
-  if (status === 'passed') {
+  if (status === 'declined') {
     return (
-      <div className="text-gray-400 font-medium text-sm">Passed</div>
+      <div className="text-gray-400 font-medium text-sm bg-gray-50 px-4 py-2 rounded-xl border border-gray-100">
+        Passed
+      </div>
     );
   }
 
   return (
     <div className="flex items-center gap-3">
       <button
-        onClick={() => updateAlertStatus('passed')}
+        onClick={() => updateAlertStatus('declined')}
         disabled={loading}
         className="px-4 py-2 text-sm font-bold text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50"
       >
-        Pass
+        {loading ? '...' : 'Pass'}
       </button>
       <button
-        onClick={() => updateAlertStatus('interested')}
+        onClick={() => updateAlertStatus('responded')}
         disabled={loading}
         className="px-6 py-2 bg-[#f59e0b] hover:bg-[#d97706] text-white text-sm font-bold rounded-xl shadow-md transition-all transform active:scale-95 disabled:opacity-50"
       >
-        Interested
+        {loading ? 'Updating...' : 'Interested'}
       </button>
     </div>
   );

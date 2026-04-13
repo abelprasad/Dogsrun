@@ -1,18 +1,29 @@
-Add a sign out button to both the shelter dashboard and rescue portal navbar.
+Fix the following issues in the DOGSRUN app:
 
-## Shelter Dashboard (src/app/dashboard/page.tsx)
-In the navbar, add a sign out button on the right side next to the org name/avatar. It should:
+## 1. Interested/Pass buttons (src/app/dashboard/rescue/alert-actions.tsx)
+The Interested and Pass buttons should update the alert status in the database when clicked.
+- "Interested" → set status to 'responded'
+- "Pass" → set status to 'declined'
 - Use the Supabase browser client from '@/lib/supabase'
-- Call supabase.auth.signOut() then redirect to '/'
-- Since this is a server component, the sign out button needs to be a separate client component
-- Create src/app/dashboard/sign-out-button.tsx as a 'use client' component that handles the sign out logic
-- Style: text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors
+- After updating, refresh the page using router.refresh() from next/navigation
+- Show a loading state while updating
+- Once actioned, replace the buttons with a status label: green "Interested ✓" or gray "Passed"
 
-## Rescue Portal (src/app/dashboard/rescue/page.tsx)
-Same approach — import and use the same SignOutButton component in the rescue portal navbar.
+## 2. View Full Profile page (src/app/dashboard/dogs/[id]/page.tsx)
+The "View Full Profile →" link from the rescue portal goes to /dashboard/dogs/[id]. This page currently only works for shelter users. Make it accessible to both shelter and rescue users — remove any redirect that blocks rescue orgs from viewing dog profiles.
 
-## SignOutButton component (src/app/dashboard/sign-out-button.tsx)
-'use client'
-- Import createClient from '@/lib/supabase'
-- On click: await supabase.auth.signOut() then window.location.href = '/'
-- Render as a simple text button matching the design system
+## 3. Matching Criteria page (src/app/dashboard/criteria/page.tsx)
+Create this page at src/app/dashboard/criteria/page.tsx. It should:
+- Be a server component that fetches the rescue org's criteria from rescue_criteria table (lookup org by user email)
+- Display current criteria: breeds, max age, max weight, sex preference, accepts mixes, states served
+- Have an "Edit" button that links to /dashboard/criteria/edit (deferred — just show the data for now)
+- If no criteria exist, show a message with a prompt to contact support to set up criteria
+- Use the DOGSRUN design system: white background, amber #f59e0b accent, gray-900 headings, gray-500 body, rounded-xl cards
+
+## 4. Add Dog form styling (src/app/dashboard/dogs/new/page.tsx)
+- Change the submit button from blue (bg-blue-600) to amber (bg-[#f59e0b] hover:bg-[#d97706])
+- Add text-gray-900 placeholder-gray-400 to ALL input fields and the textarea and select
+- Add text-gray-900 to the select element as well
+
+## 5. Homepage split CTA check (src/app/page.tsx)
+Verify the homepage has the two-card split CTA section with shelter and rescue cards linking to /register?type=shelter and /register?type=rescue. If it's missing or broken, rebuild it matching the existing design system.

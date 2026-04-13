@@ -36,6 +36,13 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
     redirect('/auth/login')
   }
 
+  // Fetch current user's organization
+  const { data: userOrg } = await supabase
+    .from('organizations')
+    .select('*')
+    .eq('id', user.id)
+    .single()
+
   // Fetch dog details
   const { data: dog } = await supabase
     .from('dogs')
@@ -54,6 +61,10 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
     .eq('dog_id', id)
     .order('created_at', { ascending: false })
 
+  const isShelter = userOrg?.type === 'shelter'
+  const isDogShelter = isShelter && userOrg.id === dog.shelter_id
+  const backLink = userOrg?.type === 'rescue' ? '/dashboard/rescue' : '/dashboard'
+
   return (
     <div className="min-h-screen bg-white text-gray-900 font-sans antialiased">
       {/* Navbar */}
@@ -62,11 +73,11 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
           <div className="flex items-center gap-8">
             <Link href="/" className="text-2xl font-bold text-[#f59e0b] tracking-tight">DOGSRUN</Link>
             <div className="hidden md:flex items-center gap-6">
-              <Link href="/dashboard" className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">Dashboard</Link>
-              <Link href="#" className="text-sm font-bold text-gray-900 border-b-2 border-[#f59e0b] pb-1">Dog Profile</Link>
+              <Link href={backLink} className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">Dashboard</Link>
+              <span className="text-sm font-bold text-gray-900 border-b-2 border-[#f59e0b] pb-1">Dog Profile</span>
             </div>
           </div>
-          <Link href="/dashboard" className="text-sm font-bold text-gray-500 hover:text-[#f59e0b] transition-colors">
+          <Link href={backLink} className="text-sm font-bold text-gray-500 hover:text-[#f59e0b] transition-colors">
             ← Back to Dashboard
           </Link>
         </div>
@@ -113,62 +124,70 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
               </div>
             </div>
 
-            {/* Alert History */}
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden">
-              <div className="px-8 py-6 border-b border-gray-100 flex items-center justify-between">
-                <h3 className="text-lg font-bold text-gray-900">Rescue Outreach</h3>
-                <span className="text-xs font-bold bg-gray-100 text-gray-600 px-2 py-1 rounded-full">{alerts?.length || 0} alerts sent</span>
-              </div>
-              <div className="divide-y divide-gray-100">
-                {alerts && alerts.length > 0 ? (
-                  alerts.map((alert: any) => (
-                    <div key={alert.id} className="px-8 py-5 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                      <div>
-                        <p className="font-bold text-gray-900">{alert.organizations?.name}</p>
-                        <p className="text-xs text-gray-500">{alert.organizations?.city}, {alert.organizations?.state}</p>
+            {/* Alert History (Only for the shelter that owns the dog) */}
+            {isDogShelter && (
+              <div className="bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden">
+                <div className="px-8 py-6 border-b border-gray-100 flex items-center justify-between">
+                  <h3 className="text-lg font-bold text-gray-900">Rescue Outreach</h3>
+                  <span className="text-xs font-bold bg-gray-100 text-gray-600 px-2 py-1 rounded-full">{alerts?.length || 0} alerts sent</span>
+                </div>
+                <div className="divide-y divide-gray-100">
+                  {alerts && alerts.length > 0 ? (
+                    alerts.map((alert: any) => (
+                      <div key={alert.id} className="px-8 py-5 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                        <div>
+                          <p className="font-bold text-gray-900">{alert.organizations?.name}</p>
+                          <p className="text-xs text-gray-500">{alert.organizations?.city}, {alert.organizations?.state}</p>
+                        </div>
+                        <div className="text-right">
+                          <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-md border ${
+                            alert.status === 'sent' ? 'bg-amber-50 text-amber-700 border-amber-100' :
+                            alert.status === 'responded' ? 'bg-green-50 text-green-700 border-green-100' :
+                            'bg-gray-50 text-gray-700 border-gray-100'
+                          }`}>
+                            {alert.status}
+                          </span>
+                          <p className="text-[10px] text-gray-400 mt-1">{new Date(alert.created_at).toLocaleDateString()}</p>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-md border ${
-                          alert.status === 'sent' ? 'bg-amber-50 text-amber-700 border-amber-100' :
-                          alert.status === 'interested' ? 'bg-green-50 text-green-700 border-green-100' :
-                          'bg-gray-50 text-gray-700 border-gray-100'
-                        }`}>
-                          {alert.status}
-                        </span>
-                        <p className="text-[10px] text-gray-400 mt-1">{new Date(alert.created_at).toLocaleDateString()}</p>
-                      </div>
+                    ))
+                  ) : (
+                    <div className="px-8 py-10 text-center text-gray-500">
+                      No rescue alerts have been sent for this dog yet.
                     </div>
-                  ))
-                ) : (
-                  <div className="px-8 py-10 text-center text-gray-500">
-                    No rescue alerts have been sent for this dog yet.
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
-            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-xl">
-              <StatusUpdater dogId={dog.id} currentStatus={dog.status || 'available'} />
-            </div>
+            {isDogShelter && (
+              <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-xl">
+                <StatusUpdater dogId={dog.id} currentStatus={dog.status || 'available'} />
+              </div>
+            )}
 
             <div className="bg-amber-50 p-6 rounded-3xl border border-amber-100">
               <h3 className="text-xs font-bold text-[#b45309] uppercase tracking-widest mb-4">Shelter Information</h3>
               <p className="font-bold text-gray-900 mb-1">{dog.organizations?.name}</p>
               <p className="text-sm text-gray-600 mb-4">{dog.organizations?.city}, {dog.organizations?.state}</p>
-              <p className="text-xs text-gray-500 leading-tight">This dog is currently listed by your shelter.</p>
+              <p className="text-xs text-gray-500 leading-tight">
+                {isDogShelter ? 'This dog is currently listed by your shelter.' : 'Contact this shelter to inquire about this dog.'}
+              </p>
             </div>
 
-            <div className="bg-gray-900 p-6 rounded-3xl border border-gray-800 text-white shadow-xl">
-              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Quick Actions</h3>
-              <div className="space-y-3">
-                <button className="w-full py-3 bg-gray-800 hover:bg-gray-700 rounded-xl text-xs font-bold transition-colors">Edit Details</button>
-                <button className="w-full py-3 bg-gray-800 hover:bg-gray-700 rounded-xl text-xs font-bold transition-colors">Share Profile</button>
-                <button className="w-full py-3 bg-red-900/50 hover:bg-red-900/80 text-red-200 rounded-xl text-xs font-bold transition-colors">Mark as Urgent</button>
+            {isDogShelter && (
+              <div className="bg-gray-900 p-6 rounded-3xl border border-gray-800 text-white shadow-xl">
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Quick Actions</h3>
+                <div className="space-y-3">
+                  <button className="w-full py-3 bg-gray-800 hover:bg-gray-700 rounded-xl text-xs font-bold transition-colors">Edit Details</button>
+                  <button className="w-full py-3 bg-gray-800 hover:bg-gray-700 rounded-xl text-xs font-bold transition-colors">Share Profile</button>
+                  <button className="w-full py-3 bg-red-900/50 hover:bg-red-900/80 text-red-200 rounded-xl text-xs font-bold transition-colors">Mark as Urgent</button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </main>

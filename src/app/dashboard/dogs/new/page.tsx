@@ -15,7 +15,7 @@ export default function NewDogPage() {
     weight_lbs: '',
     sex: 'unknown',
     color: '',
-    notes: '',
+    description: '',
   })
 
   const field = (key: string, label: string, type = 'text', placeholder = '') => (
@@ -26,7 +26,7 @@ export default function NewDogPage() {
         placeholder={placeholder}
         value={(form as any)[key]}
         onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
-        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-100 focus:border-[#f59e0b] text-gray-900 placeholder-gray-400 transition-all"
       />
     </div>
   )
@@ -42,7 +42,7 @@ export default function NewDogPage() {
     const { data: org } = await supabase
       .from('organizations')
       .select('id')
-      .eq('email', user.email)
+      .eq('id', user.id)
       .single()
 
     if (!org) {
@@ -75,65 +75,74 @@ export default function NewDogPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white border-b px-6 py-4 flex justify-between items-center">
-        <h1 className="text-xl font-bold text-gray-900">DOGSRUN</h1>
-        <button onClick={() => router.push('/dashboard')} className="text-sm text-gray-500 hover:text-gray-900">
+    <div className="min-h-screen bg-white">
+      <nav className="bg-white border-b border-gray-100 px-6 h-16 flex justify-between items-center sticky top-0 z-50">
+        <h1 className="text-2xl font-bold text-[#f59e0b]">DOGSRUN</h1>
+        <button onClick={() => router.push('/dashboard')} className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">
           ← Back to dashboard
         </button>
       </nav>
-      <main className="max-w-2xl mx-auto px-6 py-10">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Add a dog</h2>
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg border p-6 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            {field('name', 'Name', 'text', 'Buddy')}
-            {field('breed', 'Breed', 'text', 'Labrador')}
+      <main className="max-w-2xl mx-auto px-6 py-12">
+        <div className="mb-8">
+          <h2 className="text-3xl font-black text-gray-900">Add a dog</h2>
+          <p className="text-gray-500 mt-2 text-lg">Help this dog find the perfect rescue match.</p>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="bg-white rounded-3xl border border-gray-100 shadow-xl p-8 space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {field('name', 'Dog Name', 'text', 'Buddy')}
+            {field('breed', 'Primary Breed', 'text', 'Labrador')}
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {field('age_years', 'Age (years)', 'number', '2')}
             {field('weight_lbs', 'Weight (lbs)', 'number', '45')}
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Sex</label>
               <select
                 value={form.sex}
                 onChange={e => setForm(f => ({ ...f, sex: e.target.value }))}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-100 focus:border-[#f59e0b] text-gray-900 transition-all bg-white"
               >
                 <option value="male">Male</option>
                 <option value="female">Female</option>
                 <option value="unknown">Unknown</option>
               </select>
             </div>
-            {field('color', 'Color', 'text', 'Black and white')}
+            {field('color', 'Color/Markings', 'text', 'Black and white')}
           </div>
-          <div className="flex items-center gap-2">
+          
+          <div className="flex items-center gap-3 p-4 bg-amber-50 rounded-2xl border border-amber-100">
             <input
               type="checkbox"
               id="mix"
               checked={form.mix}
               onChange={e => setForm(f => ({ ...f, mix: e.target.checked }))}
-              className="rounded"
+              className="w-5 h-5 rounded border-gray-300 text-[#f59e0b] focus:ring-[#f59e0b]"
             />
-            <label htmlFor="mix" className="text-sm font-medium text-gray-700">Mixed breed</label>
+            <label htmlFor="mix" className="text-sm font-bold text-amber-900 cursor-pointer">This is a mixed breed dog</label>
           </div>
+          
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Description & Medical Notes</label>
             <textarea
-              value={form.notes}
-              onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
-              placeholder="Any relevant info about this dog..."
-              rows={3}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={form.description}
+              onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+              placeholder="Any relevant info about behavior, medical needs, or urgency..."
+              rows={4}
+              className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-100 focus:border-[#f59e0b] text-gray-900 placeholder-gray-400 transition-all"
             />
           </div>
+          
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 disabled:opacity-50"
+            className="w-full bg-[#f59e0b] text-white py-4 rounded-xl font-black text-lg shadow-lg hover:bg-[#d97706] disabled:opacity-50 transform transition active:scale-[0.98]"
           >
-            {loading ? 'Saving...' : 'Add dog'}
+            {loading ? 'Adding Dog...' : 'Post to Network'}
           </button>
         </form>
       </main>
