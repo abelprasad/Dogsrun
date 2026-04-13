@@ -1,29 +1,22 @@
-Redesign the alert email template in src/app/api/alerts/route.ts. Replace the current plain HTML email with a beautiful, professional transactional email that matches the DOGSRUN brand.
+Create a custom favicon for DOGSRUN and replace the existing one at public/favicon.ico.
 
-## Design Requirements
-- Max width: 600px, centered
-- White background with subtle gray border
-- Header: amber #f59e0b background with "DOGSRUN" in white bold text
-- Clean table layout for dog details
-- Amber CTA button "View on DOGSRUN" linking to https://dogsrun.vercel.app/dashboard/rescue
-- Footer with unsubscribe note in gray
+## Design
+Create a simple, recognizable favicon that works at 16x16 and 32x32 pixels:
+- Orange/amber circle background (#f59e0b)
+- White paw print or white bold "D" in the center
+- Should look clean and recognizable at small sizes
 
-## Content Structure
-1. Header bar — amber background, DOGSRUN logo text in white
-2. Headline — "A dog matching your criteria is available"
-3. Dog details table — clean rows with gray labels and bold values:
-   - Name
-   - Breed  
-   - Age
-   - Weight
-   - Sex
-   - Shelter name and location
-4. CTA button — amber #f59e0b, white text, "View on DOGSRUN", rounded corners, full inline styles
-5. Footer — small gray text: "You received this alert because your rescue organization has active matching criteria on DOGSRUN. To update your criteria, log in to your rescue portal."
+## Implementation
+1. Create the favicon as an SVG at public/favicon.svg
+2. Also create public/favicon.ico (use a simple approach — copy the SVG or create a minimal ICO)
+3. Update src/app/layout.tsx to reference the new favicon in the metadata:
 
-## Technical Requirements
-- All styles must be inline (no external CSS, no <style> tags) for email client compatibility
-- Use only web-safe fonts with fallbacks: font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif
-- No images or external assets
-- Must render correctly in Gmail, Outlook, and Apple Mail
-- Keep all existing template variables: dog.name, dog.breed, dog.age_years, dog.weight_lbs, dog.sex, shelter name/city/state
+export const metadata: Metadata = {
+  title: "DOGSRUN",
+  description: "The fastest way to match shelter dogs with rescue organizations.",
+  icons: {
+    icon: '/favicon.svg',
+  },
+}
+
+Use an SVG paw print shape or a bold white "D" on amber background — whichever is simpler to implement cleanly.
