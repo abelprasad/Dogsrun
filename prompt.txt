@@ -1,0 +1,22 @@
+# Save prompt to a file
+@"
+You are building DOGSRUN. Build all missing pages. DO NOT run git commands. DO NOT install packages.
+
+Read the existing codebase first, then create these files:
+
+1. src/app/page.tsx - Simple warm public homepage with navbar, hero, how it works (3 steps), for shelters section, for rescues section, footer. Amber accent color, white base, friendly tone.
+
+2. src/app/dashboard/page.tsx - Shelter dashboard, server component, auth protected, fetch org by user email, fetch dogs, show 3 stat cards and clickable dogs table.
+
+3. src/app/dashboard/dogs/[id]/page.tsx - Dog profile page, server component, auth protected, show dog details and alert history.
+
+4. src/app/dashboard/dogs/[id]/status-updater.tsx - Client component with select to update dog status via supabase.
+
+5. src/app/dashboard/rescue/page.tsx - Rescue portal, show incoming alerts with dog info and interested/pass buttons.
+
+6. src/app/register/page.tsx - Registration form with shelter and rescue tabs.
+
+7. src/components/status-badge.tsx - Reusable colored pill component for dog status.
+
+Use createServerClient from @supabase/ssr for server components. Use createClient from @/lib/supabase for client components. Design: white base, amber #f59e0b accents, gray-900 text, rounded-xl cards, warm and simple.
+"@ | Out-File -FilePath prompt.txt -Encoding utf8

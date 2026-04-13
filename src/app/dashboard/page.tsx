@@ -1,132 +1,179 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import StatusBadge from '@/components/status-badge'
 
 export default async function DashboardPage() {
   const cookieStore = await cookies()
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll() { return cookieStore.getAll() },
+        getAll() {
+          return cookieStore.getAll()
+        },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options)
-          )
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            )
+          } catch {
+            // The `setAll` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+          }
         },
       },
     }
   )
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
 
+  if (!user) {
+    redirect('/auth/login')
+  }
+
+  // Fetch organization
   const { data: org } = await supabase
     .from('organizations')
     .select('*')
-    .eq('email', user.email)
+    .eq('id', user.id)
     .single()
 
+  if (!org) {
+    // If user has no org profile, maybe they need to register it
+    redirect('/register')
+  }
+
+  if (org.type === 'rescue') {
+    redirect('/dashboard/rescue')
+  }
+
+  // Fetch dogs for this shelter
   const { data: dogs } = await supabase
     .from('dogs')
     .select('*')
+    .eq('shelter_id', org.id)
     .order('created_at', { ascending: false })
 
-  const available = dogs?.filter(d => d.status === 'available').length ?? 0
-  const adopted = dogs?.filter(d => d.status === 'adopted').length ?? 0
+  const stats = {
+    total: dogs?.length || 0,
+    urgent: dogs?.filter(d => d.status === 'urgent').length || 0,
+    placed: dogs?.filter(d => ['placed', 'adopted'].includes(d.status)).length || 0,
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white border-b px-6 py-4 flex justify-between items-center">
-        <h1 className="text-xl font-bold text-gray-900">DOGSRUN</h1>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-500">{org?.name ?? user.email}</span>
+    <div className="min-h-screen bg-white text-gray-900 font-sans antialiased">
+      {/* Navbar */}
+      <nav className="border-b border-gray-100 bg-white sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-8">
+            <Link href="/" className="text-2xl font-bold text-[#f59e0b] tracking-tight">DOGSRUN</Link>
+            <div className="hidden md:flex items-center gap-6">
+              <Link href="/dashboard" className="text-sm font-bold text-gray-900 border-b-2 border-[#f59e0b] pb-1">Dashboard</Link>
+              <Link href="/dashboard/dogs/new" className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">Add Dog</Link>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+             <div className="text-right hidden sm:block">
+              <p className="text-xs font-bold text-gray-900">{org.name}</p>
+              <p className="text-[10px] text-gray-500 uppercase tracking-wider">{org.type}</p>
+            </div>
+            <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-xs font-bold text-[#f59e0b]">
+              {org.name[0]}
+            </div>
+          </div>
         </div>
       </nav>
-      <main className="max-w-5xl mx-auto px-6 py-10">
-        <div className="flex justify-between items-center mb-8">
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
-            <p className="text-gray-500 text-sm mt-1">{org?.city}, {org?.state}</p>
+            <h1 className="text-3xl font-bold text-gray-900">Shelter Dashboard</h1>
+            <p className="text-gray-500 mt-1">Manage your dogs and track rescue interest.</p>
           </div>
-          <Link
-            href="/dashboard/dogs/new"
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm font-medium"
-          >
-            + Add dog
+          <Link href="/dashboard/dogs/new" className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-sm font-bold rounded-xl shadow-lg text-white bg-[#f59e0b] hover:bg-[#d97706] transition-all transform active:scale-95">
+            + Add New Dog
           </Link>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
-          <div className="bg-white rounded-lg border p-6">
-            <h3 className="font-semibold text-gray-900 mb-1">Total dogs</h3>
-            <p className="text-3xl font-bold text-blue-600">{dogs?.length ?? 0}</p>
+        {/* Stat Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+            <p className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Total Dogs</p>
+            <p className="text-4xl font-black text-gray-900">{stats.total}</p>
           </div>
-          <div className="bg-white rounded-lg border p-6">
-            <h3 className="font-semibold text-gray-900 mb-1">Available</h3>
-            <p className="text-3xl font-bold text-green-600">{available}</p>
+          <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+            <p className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Urgent Need</p>
+            <p className="text-4xl font-black text-red-600">{stats.urgent}</p>
           </div>
-          <div className="bg-white rounded-lg border p-6">
-            <h3 className="font-semibold text-gray-900 mb-1">Adopted</h3>
-            <p className="text-3xl font-bold text-gray-600">{adopted}</p>
+          <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+            <p className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Saved / Placed</p>
+            <p className="text-4xl font-black text-green-600">{stats.placed}</p>
           </div>
         </div>
 
-        {/* Dogs table */}
-        <div className="bg-white rounded-lg border overflow-hidden">
-          <div className="px-6 py-4 border-b flex justify-between items-center">
-            <h3 className="font-semibold text-gray-900">Your dogs</h3>
-          </div>
-          {!dogs || dogs.length === 0 ? (
-            <div className="px-6 py-12 text-center">
-              <p className="text-gray-500 mb-4">No dogs yet.</p>
-              <Link href="/dashboard/dogs/new" className="text-blue-600 hover:underline text-sm">
-                Add your first dog →
-              </Link>
-            </div>
-          ) : (
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b">
-                <tr>
-                  <th className="px-6 py-3 text-left text-gray-500 font-medium">Name</th>
-                  <th className="px-6 py-3 text-left text-gray-500 font-medium">Breed</th>
-                  <th className="px-6 py-3 text-left text-gray-500 font-medium">Age</th>
-                  <th className="px-6 py-3 text-left text-gray-500 font-medium">Weight</th>
-                  <th className="px-6 py-3 text-left text-gray-500 font-medium">Status</th>
-                  <th className="px-6 py-3 text-left text-gray-500 font-medium">Added</th>
+        {/* Dogs Table */}
+        <div className="bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="bg-gray-50/50 border-b border-gray-100">
+                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Dog</th>
+                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Details</th>
+                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {dogs.map(dog => (
-                  <tr key={dog.id} className="hover:bg-gray-50 cursor-pointer relative">
-                    <td className="px-6 py-4 font-medium text-gray-900">
-                      <Link href={`/dashboard/dogs/${dog.id}`} className="absolute inset-0" />
-                      {dog.name ?? '—'}
-                    </td>
-                    <td className="px-6 py-4 text-gray-600">{dog.breed ?? '—'}{dog.mix ? ' mix' : ''}</td>
-                    <td className="px-6 py-4 text-gray-600">{dog.age_years ? `${dog.age_years}y` : '—'}</td>
-                    <td className="px-6 py-4 text-gray-600">{dog.weight_lbs ? `${dog.weight_lbs} lbs` : '—'}</td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        dog.status === 'available' ? 'bg-green-100 text-green-700' :
-                        dog.status === 'adopted' ? 'bg-gray-100 text-gray-600' :
-                        dog.status === 'pending' ? 'bg-amber-100 text-amber-700' :
-                        'bg-gray-100 text-gray-600'
-                      }`}>
-                        {dog.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-gray-500">
-                      {new Date(dog.created_at).toLocaleDateString()}
+                {dogs && dogs.length > 0 ? (
+                  dogs.map((dog) => (
+                    <tr key={dog.id} className="hover:bg-amber-50/30 transition-colors group">
+                      <td className="px-6 py-5">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center text-gray-400 font-bold">
+                            {dog.name?.[0] || 'D'}
+                          </div>
+                          <div>
+                            <p className="font-bold text-gray-900 group-hover:text-[#f59e0b] transition-colors">{dog.name || 'Unnamed'}</p>
+                            <p className="text-xs text-gray-500">{dog.breed || 'Unknown breed'}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-5">
+                        <p className="text-sm text-gray-600">{dog.age_years ? `${dog.age_years}y` : '—'} • {dog.sex || '—'} • {dog.weight_lbs ? `${dog.weight_lbs} lbs` : '—'}</p>
+                      </td>
+                      <td className="px-6 py-5">
+                        <StatusBadge status={dog.status || 'available'} />
+                      </td>
+                      <td className="px-6 py-5 text-right">
+                        <Link href={`/dashboard/dogs/${dog.id}`} className="inline-flex items-center justify-center px-4 py-2 border border-gray-200 text-xs font-bold rounded-xl text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm">
+                          View Profile
+                        </Link>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-20 text-center">
+                      <div className="flex flex-col items-center">
+                        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center text-gray-300 mb-4">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                          </svg>
+                        </div>
+                        <p className="text-gray-500 font-medium">No dogs added yet.</p>
+                        <Link href="/dashboard/dogs/new" className="text-[#f59e0b] font-bold mt-2 hover:underline">Add your first dog</Link>
+                      </div>
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
-          )}
+          </div>
         </div>
       </main>
     </div>

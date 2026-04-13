@@ -1,166 +1,172 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
+import { notFound, redirect } from 'next/navigation'
+import StatusBadge from '@/components/status-badge'
 import StatusUpdater from './status-updater'
 
-export default async function DogProfilePage({ params }: { params: { id: string } }) {
+export default async function DogProfilePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const cookieStore = await cookies()
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll() { return cookieStore.getAll() },
+        getAll() {
+          return cookieStore.getAll()
+        },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options)
-          )
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            )
+          } catch {
+            // Can be ignored if you have middleware refreshing user sessions.
+          }
         },
       },
     }
   )
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
 
-  const { data: dog } = await supabase
-    .from('dogs')
-    .select('*, organizations(name, city, state)')
-    .eq('id', params.id)
-    .single()
-
-  if (!dog) notFound()
-
-  const { data: alerts } = await supabase
-    .from('alerts')
-    .select('*, organizations(name, city, state)')
-    .eq('dog_id', dog.id)
-    .order('sent_at', { ascending: false })
-
-  const statusColors: Record<string, string> = {
-    available: 'bg-green-100 text-green-700',
-    pending: 'bg-amber-100 text-amber-700',
-    adopted: 'bg-gray-100 text-gray-600',
-    transferred: 'bg-blue-100 text-blue-700',
-    deceased: 'bg-red-100 text-red-700',
+  if (!user) {
+    redirect('/auth/login')
   }
 
+  // Fetch dog details
+  const { data: dog } = await supabase
+    .from('dogs')
+    .select('*, organizations(*)')
+    .eq('id', id)
+    .single()
+
+  if (!dog) {
+    notFound()
+  }
+
+  // Fetch alert history for this dog
+  const { data: alerts } = await supabase
+    .from('alerts')
+    .select('*, organizations!alerts_rescue_id_fkey(name, city, state)')
+    .eq('dog_id', id)
+    .order('created_at', { ascending: false })
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white border-b px-6 py-4 flex justify-between items-center">
-        <h1 className="text-xl font-bold text-gray-900">DOGSRUN</h1>
-        <Link href="/dashboard" className="text-sm text-gray-500 hover:text-gray-900">
-          ← Back to dashboard
-        </Link>
+    <div className="min-h-screen bg-white text-gray-900 font-sans antialiased">
+      {/* Navbar */}
+      <nav className="border-b border-gray-100 bg-white sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-8">
+            <Link href="/" className="text-2xl font-bold text-[#f59e0b] tracking-tight">DOGSRUN</Link>
+            <div className="hidden md:flex items-center gap-6">
+              <Link href="/dashboard" className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">Dashboard</Link>
+              <Link href="#" className="text-sm font-bold text-gray-900 border-b-2 border-[#f59e0b] pb-1">Dog Profile</Link>
+            </div>
+          </div>
+          <Link href="/dashboard" className="text-sm font-bold text-gray-500 hover:text-[#f59e0b] transition-colors">
+            ← Back to Dashboard
+          </Link>
+        </div>
       </nav>
 
-      <main className="max-w-5xl mx-auto px-6 py-10">
-
-        {/* Header */}
-        <div className="bg-white rounded-xl border p-8 mb-6">
-          <div className="flex justify-between items-start">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <h2 className="text-3xl font-bold text-gray-900">{dog.name ?? 'Unnamed'}</h2>
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusColors[dog.status] ?? 'bg-gray-100 text-gray-600'}`}>
-                  {dog.status}
-                </span>
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Main Info */}
+          <div className="md:col-span-2 space-y-8">
+            <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-xl overflow-hidden relative">
+               <div className="absolute top-0 right-0 p-8">
+                <StatusBadge status={dog.status || 'available'} />
               </div>
-              <p className="text-gray-500">
-                {dog.breed ?? 'Unknown breed'}{dog.mix ? ' mix' : ''} · {dog.age_years ? `${dog.age_years}y` : 'Age unknown'} · {dog.weight_lbs ? `${dog.weight_lbs} lbs` : ''} · {dog.sex ?? 'Unknown sex'}
-              </p>
-              <p className="text-sm text-gray-400 mt-1">
-                Intake date: {dog.intake_date ? new Date(dog.intake_date).toLocaleDateString() : '—'}
-              </p>
-            </div>
-            <StatusUpdater dogId={dog.id} currentStatus={dog.status} />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-3 gap-6">
-
-          {/* Details */}
-          <div className="col-span-2 space-y-6">
-            <div className="bg-white rounded-xl border p-6">
-              <h3 className="font-semibold text-gray-900 mb-4">Dog details</h3>
-              <div className="grid grid-cols-2 gap-4">
-                {[
-                  { label: 'Breed', value: `${dog.breed ?? '—'}${dog.mix ? ' mix' : ''}` },
-                  { label: 'Age', value: dog.age_years ? `${dog.age_years} years` : '—' },
-                  { label: 'Weight', value: dog.weight_lbs ? `${dog.weight_lbs} lbs` : '—' },
-                  { label: 'Sex', value: dog.sex ?? '—' },
-                  { label: 'Color', value: dog.color ?? '—' },
-                  { label: 'Status', value: dog.status },
-                ].map(({ label, value }) => (
-                  <div key={label} className="border-b border-gray-100 pb-3">
-                    <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">{label}</p>
-                    <p className="text-gray-900 font-medium capitalize">{value}</p>
-                  </div>
-                ))}
-              </div>
-              {dog.notes && (
-                <div className="mt-4">
-                  <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Notes</p>
-                  <p className="text-gray-700 text-sm leading-relaxed">{dog.notes}</p>
+              <div className="flex flex-col gap-6">
+                <div className="w-24 h-24 rounded-3xl bg-amber-50 flex items-center justify-center text-4xl font-black text-[#f59e0b]">
+                  {dog.name?.[0] || 'D'}
                 </div>
-              )}
+                <div>
+                  <h1 className="text-4xl font-black text-gray-900 mb-2">{dog.name || 'Unnamed Dog'}</h1>
+                  <p className="text-xl text-gray-500 font-medium">{dog.breed || 'Unknown breed'}{dog.mix ? ' mix' : ''}</p>
+                </div>
+                
+                <div className="grid grid-cols-3 gap-4 py-6 border-y border-gray-100">
+                  <div>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Age</p>
+                    <p className="text-lg font-bold text-gray-900">{dog.age_years ? `${dog.age_years} years` : '—'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Sex</p>
+                    <p className="text-lg font-bold text-gray-900">{dog.sex || '—'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Weight</p>
+                    <p className="text-lg font-bold text-gray-900">{dog.weight_lbs ? `${dog.weight_lbs} lbs` : '—'}</p>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Description / Notes</h3>
+                  <p className="text-gray-700 leading-relaxed bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                    {dog.description || 'No additional notes provided for this dog.'}
+                  </p>
+                </div>
+              </div>
             </div>
 
-            {/* Alert history */}
-            <div className="bg-white rounded-xl border p-6">
-              <h3 className="font-semibold text-gray-900 mb-4">
-                Alert history
-                <span className="ml-2 text-sm font-normal text-gray-400">({alerts?.length ?? 0} sent)</span>
-              </h3>
-              {!alerts || alerts.length === 0 ? (
-                <p className="text-gray-400 text-sm">No alerts sent yet.</p>
-              ) : (
-                <div className="space-y-3">
-                  {alerts.map(alert => (
-                    <div key={alert.id} className="flex justify-between items-center py-3 border-b border-gray-100 last:border-0">
+            {/* Alert History */}
+            <div className="bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden">
+              <div className="px-8 py-6 border-b border-gray-100 flex items-center justify-between">
+                <h3 className="text-lg font-bold text-gray-900">Rescue Outreach</h3>
+                <span className="text-xs font-bold bg-gray-100 text-gray-600 px-2 py-1 rounded-full">{alerts?.length || 0} alerts sent</span>
+              </div>
+              <div className="divide-y divide-gray-100">
+                {alerts && alerts.length > 0 ? (
+                  alerts.map((alert: any) => (
+                    <div key={alert.id} className="px-8 py-5 flex items-center justify-between hover:bg-gray-50 transition-colors">
                       <div>
-                        <p className="font-medium text-gray-900 text-sm">{(alert.organizations as any)?.name ?? 'Unknown rescue'}</p>
-                        <p className="text-xs text-gray-400">{(alert.organizations as any)?.city}, {(alert.organizations as any)?.state}</p>
+                        <p className="font-bold text-gray-900">{alert.organizations?.name}</p>
+                        <p className="text-xs text-gray-500">{alert.organizations?.city}, {alert.organizations?.state}</p>
                       </div>
                       <div className="text-right">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          alert.status === 'responded' ? 'bg-green-100 text-green-700' :
-                          alert.status === 'opened' ? 'bg-blue-100 text-blue-700' :
-                          alert.status === 'declined' ? 'bg-red-100 text-red-700' :
-                          'bg-gray-100 text-gray-600'
+                        <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-md border ${
+                          alert.status === 'sent' ? 'bg-amber-50 text-amber-700 border-amber-100' :
+                          alert.status === 'interested' ? 'bg-green-50 text-green-700 border-green-100' :
+                          'bg-gray-50 text-gray-700 border-gray-100'
                         }`}>
                           {alert.status}
                         </span>
-                        <p className="text-xs text-gray-400 mt-1">{new Date(alert.sent_at).toLocaleDateString()}</p>
+                        <p className="text-[10px] text-gray-400 mt-1">{new Date(alert.created_at).toLocaleDateString()}</p>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
+                  ))
+                ) : (
+                  <div className="px-8 py-10 text-center text-gray-500">
+                    No rescue alerts have been sent for this dog yet.
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
-            <div className="bg-white rounded-xl border p-6">
-              <h3 className="font-semibold text-gray-900 mb-4">Shelter</h3>
-              <p className="font-medium text-gray-900">{(dog.organizations as any)?.name}</p>
-              <p className="text-sm text-gray-500">{(dog.organizations as any)?.city}, {(dog.organizations as any)?.state}</p>
+            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-xl">
+              <StatusUpdater dogId={dog.id} currentStatus={dog.status || 'available'} />
             </div>
 
-            <div className="bg-white rounded-xl border p-6">
-              <h3 className="font-semibold text-gray-900 mb-4">Quick actions</h3>
-              <div className="space-y-2">
-                <Link
-                  href={`/dashboard/dogs/${dog.id}/edit`}
-                  className="block w-full text-center border border-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 transition-colors"
-                >
-                  Edit dog info
-                </Link>
-                <button className="block w-full text-center border border-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 transition-colors">
-                  Send manual alert
-                </button>
+            <div className="bg-amber-50 p-6 rounded-3xl border border-amber-100">
+              <h3 className="text-xs font-bold text-[#b45309] uppercase tracking-widest mb-4">Shelter Information</h3>
+              <p className="font-bold text-gray-900 mb-1">{dog.organizations?.name}</p>
+              <p className="text-sm text-gray-600 mb-4">{dog.organizations?.city}, {dog.organizations?.state}</p>
+              <p className="text-xs text-gray-500 leading-tight">This dog is currently listed by your shelter.</p>
+            </div>
+
+            <div className="bg-gray-900 p-6 rounded-3xl border border-gray-800 text-white shadow-xl">
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Quick Actions</h3>
+              <div className="space-y-3">
+                <button className="w-full py-3 bg-gray-800 hover:bg-gray-700 rounded-xl text-xs font-bold transition-colors">Edit Details</button>
+                <button className="w-full py-3 bg-gray-800 hover:bg-gray-700 rounded-xl text-xs font-bold transition-colors">Share Profile</button>
+                <button className="w-full py-3 bg-red-900/50 hover:bg-red-900/80 text-red-200 rounded-xl text-xs font-bold transition-colors">Mark as Urgent</button>
               </div>
             </div>
           </div>

@@ -1,38 +1,63 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { createClient } from '@/lib/supabase'
-import { useRouter } from 'next/navigation'
+import React, { useState } from 'react';
+import { createClient } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
 
-export default function StatusUpdater({ dogId, currentStatus }: { dogId: string, currentStatus: string }) {
-  const [status, setStatus] = useState(currentStatus)
-  const [loading, setLoading] = useState(false)
-  const router = useRouter()
+interface StatusUpdaterProps {
+  dogId: string;
+  currentStatus: string;
+}
 
-  const handleChange = async (newStatus: string) => {
-    setLoading(true)
-    const supabase = createClient()
-    await supabase.from('dogs').update({ status: newStatus }).eq('id', dogId)
-    setStatus(newStatus)
-    router.refresh()
-    setLoading(false)
+const statuses = [
+  { value: 'available', label: 'Available' },
+  { value: 'urgent', label: 'Urgent' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'rescue_requested', label: 'Rescue Requested' },
+  { value: 'placed', label: 'Placed' },
+  { value: 'adopted', label: 'Adopted' },
+];
+
+export default function StatusUpdater({ dogId, currentStatus }: StatusUpdaterProps) {
+  const [status, setStatus] = useState(currentStatus);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  async function handleStatusChange(newStatus: string) {
+    setLoading(true);
+    const supabase = createClient();
+
+    const { error } = await supabase
+      .from('dogs')
+      .update({ status: newStatus })
+      .eq('id', dogId);
+
+    if (error) {
+      alert('Failed to update status: ' + error.message);
+      setStatus(currentStatus);
+    } else {
+      setStatus(newStatus);
+      router.refresh();
+    }
+    setLoading(false);
   }
 
   return (
-    <div>
-      <label className="block text-xs text-gray-400 mb-1">Update status</label>
+    <div className="flex flex-col gap-2">
+      <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Update Status</label>
       <select
         value={status}
-        onChange={e => handleChange(e.target.value)}
         disabled={loading}
-        className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+        onChange={(e) => handleStatusChange(e.target.value)}
+        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#f59e0b] focus:ring-2 focus:ring-amber-100 outline-none transition-all bg-white font-medium text-gray-900"
       >
-        <option value="available">Available</option>
-        <option value="pending">Pending</option>
-        <option value="adopted">Adopted</option>
-        <option value="transferred">Transferred</option>
-        <option value="deceased">Deceased</option>
+        {statuses.map((s) => (
+          <option key={s.value} value={s.value}>
+            {s.label}
+          </option>
+        ))}
       </select>
+      {loading && <p className="text-[10px] text-[#f59e0b] animate-pulse">Updating...</p>}
     </div>
-  )
+  );
 }
