@@ -1,22 +1,18 @@
-# Save prompt to a file
-@"
-You are building DOGSRUN. Build all missing pages. DO NOT run git commands. DO NOT install packages.
+Add a sign out button to both the shelter dashboard and rescue portal navbar.
 
-Read the existing codebase first, then create these files:
+## Shelter Dashboard (src/app/dashboard/page.tsx)
+In the navbar, add a sign out button on the right side next to the org name/avatar. It should:
+- Use the Supabase browser client from '@/lib/supabase'
+- Call supabase.auth.signOut() then redirect to '/'
+- Since this is a server component, the sign out button needs to be a separate client component
+- Create src/app/dashboard/sign-out-button.tsx as a 'use client' component that handles the sign out logic
+- Style: text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors
 
-1. src/app/page.tsx - Simple warm public homepage with navbar, hero, how it works (3 steps), for shelters section, for rescues section, footer. Amber accent color, white base, friendly tone.
+## Rescue Portal (src/app/dashboard/rescue/page.tsx)
+Same approach — import and use the same SignOutButton component in the rescue portal navbar.
 
-2. src/app/dashboard/page.tsx - Shelter dashboard, server component, auth protected, fetch org by user email, fetch dogs, show 3 stat cards and clickable dogs table.
-
-3. src/app/dashboard/dogs/[id]/page.tsx - Dog profile page, server component, auth protected, show dog details and alert history.
-
-4. src/app/dashboard/dogs/[id]/status-updater.tsx - Client component with select to update dog status via supabase.
-
-5. src/app/dashboard/rescue/page.tsx - Rescue portal, show incoming alerts with dog info and interested/pass buttons.
-
-6. src/app/register/page.tsx - Registration form with shelter and rescue tabs.
-
-7. src/components/status-badge.tsx - Reusable colored pill component for dog status.
-
-Use createServerClient from @supabase/ssr for server components. Use createClient from @/lib/supabase for client components. Design: white base, amber #f59e0b accents, gray-900 text, rounded-xl cards, warm and simple.
-"@ | Out-File -FilePath prompt.txt -Encoding utf8
+## SignOutButton component (src/app/dashboard/sign-out-button.tsx)
+'use client'
+- Import createClient from '@/lib/supabase'
+- On click: await supabase.auth.signOut() then window.location.href = '/'
+- Render as a simple text button matching the design system

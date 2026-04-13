@@ -1,14 +1,26 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase';
 
-export default function RegisterPage() {
+function RegisterForm() {
+  const searchParams = useSearchParams();
   const [type, setType] = useState<'shelter' | 'rescue'>('shelter');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [email, setEmail] = useState('');
+
+  useEffect(() => {
+    const typeParam = searchParams.get('type');
+    if (typeParam === 'rescue') {
+      setType('rescue');
+    } else if (typeParam === 'shelter') {
+      setType('shelter');
+    }
+  }, [searchParams]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -16,22 +28,23 @@ export default function RegisterPage() {
     setError(null);
 
     const formData = new FormData(e.currentTarget);
-    const email = formData.get('email') as string;
+    const emailVal = formData.get('email') as string;
     const password = formData.get('password') as string;
     const orgName = formData.get('orgName') as string;
     const city = formData.get('city') as string;
     const state = formData.get('state') as string;
+    setEmail(emailVal);
 
     const supabase = createClient();
 
     // 1. Sign up the user
     const { data: authData, error: authError } = await supabase.auth.signUp({
-  email,
-  password,
-  options: {
-    emailRedirectTo: `${window.location.origin}/auth/callback`,
-  },
-});
+      email: emailVal,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
 
     if (authError) {
       setError(authError.message);
@@ -44,7 +57,7 @@ export default function RegisterPage() {
       const { error: profileError } = await supabase.from('organizations').insert({
         id: authData.user.id,
         name: orgName,
-        email: email,
+        email: emailVal,
         city: city,
         state: state,
         type: type,
@@ -53,9 +66,9 @@ export default function RegisterPage() {
       if (profileError) {
         setError(profileError.message);
       } else {
-        // 3. Send magic link so they auto-login after confirming
+        // 3. Send magic link
         await supabase.auth.signInWithOtp({
-          email,
+          email: emailVal,
           options: {
             emailRedirectTo: `${window.location.origin}/auth/callback`,
           },
@@ -69,129 +82,135 @@ export default function RegisterPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
-        <div className="max-w-md w-full text-center">
-          <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6 text-[#f59e0b]">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Check your email</h2>
-          <p className="text-gray-600 mb-8">We've sent a login link to your email address. Click it to access your dashboard.</p>
-          <Link href="/auth/login" className="text-[#f59e0b] font-medium hover:underline">
-            Back to login
-          </Link>
+      <div className="max-w-md w-full text-center">
+        <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6 text-[#f59e0b]">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
         </div>
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">Check your email</h2>
+        <p className="text-gray-600 mb-8">We've sent a login link to <strong>{email}</strong>. Click it to access your dashboard.</p>
+        <Link href="/auth/login" className="text-[#f59e0b] font-medium hover:underline">
+          Back to login
+        </Link>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4 py-12">
-      <div className="max-w-md w-full">
-        <div className="text-center mb-10">
-          <Link href="/" className="text-3xl font-bold text-[#f59e0b] mb-4 inline-block">DOGSRUN</Link>
-          <h1 className="text-2xl font-bold text-gray-900">Join the network</h1>
-          <p className="text-gray-600 mt-2">Help us save more dogs, faster.</p>
+    <div className="max-w-md w-full">
+      <div className="text-center mb-10">
+        <Link href="/" className="text-3xl font-bold text-[#f59e0b] mb-4 inline-block">DOGSRUN</Link>
+        <h1 className="text-2xl font-bold text-gray-900">Join the network</h1>
+        <p className="text-gray-600 mt-2">Help us save more dogs, faster.</p>
+      </div>
+
+      <div className="bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden">
+        <div className="flex border-b border-gray-100">
+          <button
+            onClick={() => setType('shelter')}
+            className={`flex-1 py-4 text-sm font-bold transition-colors ${type === 'shelter' ? 'text-[#f59e0b] border-b-2 border-[#f59e0b] bg-amber-50/50' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Shelter
+          </button>
+          <button
+            onClick={() => setType('rescue')}
+            className={`flex-1 py-4 text-sm font-bold transition-colors ${type === 'rescue' ? 'text-[#f59e0b] border-b-2 border-[#f59e0b] bg-amber-50/50' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Rescue
+          </button>
         </div>
 
-        <div className="bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden">
-          <div className="flex border-b border-gray-100">
-            <button
-              onClick={() => setType('shelter')}
-              className={`flex-1 py-4 text-sm font-bold transition-colors ${type === 'shelter' ? 'text-[#f59e0b] border-b-2 border-[#f59e0b] bg-amber-50/50' : 'text-gray-500 hover:text-gray-700'}`}
-            >
-              Shelter
-            </button>
-            <button
-              onClick={() => setType('rescue')}
-              className={`flex-1 py-4 text-sm font-bold transition-colors ${type === 'rescue' ? 'text-[#f59e0b] border-b-2 border-[#f59e0b] bg-amber-50/50' : 'text-gray-500 hover:text-gray-700'}`}
-            >
-              Rescue
-            </button>
+        <form onSubmit={handleSubmit} className="p-8 space-y-6">
+          {error && (
+            <div className="p-4 bg-red-50 text-red-700 text-sm rounded-xl border border-red-100">
+              {error}
+            </div>
+          )}
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Organization Name</label>
+            <input
+              name="orgName"
+              type="text"
+              required
+              placeholder={type === 'shelter' ? 'City Animal Shelter' : 'Golden Retriever Rescue'}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#f59e0b] focus:ring-2 focus:ring-amber-100 outline-none transition-all text-gray-900 placeholder-gray-400"
+            />
           </div>
 
-          <form onSubmit={handleSubmit} className="p-8 space-y-6">
-            {error && (
-              <div className="p-4 bg-red-50 text-red-700 text-sm rounded-xl border border-red-100">
-                {error}
-              </div>
-            )}
-
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Organization Name</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">City</label>
               <input
-                name="orgName"
+                name="city"
                 type="text"
                 required
-                placeholder={type === 'shelter' ? 'City Animal Shelter' : 'Golden Retriever Rescue'}
+                placeholder="Austin"
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#f59e0b] focus:ring-2 focus:ring-amber-100 outline-none transition-all text-gray-900 placeholder-gray-400"
               />
             </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">City</label>
-                <input
-                  name="city"
-                  type="text"
-                  required
-                  placeholder="Austin"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#f59e0b] focus:ring-2 focus:ring-amber-100 outline-none transition-all text-gray-900 placeholder-gray-400"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">State</label>
-                <input
-                  name="state"
-                  type="text"
-                  required
-                  placeholder="TX"
-                  maxLength={2}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#f59e0b] focus:ring-2 focus:ring-amber-100 outline-none transition-all text-gray-900 placeholder-gray-400"
-                />
-              </div>
-            </div>
-
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Work Email</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">State</label>
               <input
-                name="email"
-                type="email"
+                name="state"
+                type="text"
                 required
-                placeholder="director@org.org"
+                placeholder="TX"
+                maxLength={2}
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#f59e0b] focus:ring-2 focus:ring-amber-100 outline-none transition-all text-gray-900 placeholder-gray-400"
               />
             </div>
+          </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
-              <input
-                name="password"
-                type="password"
-                required
-                minLength={6}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#f59e0b] focus:ring-2 focus:ring-amber-100 outline-none transition-all text-gray-900 placeholder-gray-400"
-              />
-            </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Work Email</label>
+            <input
+              name="email"
+              type="email"
+              required
+              placeholder="director@org.org"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#f59e0b] focus:ring-2 focus:ring-amber-100 outline-none transition-all text-gray-900 placeholder-gray-400"
+            />
+          </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-4 bg-[#f59e0b] text-white font-bold rounded-xl shadow-lg hover:bg-[#d97706] disabled:opacity-50 transform transition active:scale-95"
-            >
-              {loading ? 'Creating account...' : `Register as ${type === 'shelter' ? 'Shelter' : 'Rescue'}`}
-            </button>
-          </form>
-        </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+            <input
+              name="password"
+              type="password"
+              required
+              minLength={6}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#f59e0b] focus:ring-2 focus:ring-amber-100 outline-none transition-all text-gray-900 placeholder-gray-400"
+            />
+          </div>
 
-        <p className="text-center mt-8 text-gray-600">
-          Already have an account?{' '}
-          <Link href="/auth/login" className="text-[#f59e0b] font-bold hover:underline">
-            Login
-          </Link>
-        </p>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-4 bg-[#f59e0b] text-white font-bold rounded-xl shadow-lg hover:bg-[#d97706] disabled:opacity-50 transform transition active:scale-95"
+          >
+            {loading ? 'Creating account...' : `Register as ${type === 'shelter' ? 'Shelter' : 'Rescue'}`}
+          </button>
+        </form>
       </div>
+
+      <p className="text-center mt-8 text-gray-600">
+        Already have an account?{' '}
+        <Link href="/auth/login" className="text-[#f59e0b] font-bold hover:underline">
+          Login
+        </Link>
+      </p>
+    </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4 py-12">
+      <Suspense fallback={<div className="text-gray-500 font-medium">Loading...</div>}>
+        <RegisterForm />
+      </Suspense>
     </div>
   );
 }

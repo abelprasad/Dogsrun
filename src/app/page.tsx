@@ -21,7 +21,7 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <header className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
+      <header className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center border-b border-gray-50">
         <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-gray-900 mb-6">
           Every dog deserves a <span className="text-[#f59e0b]">run</span> to safety.
         </h1>
@@ -29,15 +29,54 @@ export default function Home() {
           The fastest way for animal shelters to find specialized rescues for their most urgent dogs. 
           Real-time matching, instant alerts, and seamless communication.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link href="/register" className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-lg font-medium rounded-xl shadow-lg text-white bg-[#f59e0b] hover:bg-[#d97706] transform transition hover:scale-105 active:scale-95">
-            Get Started
-          </Link>
-          <Link href="#how-it-works" className="inline-flex items-center justify-center px-8 py-4 border border-gray-200 text-lg font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-colors shadow-sm">
+        <div className="flex justify-center">
+          <Link href="#join" className="inline-flex items-center justify-center px-8 py-4 border border-gray-200 text-lg font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-colors shadow-sm">
             Learn More
           </Link>
         </div>
       </header>
+
+      {/* Join the Network Section */}
+      <section id="join" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl font-extrabold text-gray-900 mb-4">Join the network</h2>
+          <p className="text-lg text-gray-600">How do you want to get started?</p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Shelter Card */}
+          <div className="bg-white p-10 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all group">
+            <div className="w-14 h-14 rounded-2xl bg-amber-50 flex items-center justify-center text-[#f59e0b] mb-8 group-hover:scale-110 transition-transform">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">I run a shelter</h3>
+            <p className="text-gray-500 mb-10 leading-relaxed">
+              List dogs that need rescue pulls. Get matched with the right rescue orgs instantly.
+            </p>
+            <Link href="/register?type=shelter" className="inline-flex items-center justify-center w-full px-6 py-4 border border-transparent text-base font-bold rounded-xl text-white bg-[#f59e0b] hover:bg-[#d97706] transition-all transform active:scale-95 shadow-lg shadow-amber-200">
+              Get Started as a Shelter
+            </Link>
+          </div>
+
+          {/* Rescue Card */}
+          <div className="bg-white p-10 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all group">
+            <div className="w-14 h-14 rounded-2xl bg-amber-50 flex items-center justify-center text-[#f59e0b] mb-8 group-hover:scale-110 transition-transform">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">I run a rescue</h3>
+            <p className="text-gray-500 mb-10 leading-relaxed">
+              Set your criteria once. Get alerted automatically when matching dogs are available.
+            </p>
+            <Link href="/register?type=rescue" className="inline-flex items-center justify-center w-full px-6 py-4 border border-gray-200 text-base font-bold rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-all transform active:scale-95 shadow-sm">
+              Get Started as a Rescue
+            </Link>
+          </div>
+        </div>
+      </section>
 
       {/* How it Works (3 Steps) */}
       <section id="how-it-works" className="py-20 bg-gray-50">

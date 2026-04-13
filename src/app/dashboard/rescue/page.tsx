@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import StatusBadge from '@/components/status-badge'
 import AlertActions from './alert-actions'
+import SignOutButton from '../sign-out-button'
 
 export default async function RescuePortalPage() {
   const cookieStore = await cookies()
@@ -73,6 +74,7 @@ export default async function RescuePortalPage() {
             <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-xs font-bold text-[#f59e0b]">
               {org.name[0]}
             </div>
+            <SignOutButton />
           </div>
         </div>
       </nav>
