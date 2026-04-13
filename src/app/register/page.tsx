@@ -50,6 +50,13 @@ export default function RegisterPage() {
       if (profileError) {
         setError(profileError.message);
       } else {
+        // 3. Send magic link so they auto-login after confirming
+        await supabase.auth.signInWithOtp({
+          email,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+          },
+        });
         setSuccess(true);
       }
     }
@@ -67,7 +74,7 @@ export default function RegisterPage() {
             </svg>
           </div>
           <h2 className="text-3xl font-bold text-gray-900 mb-2">Check your email</h2>
-          <p className="text-gray-600 mb-8">We've sent a confirmation link to your email address. Please verify your account to continue.</p>
+          <p className="text-gray-600 mb-8">We've sent a login link to your email address. Click it to access your dashboard.</p>
           <Link href="/auth/login" className="text-[#f59e0b] font-medium hover:underline">
             Back to login
           </Link>
@@ -115,7 +122,7 @@ export default function RegisterPage() {
                 type="text"
                 required
                 placeholder={type === 'shelter' ? 'City Animal Shelter' : 'Golden Retriever Rescue'}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#f59e0b] focus:ring-2 focus:ring-amber-100 outline-none transition-all"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#f59e0b] focus:ring-2 focus:ring-amber-100 outline-none transition-all text-gray-900 placeholder-gray-400"
               />
             </div>
 
@@ -127,7 +134,7 @@ export default function RegisterPage() {
                   type="text"
                   required
                   placeholder="Austin"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#f59e0b] focus:ring-2 focus:ring-amber-100 outline-none transition-all"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#f59e0b] focus:ring-2 focus:ring-amber-100 outline-none transition-all text-gray-900 placeholder-gray-400"
                 />
               </div>
               <div>
@@ -138,7 +145,7 @@ export default function RegisterPage() {
                   required
                   placeholder="TX"
                   maxLength={2}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#f59e0b] focus:ring-2 focus:ring-amber-100 outline-none transition-all"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#f59e0b] focus:ring-2 focus:ring-amber-100 outline-none transition-all text-gray-900 placeholder-gray-400"
                 />
               </div>
             </div>
@@ -150,7 +157,7 @@ export default function RegisterPage() {
                 type="email"
                 required
                 placeholder="director@org.org"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#f59e0b] focus:ring-2 focus:ring-amber-100 outline-none transition-all"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#f59e0b] focus:ring-2 focus:ring-amber-100 outline-none transition-all text-gray-900 placeholder-gray-400"
               />
             </div>
 
@@ -161,7 +168,7 @@ export default function RegisterPage() {
                 type="password"
                 required
                 minLength={6}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#f59e0b] focus:ring-2 focus:ring-amber-100 outline-none transition-all"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#f59e0b] focus:ring-2 focus:ring-amber-100 outline-none transition-all text-gray-900 placeholder-gray-400"
               />
             </div>
 
