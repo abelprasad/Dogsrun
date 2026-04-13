@@ -38,21 +38,27 @@ export default function NewDogPage() {
       return
     }
 
-    const { error } = await supabase.from('dogs').insert({
+    const { data, error } = await supabase.from('dogs').insert({
       ...form,
       age_years: form.age_years ? parseFloat(form.age_years) : null,
       weight_lbs: form.weight_lbs ? parseFloat(form.weight_lbs) : null,
       shelter_id: org.id,
       status: 'available',
-    })
+    }).select().single()
 
     if (error) {
       alert(error.message)
     } else {
+      // Fire alerts for the new dog
+      if (data) {
+        await fetch('/api/alerts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ dog_id: data.id }),
+        })
+      }
       router.push('/dashboard')
     }
-    setLoading(false)
-  }
 
   const field = (key: string, label: string, type = 'text', placeholder = '') => (
     <div>
