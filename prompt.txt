@@ -1,22 +1,26 @@
-Create a custom favicon for DOGSRUN and replace the existing one at public/favicon.ico.
+Create a client-side auth confirm page at src/app/auth/confirm/page.tsx that handles the implicit auth flow (email confirmation links with #access_token= hash fragments).
 
-## Design
-Create a simple, recognizable favicon that works at 16x16 and 32x32 pixels:
-- Orange/amber circle background (#f59e0b)
-- White paw print or white bold "D" in the center
-- Should look clean and recognizable at small sizes
+## The Problem
+When Supabase sends confirmation emails via signUp(), the link contains #access_token= as a hash fragment. This bypasses the /auth/callback route and lands on the homepage instead of the dashboard.
 
-## Implementation
-1. Create the favicon as an SVG at public/favicon.svg
-2. Also create public/favicon.ico (use a simple approach — copy the SVG or create a minimal ICO)
-3. Update src/app/layout.tsx to reference the new favicon in the metadata:
+## The Fix
+Create src/app/auth/confirm/page.tsx as a 'use client' component that:
+1. On mount, calls supabase.auth.getSession() to exchange the hash fragment for a session (Supabase JS does this automatically when it detects the hash)
+2. Listens to onAuthStateChange for the SIGNED_IN event
+3. Once session is established, looks up the org type from the organizations table by user email
+4. Redirects to /dashboard/rescue if type is 'rescue', otherwise /dashboard
+5. Shows a "Signing you in..." loading state while this happens
+6. Uses createClient from '@/lib/supabase'
+7. Uses useRouter from next/navigation for redirects
 
-export const metadata: Metadata = {
-  title: "DOGSRUN",
-  description: "The fastest way to match shelter dogs with rescue organizations.",
-  icons: {
-    icon: '/favicon.svg',
-  },
-}
+## Also update src/app/layout.tsx
+Add a listener using supabase.auth.onAuthStateChange at the app level — actually don't do this in layout.
 
-Use an SVG paw print shape or a bold white "D" on amber background — whichever is simpler to implement cleanly.
+## Also update Supabase Site URL
+The Supabase Site URL needs to be updated to https://dogsrun.net/auth/confirm so confirmation emails redirect to this page. But we can't do that from code — just create the page.
+
+## Page content while loading:
+- White background
+- Centered DOGSRUN text in amber
+- "Signing you in..." in gray below
+- Simple spinner or just the text is fine
