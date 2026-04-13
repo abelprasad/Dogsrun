@@ -51,7 +51,7 @@ export default async function RescuePortalPage() {
     .from('alerts')
     .select('*, dogs(*, organizations(name, city, state))')
     .eq('rescue_id', org.id)
-    .order('created_at', { ascending: false })
+    .order('sent_at', { ascending: false })
 
   return (
     <div className="min-h-screen bg-white text-gray-900 font-sans antialiased">
@@ -125,7 +125,7 @@ export default async function RescuePortalPage() {
                 </div>
                 
                 <div className="bg-gray-50/50 px-8 py-3 border-t border-gray-100 flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Received {new Date(alert.created_at).toLocaleDateString()}</span>
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Received {new Date(alert.sent_at).toLocaleDateString()}</span>
                   <Link href={`/dashboard/dogs/${alert.dog_id}`} className="text-xs font-bold text-[#f59e0b] hover:underline">View Full Profile →</Link>
                 </div>
               </div>
