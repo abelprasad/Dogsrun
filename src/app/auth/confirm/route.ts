@@ -1,11 +1,3 @@
-Replace the client-side auth confirm page with a server-side route handler, following the official Supabase SSR pattern.
-
-## Step 1 — Delete the existing file
-Delete src/app/auth/confirm/page.tsx
-
-## Step 2 — Create src/app/auth/confirm/route.ts
-Create a server-side GET route handler:
-
 import { type EmailOtpType } from '@supabase/supabase-js'
 import { type NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
@@ -25,9 +17,15 @@ export async function GET(request: NextRequest) {
         cookies: {
           getAll() { return cookieStore.getAll() },
           setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            )
+            try {
+              cookiesToSet.forEach(({ name, value, options }) =>
+                cookieStore.set(name, value, options)
+              )
+            } catch {
+              // The `setAll` method was called from a Server Component.
+              // This can be ignored if you have middleware refreshing
+              // user sessions.
+            }
           },
         },
       }
@@ -42,18 +40,18 @@ export async function GET(request: NextRequest) {
         .eq('email', user.email)
         .maybeSingle()
 
+      const url = new URL(request.url)
       if (org?.type === 'rescue') {
-        return NextResponse.redirect(new URL('/dashboard/rescue', request.url))
+        url.pathname = '/dashboard/rescue'
+      } else {
+        url.pathname = '/dashboard'
       }
-      return NextResponse.redirect(new URL('/dashboard', request.url))
+      url.searchParams.delete('token_hash')
+      url.searchParams.delete('type')
+      
+      return NextResponse.redirect(url)
     }
   }
 
   return NextResponse.redirect(new URL('/auth/login', request.url))
 }
-
-## Step 3 — Update Supabase email template
-We cannot do this from code, but note: in Supabase dashboard → Authentication → Email Templates → Confirm signup, change the confirmation URL from {{ .ConfirmationURL }} to:
-{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email
-
-Do not change any other files.
