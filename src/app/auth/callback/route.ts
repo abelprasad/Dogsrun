@@ -23,7 +23,19 @@ export async function GET(request: NextRequest) {
         },
       }
     )
-    await supabase.auth.exchangeCodeForSession(code)
+    const { data: { user } } = await supabase.auth.exchangeCodeForSession(code)
+
+    if (user) {
+      const { data: org } = await supabase
+        .from('organizations')
+        .select('type')
+        .eq('email', user.email)
+        .maybeSingle()
+
+      if (org?.type === 'rescue') {
+        return NextResponse.redirect(new URL('/dashboard/rescue', request.url))
+      }
+    }
   }
 
   return NextResponse.redirect(new URL(next, request.url))
