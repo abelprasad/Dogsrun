@@ -73,7 +73,8 @@ export default function RootLayout({
               <div className="flex items-center gap-8">
                 <Link href="/dogs" className="text-sm font-medium text-[#9ca3af] hover:text-white transition-colors">Browse Dogs</Link>
                 <Link href="/about" className="text-sm font-medium text-[#9ca3af] hover:text-white transition-colors">About</Link>
-                <Link href="mailto:support@dogsrun.net" className="text-sm font-medium text-[#9ca3af] hover:text-white transition-colors">Contact</Link>
+                <Link href="/faq" className="text-sm font-medium text-[#9ca3af] hover:text-white transition-colors">FAQ</Link>
+                <Link href="/contact" className="text-sm font-medium text-[#9ca3af] hover:text-white transition-colors">Contact</Link>
               </div>
               <div className="text-[#6b7280] text-xs font-medium">
                 © {new Date().getFullYear()} DOGSRUN | 501(c)(3) nonprofit
