@@ -1,59 +1,25 @@
-Replace the client-side auth confirm page with a server-side route handler, following the official Supabase SSR pattern.
+I'm building a Next.js 15 app with Supabase. I need to make the rescue criteria page fully editable.
 
-## Step 1 — Delete the existing file
-Delete src/app/auth/confirm/page.tsx
+File to edit: src/app/dashboard/criteria/page.tsx
 
-## Step 2 — Create src/app/auth/confirm/route.ts
-Create a server-side GET route handler:
+The rescue_criteria table schema:
+- id (uuid)
+- rescue_id (uuid → organizations.id)
+- breeds (text[])
+- max_age_years (integer)
+- max_weight_lbs (integer)
+- sex_preference (text: 'male'|'female'|'any')
+- accepts_mixes (boolean)
+- states_served (text[])
+- is_active (boolean)
+- created_at
 
-import { type EmailOtpType } from '@supabase/supabase-js'
-import { type NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+The org lookup always uses .eq('email', user.email) NOT .eq('id', user.id) because organizations.id is separate from the Supabase auth user UUID.
 
-export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url)
-  const token_hash = searchParams.get('token_hash')
-  const type = searchParams.get('type') as EmailOtpType | null
-
-  if (token_hash && type) {
-    const cookieStore = await cookies()
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() { return cookieStore.getAll() },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            )
-          },
-        },
-      }
-    )
-
-    const { data: { user }, error } = await supabase.auth.verifyOtp({ token_hash, type })
-
-    if (!error && user) {
-      const { data: org } = await supabase
-        .from('organizations')
-        .select('type')
-        .eq('email', user.email)
-        .maybeSingle()
-
-      if (org?.type === 'rescue') {
-        return NextResponse.redirect(new URL('/dashboard/rescue', request.url))
-      }
-      return NextResponse.redirect(new URL('/dashboard', request.url))
-    }
-  }
-
-  return NextResponse.redirect(new URL('/auth/login', request.url))
-}
-
-## Step 3 — Update Supabase email template
-We cannot do this from code, but note: in Supabase dashboard → Authentication → Email Templates → Confirm signup, change the confirmation URL from {{ .ConfirmationURL }} to:
-{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email
-
-Do not change any other files.
+Requirements:
+- If no criteria exist, show a form to create them
+- If criteria exist, show the current values with an Edit button
+- Editable fields: breeds (comma-separated input that saves as array), max_age_years, max_weight_lbs, sex_preference (dropdown: any/male/female), accepts_mixes (checkbox), states_served (comma-separated), is_active (toggle)
+- On save, upsert to rescue_criteria table
+- Use the existing design system: white bg, amber #f59e0b accents, gray-900 text, rounded-xl cards, Tailwind CSS
+- Use the Supabase browser client from @/lib/supabase

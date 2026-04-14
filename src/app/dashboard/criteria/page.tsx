@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import SignOutButton from '../sign-out-button'
+import CriteriaForm from './criteria-form'
 
 export default async function CriteriaPage() {
   const cookieStore = await cookies()
@@ -34,11 +35,11 @@ export default async function CriteriaPage() {
     redirect('/auth/login')
   }
 
-  // Fetch organization
+  // Fetch organization by email as requested
   const { data: org } = await supabase
     .from('organizations')
     .select('*')
-    .eq('id', user.id)
+    .eq('email', user.email)
     .single()
 
   if (!org || org.type !== 'rescue') {
@@ -50,7 +51,7 @@ export default async function CriteriaPage() {
     .from('rescue_criteria')
     .select('*')
     .eq('organization_id', org.id)
-    .single()
+    .maybeSingle()
 
   const backLink = '/dashboard/rescue'
 
@@ -85,84 +86,14 @@ export default async function CriteriaPage() {
             <h1 className="text-3xl font-extrabold text-gray-900">Matching Criteria</h1>
             <p className="text-gray-600 mt-2">Define which dogs your rescue organization can support.</p>
           </div>
-          <Link href="/dashboard/criteria/edit" className="inline-flex items-center justify-center px-6 py-3 border border-gray-200 text-sm font-bold rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-all shadow-sm">
-            Edit Criteria
-          </Link>
         </div>
 
-        {criteria ? (
-          <div className="bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden">
-            <div className="p-8 space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Target Breeds</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {criteria.breeds && criteria.breeds.length > 0 ? (
-                      criteria.breeds.map((breed: string) => (
-                        <span key={breed} className="px-3 py-1 bg-amber-50 text-[#f59e0b] text-sm font-bold rounded-lg border border-amber-100">
-                          {breed}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-gray-500 text-sm italic">All breeds accepted</span>
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Location Focus</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {criteria.states_served && criteria.states_served.length > 0 ? (
-                      criteria.states_served.map((state: string) => (
-                        <span key={state} className="px-3 py-1 bg-gray-50 text-gray-700 text-sm font-bold rounded-lg border border-gray-100">
-                          {state}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-gray-500 text-sm italic">No specific states set</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-8 border-t border-gray-50">
-                <div>
-                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Max Age</h3>
-                  <p className="text-xl font-bold text-gray-900">{criteria.max_age_years ? `${criteria.max_age_years} years` : 'Any age'}</p>
-                </div>
-                <div>
-                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Max Weight</h3>
-                  <p className="text-xl font-bold text-gray-900">{criteria.max_weight_lbs ? `${criteria.max_weight_lbs} lbs` : 'Any weight'}</p>
-                </div>
-                <div>
-                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Sex Preference</h3>
-                  <p className="text-xl font-bold text-gray-900 capitalize">{criteria.sex_preference || 'Any'}</p>
-                </div>
-              </div>
-
-              <div className="pt-8 border-t border-gray-50">
-                 <div className="flex items-center gap-3">
-                  <div className={`w-10 h-6 rounded-full transition-colors relative ${criteria.accepts_mixes ? 'bg-green-500' : 'bg-gray-200'}`}>
-                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${criteria.accepts_mixes ? 'left-5' : 'left-1'}`}></div>
-                  </div>
-                  <span className="font-bold text-gray-700">Accepts Mixed Breeds</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="bg-white py-24 rounded-3xl border border-gray-100 text-center shadow-xl">
-             <div className="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center text-[#f59e0b] mx-auto mb-6">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-              </svg>
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">No criteria set up</h3>
-            <p className="text-gray-500 max-w-sm mx-auto mb-8">Please contact DOGSRUN support to initialize your rescue organization's matching criteria.</p>
-            <Link href="mailto:support@dogsrun.org" className="inline-flex items-center px-8 py-4 bg-[#f59e0b] text-white font-black rounded-xl shadow-lg hover:bg-[#d97706] transition-all transform active:scale-95">
-              Contact Support
-            </Link>
-          </div>
+        <CriteriaForm organizationId={org.id} initialCriteria={criteria} />
+        
+        {!criteria && (
+          <p className="mt-8 text-center text-sm text-gray-400">
+            If you need help setting up your criteria, please contact <Link href="mailto:support@dogsrun.org" className="text-[#f59e0b] hover:underline">support@dogsrun.org</Link>.
+          </p>
         )}
       </main>
     </div>
