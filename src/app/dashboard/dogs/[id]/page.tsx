@@ -92,8 +92,12 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
                 <StatusBadge status={dog.status || 'available'} />
               </div>
               <div className="flex flex-col gap-6">
-                <div className="w-24 h-24 rounded-3xl bg-amber-50 flex items-center justify-center text-4xl font-black text-[#f59e0b]">
-                  {dog.name?.[0] || 'D'}
+                <div className="w-24 h-24 rounded-3xl bg-amber-50 flex items-center justify-center text-4xl font-black text-[#f59e0b] overflow-hidden">
+                  {dog.photo_url ? (
+                    <img src={dog.photo_url} alt={dog.name} className="w-full h-full object-cover" />
+                  ) : (
+                    dog.name?.[0] || 'D'
+                  )}
                 </div>
                 <div>
                   <h1 className="text-4xl font-black text-gray-900 mb-2">{dog.name || 'Unnamed Dog'}</h1>

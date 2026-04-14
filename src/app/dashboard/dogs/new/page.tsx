@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 export default function NewDogPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [photo, setPhoto] = useState<File | null>(null)
   const [form, setForm] = useState({
     name: '',
     breed: '',
@@ -51,12 +52,35 @@ export default function NewDogPage() {
       return
     }
 
+    let photo_url = null
+    if (photo) {
+      const folderId = crypto.randomUUID()
+      const fileName = `${folderId}/${photo.name}`
+      
+      const { error: uploadError } = await supabase.storage
+        .from('dog-photos')
+        .upload(fileName, photo)
+
+      if (uploadError) {
+        alert('Error uploading photo: ' + uploadError.message)
+        setLoading(false)
+        return
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('dog-photos')
+        .getPublicUrl(fileName)
+      
+      photo_url = publicUrl
+    }
+
     const { data, error } = await supabase.from('dogs').insert({
       ...form,
       age_years: form.age_years ? parseFloat(form.age_years) : null,
       weight_lbs: form.weight_lbs ? parseFloat(form.weight_lbs) : null,
       shelter_id: org.id,
       status: 'available',
+      photo_url,
     }).select().single()
 
     if (error) {
@@ -135,6 +159,28 @@ export default function NewDogPage() {
               rows={4}
               className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-100 focus:border-[#f59e0b] text-gray-900 placeholder-gray-400 transition-all"
             />
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">Dog Photo</label>
+            <div className="relative group">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={e => setPhoto(e.target.files?.[0] || null)}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+              />
+              <div className="border-2 border-dashed border-amber-300 bg-amber-50/30 rounded-2xl p-8 text-center group-hover:bg-amber-50 transition-colors">
+                {photo ? (
+                  <p className="text-amber-900 font-bold">{photo.name}</p>
+                ) : (
+                  <>
+                    <p className="text-amber-900 font-bold">Click to upload photo</p>
+                    <p className="text-xs text-gray-500 mt-1">Accepts PNG, JPG, or WEBP (Max 5MB)</p>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
           
           <button

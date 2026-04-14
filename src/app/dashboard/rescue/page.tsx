@@ -92,8 +92,12 @@ export default async function RescuePortalPage() {
                 <div className="p-8">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="flex items-start gap-6">
-                      <div className="w-20 h-20 rounded-3xl bg-amber-50 flex items-center justify-center text-3xl font-black text-[#f59e0b] flex-shrink-0">
-                        {alert.dogs?.name?.[0] || 'D'}
+                      <div className="w-20 h-20 rounded-3xl bg-amber-50 flex items-center justify-center text-3xl font-black text-[#f59e0b] flex-shrink-0 overflow-hidden">
+                        {alert.dogs?.photo_url ? (
+                          <img src={alert.dogs.photo_url} alt={alert.dogs.name} className="w-full h-full object-cover" />
+                        ) : (
+                          alert.dogs?.name?.[0] || 'D'
+                        )}
                       </div>
                       <div>
                         <div className="flex items-center gap-3 mb-2">
