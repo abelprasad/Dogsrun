@@ -24,13 +24,24 @@ export default async function PublicDogsPage() {
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-12 text-center">
-          <h1 className="text-4xl font-black text-gray-900 mb-4">Dogs available for rescue</h1>
-          <p className="text-xl text-gray-500 max-w-2xl mx-auto">
+      <header className="relative h-80 flex items-center justify-center overflow-hidden">
+        <img 
+          src="https://images.pexels.com/photos/3628100/pexels-photo-3628100.jpeg?auto=compress&cs=tinysrgb&w=1600"
+          alt="Dogs looking for rescue"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-black/50 z-10"></div>
+        <div className="relative z-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
+          <h1 className="text-4xl md:text-5xl font-black tracking-tight text-white mb-4">
+            Dogs looking for a second chance
+          </h1>
+          <p className="text-xl text-gray-200 max-w-2xl mx-auto">
             These dogs are waiting for a rescue organization to give them a second chance.
           </p>
         </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {dogs?.map((dog) => (

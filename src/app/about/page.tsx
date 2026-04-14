@@ -16,14 +16,25 @@ export default function AboutPage() {
 
       <main>
         {/* Hero Section */}
-        <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
-          <h1 className="text-5xl md:text-7xl font-black tracking-tight text-gray-900 mb-8">
-            Connecting <span className="text-[#f59e0b]">shelters</span> and <span className="text-[#f59e0b]">rescues</span>
-          </h1>
+        <section className="relative h-96 flex items-center justify-center overflow-hidden">
+          <img 
+            src="https://images.pexels.com/photos/3628100/pexels-photo-3628100.jpeg?auto=compress&cs=tinysrgb&w=1600"
+            alt="About DOGSRUN"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-black/60 z-10"></div>
+          <div className="relative z-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
+            <h1 className="text-4xl md:text-6xl font-black tracking-tight text-white">
+              Connecting shelters and rescues
+            </h1>
+          </div>
+        </section>
+
+        <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
           <div className="max-w-3xl mx-auto">
-            <p className="text-2xl text-gray-600 leading-relaxed mb-12">
-              We are committed to improving the lives of shelter dogs by creating a collaborative network 
-              that helps rescues find dogs they can help, reducing overcrowding in shelters.
+            <p className="text-2xl text-gray-600 leading-relaxed mb-12 italic">
+              "We are committed to improving the lives of shelter dogs by creating a collaborative network 
+              that helps rescues find dogs they can help, reducing overcrowding in shelters."
             </p>
           </div>
           <div className="flex justify-center gap-4">

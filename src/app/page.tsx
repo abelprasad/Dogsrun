@@ -25,21 +25,29 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <header className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center border-b border-gray-50">
-        <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-gray-900 mb-6">
-          Every dog deserves a <span className="text-[#f59e0b]">run</span> to safety.
-        </h1>
-        <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-10 leading-relaxed">
-          The fastest way for animal shelters to find specialized rescues for their most urgent dogs. 
-          Real-time matching, instant alerts, and seamless communication.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link href="/register" className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-lg font-medium rounded-xl shadow-lg text-white bg-[#f59e0b] hover:bg-[#d97706] transform transition hover:scale-105 active:scale-95">
-            Get Started
-          </Link>
-          <Link href="#join" className="inline-flex items-center justify-center px-8 py-4 border border-gray-200 text-lg font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-colors shadow-sm">
-            Learn More
-          </Link>
+      <header className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        <img 
+          src="https://images.pexels.com/photos/13349425/pexels-photo-13349425.jpeg?auto=compress&cs=tinysrgb&w=1600"
+          alt="Dog background"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-black/50 z-10"></div>
+        
+        <div className="relative z-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-white mb-6">
+            Every dog deserves a <span className="text-[#f59e0b]">run</span> to safety.
+          </h1>
+          <p className="text-xl md:text-2xl text-gray-200 max-w-3xl mx-auto mb-10 leading-relaxed font-medium">
+            The fastest way for shelters to find rescues for their most urgent dogs.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/register" className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-lg font-bold rounded-xl shadow-lg text-white bg-[#f59e0b] hover:bg-[#d97706] transform transition hover:scale-105 active:scale-95">
+              Get Started
+            </Link>
+            <Link href="/dogs" className="inline-flex items-center justify-center px-8 py-4 border-2 border-white text-lg font-bold rounded-xl text-white hover:bg-white/10 transition-colors">
+              Browse Dogs
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -125,16 +133,12 @@ export default function Home() {
               <li className="flex items-start gap-3">✓ Focused on high-needs dogs</li>
             </ul>
           </div>
-          <div className="bg-amber-50 rounded-3xl p-8 border border-amber-100 shadow-inner">
-            <div className="bg-white rounded-2xl p-6 shadow-xl border border-gray-100">
-              <div className="h-4 w-32 bg-gray-100 rounded mb-4"></div>
-              <div className="h-8 w-48 bg-amber-100 rounded mb-6"></div>
-              <div className="space-y-3">
-                <div className="h-4 w-full bg-gray-50 rounded"></div>
-                <div className="h-4 w-full bg-gray-50 rounded"></div>
-                <div className="h-4 w-2/3 bg-gray-50 rounded"></div>
-              </div>
-            </div>
+          <div className="relative aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl">
+            <img 
+              src="https://images.pexels.com/photos/16583180/pexels-photo-16583180.jpeg?auto=compress&cs=tinysrgb&w=1200"
+              alt="Shelter dogs"
+              className="w-full h-full object-cover"
+            />
           </div>
         </div>
       </section>
@@ -142,15 +146,12 @@ export default function Home() {
       {/* For Rescues Section */}
       <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          <div className="order-2 lg:order-1 bg-gray-50 rounded-3xl p-8 border border-gray-100 shadow-inner">
-             <div className="bg-white rounded-2xl p-6 shadow-xl border border-gray-100">
-              <div className="flex gap-2 mb-4">
-                <div className="h-6 w-20 bg-amber-400 rounded-full"></div>
-                <div className="h-6 w-24 bg-gray-100 rounded-full"></div>
-              </div>
-              <div className="h-10 w-40 bg-gray-900 rounded mb-4"></div>
-              <div className="h-4 w-full bg-gray-50 rounded"></div>
-            </div>
+          <div className="order-2 lg:order-1 relative aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl">
+            <img 
+              src="https://images.pexels.com/photos/6298625/pexels-photo-6298625.jpeg?auto=compress&cs=tinysrgb&w=1200"
+              alt="Rescue volunteer"
+              className="w-full h-full object-cover"
+            />
           </div>
           <div className="order-1 lg:order-2">
             <h2 className="text-3xl font-bold text-gray-900 mb-6">Built for Rescues</h2>

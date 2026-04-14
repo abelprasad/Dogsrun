@@ -1,49 +1,28 @@
-I'm building a Next.js 15 app with Supabase. I need to add several public-facing pages to the site.
+Update all public pages in the DOGSRUN Next.js app with these specific Pexels photo URLs. These are the exact images to use — do not substitute any others.
 
-## 1. Public dogs page at /dogs
-File: src/app/dogs/page.tsx
+Homepage hero (src/app/page.tsx):
+- Full viewport hero section with background image
+- URL: https://images.pexels.com/photos/13349425/pexels-photo-13349425.jpeg?auto=compress&cs=tinysrgb&w=1600
+- Dark overlay bg-black/50, white headline text
+- Headline: "Every dog deserves a run to safety."
+- Subheadline: "The fastest way for shelters to find rescues for their most urgent dogs."
+- Two buttons: amber "Get Started" + white outlined "Browse Dogs"
+- Section height: min-h-screen
 
-- Fetch all dogs where status = 'available' from Supabase (no auth required, use anon key)
-- Display in a responsive grid (3 columns desktop, 2 tablet, 1 mobile)
-- Each card shows: photo (or amber letter avatar fallback), name, breed, age, weight, sex, shelter name (join with organizations)
-- Card links to /dogs/[id] (public dog profile)
-- Page title: "Dogs available for rescue"
-- Subtitle: "These dogs are waiting for a rescue organization to give them a second chance."
+About page hero (src/app/about/page.tsx):
+- URL: https://images.pexels.com/photos/3628100/pexels-photo-3628100.jpeg?auto=compress&cs=tinysrgb&w=1600
+- Full width, h-96, object-cover, dark overlay, white headline "Connecting shelters and rescues"
 
-## 2. Public dog profile at /dogs/[id]
-File: src/app/dogs/[id]/page.tsx
+Shelter section image (homepage and/or about):
+- URL: https://images.pexels.com/photos/16583180/pexels-photo-16583180.jpeg?auto=compress&cs=tinysrgb&w=1200
+- Use in the "Built for Shelters" or "How it works" section, rounded-2xl, object-cover
 
-- Fetch dog by id + shelter name
-- Show: large photo, name, breed, age, weight, sex, color, notes, shelter name + city/state
-- Status badge (available/pending)
-- CTA button: "Interested in rescuing?" → links to /register?type=rescue
-- Back link to /dogs
+Rescue section image (homepage and/or about):
+- URL: https://images.pexels.com/photos/6298625/pexels-photo-6298625.jpeg?auto=compress&cs=tinysrgb&w=1200
+- Use in the "Built for Rescues" section, rounded-2xl, object-cover
 
-## 3. About page at /about
-File: src/app/about/page.tsx
+Dogs page hero (src/app/dogs/page.tsx):
+- URL: https://images.pexels.com/photos/3628100/pexels-photo-3628100.jpeg?auto=compress&cs=tinysrgb&w=1600
+- Full width banner h-80, dark overlay, white headline "Dogs looking for a second chance"
 
-Content to include:
-- Hero: "Connecting shelters and rescues" 
-- Mission: "We are committed to improving the lives of shelter dogs by creating a collaborative network that helps rescues find dogs they can help, reducing overcrowding in shelters."
-- How it works: 3 steps — Shelters add dogs → System matches criteria → Rescues get instant alerts
-- Nonprofit info footer section: "Dog Shelter & Rescue Unification Network, LLC, is a 501(c3) nonprofit charity. EIN 993286395. Mailing address: 221 W 9th St #896, Wilmington, DE 19801. Phone: 904-923-4441"
-
-## 4. Update homepage navigation
-File: src/app/page.tsx
-
-Add navigation links to the header:
-- "Browse Dogs" → /dogs
-- "About" → /about
-- Keep existing "Login" and "Register" buttons
-
-## 5. Add footer to layout
-File: src/app/layout.tsx
-
-Add a simple footer to all pages:
-- Left: "© 2026 DOGSRUN — Dog Shelter & Rescue Unification Network"
-- Center: links — Browse Dogs, About, Contact
-- Right: "EIN 993286395 | 501(c)(3) nonprofit"
-- Border-top border-gray-100, py-8, text-gray-500 text-sm
-
-Use the existing design system throughout: white bg, amber #f59e0b accents, gray-900 headings, gray-500 body, rounded-xl cards, Tailwind CSS.
-RLS is disabled on dogs and organizations tables so anon reads will work fine.
+Use <img> tags not next/image. Keep all existing functionality intact. 
