@@ -21,7 +21,7 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="relative h-48 rounded-xl overflow-hidden border border-gray-100 shadow-sm">
             <Image
-              src="https://images.pexels.com/photos/6298625/pexels-photo-6298625.jpeg?auto=compress&cs=tinysrgb&w=600"
+              src="https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg?auto=compress&cs=tinysrgb&w=600"
               alt="Rescue volunteer"
               fill
               className="object-cover"
@@ -30,7 +30,7 @@ export default function AboutPage() {
           </div>
           <div className="relative h-48 rounded-xl overflow-hidden border border-gray-100 shadow-sm">
             <Image
-              src="https://images.pexels.com/photos/4498198/pexels-photo-4498198.jpeg?auto=compress&cs=tinysrgb&w=600"
+              src="https://images.pexels.com/photos/2607544/pexels-photo-2607544.jpeg?auto=compress&cs=tinysrgb&w=600"
               alt="Happy dog"
               fill
               className="object-cover"

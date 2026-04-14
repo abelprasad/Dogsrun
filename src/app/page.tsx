@@ -34,7 +34,7 @@ export default function Home() {
               </div>
               <div className="relative rounded-xl overflow-hidden border border-gray-200 shadow-sm">
                 <Image
-                  src="https://images.pexels.com/photos/4498198/pexels-photo-4498198.jpeg?auto=compress&cs=tinysrgb&w=400"
+                  src="https://images.pexels.com/photos/2607544/pexels-photo-2607544.jpeg?auto=compress&cs=tinysrgb&w=600"
                   alt="Top right dog photo"
                   fill
                   className="object-cover"
