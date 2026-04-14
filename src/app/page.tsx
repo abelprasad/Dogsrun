@@ -4,7 +4,7 @@ export default function Home() {
   return (
     <div>
       {/* Band 2: Amber Hero */}
-      <section className="bg-[#fffbeb] border-bottom border-gray-200 py-12 px-8">
+      <section className="bg-[#fffbeb] border-b border-gray-200 py-12 px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div>

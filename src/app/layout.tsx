@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
+import Image from "next/image";
 import Navbar from "@/components/navbar";
 import "./globals.css";
 
@@ -53,14 +54,20 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-white">
         <Navbar />
-        <main className="flex-grow">
+        <main className="flex-1 bg-white">
           {children}
         </main>
-        <footer className="bg-[#111] border-t border-white/5 py-12 px-8">
+        <footer className="bg-[#111] border-t border-white/5 py-8 px-8">
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row justify-between items-center gap-8 text-gray-400 text-sm">
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-[#f59e0b]"></div>
+                <Image
+                  src="https://dogsrun2.powerappsportals.com/DOGSRUN Logo idea 4.PNG"
+                  alt="DOGSRUN logo"
+                  width={36}
+                  height={36}
+                  unoptimized
+                />
                 <span className="font-semibold tracking-wider text-white text-sm uppercase">DOGSRUN</span>
               </div>
               <div className="flex items-center gap-8">
