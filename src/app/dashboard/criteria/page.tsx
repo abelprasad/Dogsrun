@@ -50,7 +50,7 @@ export default async function CriteriaPage() {
   const { data: criteria } = await supabase
     .from('rescue_criteria')
     .select('*')
-    .eq('organization_id', org.id)
+    .eq('rescue_id', org.id)
     .maybeSingle()
 
   const backLink = '/dashboard/rescue'
@@ -88,7 +88,7 @@ export default async function CriteriaPage() {
           </div>
         </div>
 
-        <CriteriaForm organizationId={org.id} initialCriteria={criteria} />
+        <CriteriaForm rescueId={org.id} initialCriteria={criteria} />
         
         {!criteria && (
           <p className="mt-8 text-center text-sm text-gray-400">

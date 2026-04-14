@@ -5,11 +5,11 @@ import { createClient } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 
 interface CriteriaFormProps {
-  organizationId: string;
+  rescueId: string;
   initialCriteria?: any;
 }
 
-export default function CriteriaForm({ organizationId, initialCriteria }: CriteriaFormProps) {
+export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaFormProps) {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(!initialCriteria);
   const [loading, setLoading] = useState(false);
@@ -29,7 +29,7 @@ export default function CriteriaForm({ organizationId, initialCriteria }: Criter
     const supabase = createClient();
 
     const payload = {
-      organization_id: organizationId,
+      rescue_id: rescueId,
       breeds: form.breeds.split(',').map((s: string) => s.trim()).filter(Boolean),
       max_age_years: form.max_age_years ? parseInt(form.max_age_years.toString()) : null,
       max_weight_lbs: form.max_weight_lbs ? parseInt(form.max_weight_lbs.toString()) : null,
@@ -41,7 +41,7 @@ export default function CriteriaForm({ organizationId, initialCriteria }: Criter
 
     const { error } = await supabase
       .from('rescue_criteria')
-      .upsert(payload, { onConflict: 'organization_id' });
+      .upsert(payload, { onConflict: 'rescue_id' });
 
     if (error) {
       alert('Error saving criteria: ' + error.message);
