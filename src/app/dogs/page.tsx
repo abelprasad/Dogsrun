@@ -28,7 +28,7 @@ export default async function PublicDogsPage() {
         <img 
           src="https://images.pexels.com/photos/3628100/pexels-photo-3628100.jpeg?auto=compress&cs=tinysrgb&w=1600"
           alt="Dogs looking for rescue"
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover object-[center_40%]"
         />
         <div className="absolute inset-0 bg-black/50 z-10"></div>
         <div className="relative z-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
