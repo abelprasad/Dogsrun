@@ -7,7 +7,13 @@ export default function Home() {
       <nav className="border-b border-gray-100 bg-white/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <Link href="/" className="text-2xl font-bold text-[#f59e0b] tracking-tight">DOGSRUN</Link>
+            <Link href="/" className="flex items-center">
+              <img 
+                src="https://dogsrun2.powerappsportals.com/DOGSRUN Logo idea 4.PNG"
+                alt="DOGSRUN"
+                className="h-10 w-auto"
+              />
+            </Link>
             <div className="hidden md:flex items-center gap-6">
               <Link href="/dogs" className="text-sm font-medium text-gray-500 hover:text-[#f59e0b] transition-colors">Browse Dogs</Link>
               <Link href="/about" className="text-sm font-medium text-gray-500 hover:text-[#f59e0b] transition-colors">About</Link>
@@ -29,7 +35,7 @@ export default function Home() {
         <img 
           src="https://images.pexels.com/photos/13349425/pexels-photo-13349425.jpeg?auto=compress&cs=tinysrgb&w=1600"
           alt="Dog background"
-          className="absolute inset-0 w-full h-full object-cover object-[center_60%]"
+          className="absolute inset-0 w-full h-full object-cover object-[center_70%]"
         />
         <div className="absolute inset-0 bg-black/50 z-10"></div>
         
@@ -135,7 +141,7 @@ export default function Home() {
           </div>
           <div className="relative aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl">
             <img 
-              src="https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg?auto=compress&cs=tinysrgb&w=1200"
+              src="https://images.pexels.com/photos/16583180/pexels-photo-16583180.jpeg?auto=compress&cs=tinysrgb&w=1200"
               alt="Shelter dogs"
               className="w-full h-full object-cover"
             />

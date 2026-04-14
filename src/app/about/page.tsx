@@ -6,7 +6,13 @@ export default function AboutPage() {
       {/* Navbar */}
       <nav className="border-b border-gray-100 bg-white sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-bold text-[#f59e0b] tracking-tight">DOGSRUN</Link>
+          <Link href="/" className="flex items-center">
+            <img 
+              src="https://dogsrun2.powerappsportals.com/DOGSRUN Logo idea 4.PNG"
+              alt="DOGSRUN"
+              className="h-10 w-auto"
+            />
+          </Link>
           <div className="flex items-center gap-6">
             <Link href="/dogs" className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">Browse Dogs</Link>
             <Link href="/auth/login" className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">Login</Link>
