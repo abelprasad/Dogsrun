@@ -67,8 +67,8 @@ export async function POST(req: NextRequest) {
     })
 
     return NextResponse.json({ message: 'Notification sent' })
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error in notify-shelter:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: (error as Error).message }, { status: 500 })
   }
 }

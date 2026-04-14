@@ -1,59 +1,124 @@
-Make the following visual improvements to DOGSRUN using real Pexels photos.
+Create two new pages for DOGSRUN: /faq and /contact.
 
-## 1. src/app/page.tsx — Hero photo collage + How it works section
+## PAGE 1: src/app/faq/page.tsx
 
-### Hero section changes
-Change the hero from a single-column layout to a 2-column grid:
-- Left column: existing headline, description, and buttons (unchanged)
-- Right column: a photo collage grid with 3 Pexels dog photos:
-  - Layout: 2 columns, first photo spans 2 rows (tall), other 2 stack on the right
-  - All photos: border-radius rounded-xl, object-cover, overflow-hidden
-  - Photo URLs:
-    - Large (spans 2 rows): https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg?auto=compress&cs=tinysrgb&w=600
-    - Top right: https://images.pexels.com/photos/4498198/pexels-photo-4498198.jpeg?auto=compress&cs=tinysrgb&w=400
-    - Bottom right: https://images.pexels.com/photos/3628100/pexels-photo-3628100.jpeg?auto=compress&cs=tinysrgb&w=400
-  - Use next/image with unoptimized for all 3
-  - Hero height: min-h-[320px]
+Layout follows the standard band pattern (dark nav via layout, amber hero, white body).
 
-### Add "How it works" section between hero and join cards
-- Background: #fafaf9, border-top and border-bottom: border-gray-200, py-16 px-8
-- Heading: "How it works" — text-2xl font-black text-[#111] mb-2
-- Subheading: "Three steps to save more lives." — text-sm text-gray-500 mb-12
-- 3-column grid, each step:
-  - Large number (1, 2, 3): text-5xl font-black text-[#f59e0b] mb-3
-  - Title: font-bold text-[#111] text-base mb-1
-  - Description: text-sm text-gray-500 leading-relaxed
-- Step 1: "Shelter adds a dog" — "Staff enter intake details and a photo. Takes under 2 minutes."
-- Step 2: "System finds matches" — "DOGSRUN checks every active rescue's criteria and finds the right fit instantly."
-- Step 3: "Rescue gets alerted" — "Matched rescues receive an instant email with one-click Interested or Pass links. No login needed."
+### Hero band (bg-[#fffbeb], border-b border-gray-200, py-12 px-8)
+- h1: "Frequently asked questions"
+- Subtitle: "Answers to common questions about joining DOGSRUN, managing shelter dog profiles, and receiving rescue notifications."
 
-## 2. src/app/about/page.tsx — Photo strip
+### Body (py-12 px-8, max-w-3xl mx-auto)
+Accordion FAQ — use 'use client' with useState. Each item:
+- Clickable row: question text + chevron (▾ closed, ▴ open)
+- border-b border-gray-100 between items
+- Question: font-semibold text-[#111] text-base py-4
+- Answer: text-sm text-gray-500 leading-relaxed pb-4
 
-Add a full-width photo strip between the hero band and the mission content:
-- 3 photos side by side, each h-48, object-cover, rounded-xl
-- Gap: gap-4, px-8, py-8, background white
-- Photo URLs:
-  - https://images.pexels.com/photos/6298625/pexels-photo-6298625.jpeg?auto=compress&cs=tinysrgb&w=600
-  - https://images.pexels.com/photos/4498198/pexels-photo-4498198.jpeg?auto=compress&cs=tinysrgb&w=600
-  - https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg?auto=compress&cs=tinysrgb&w=600
-- Use next/image with unoptimized and fill or fixed dimensions
+FAQ items:
+1. How can a dog shelter join DOGSRUN?
+   Shelters can join by registering on our registration page. Once approved, you can log in to add dogs, manage profiles, and track rescue interest in real time.
 
-## 3. src/app/dashboard/page.tsx — Dog cards with photos
+2. How do rescues receive notifications about available dogs?
+   Rescues set their matching criteria once — breed preferences, size, age, location. DOGSRUN automatically checks every new dog against your criteria and sends an instant email alert when there's a match. No manual searching needed.
 
-Update the shelter dashboard dog cards to show the dog's photo:
-- Each dog card should show the dog's photo_url from the database at the top of the card
-- Photo: w-full h-36 object-cover rounded-t-xl (top of card, no border-radius on bottom corners)
-- If photo_url is null or empty, show a placeholder div with bg-gray-100 and a centered gray dog icon or just bg-gray-100
-- Below the photo: dog name, breed, age/sex/weight pills, status badge, and Manage Dog button (all existing info, just add photo on top)
-- Use a regular <img> tag with the photo_url since these are already stored in Supabase Storage public URLs
+3. How does the matching work?
+   When a shelter adds a dog, DOGSRUN checks all active rescue organizations' saved criteria. Any rescue whose criteria match the dog's breed, age, weight, sex, and mix status receives an email alert instantly.
 
-## General rules
-- Do not change any logic, API calls, or Supabase queries
-- Do not add any new npm dependencies  
-- Add unoptimized to any next/image tags using external Pexels URLs
-- Add pexels.com to next.config.ts remotePatterns:
-  {
-    protocol: 'https',
-    hostname: 'images.pexels.com',
-  }
-- After changes, show me the diff for each file
+4. Can shelters update dog information after submission?
+   Yes. Shelters can log in anytime to update health status, photos, descriptions, or mark a dog as adopted, transferred, or deceased.
+
+5. Is there a fee to join DOGSRUN?
+   DOGSRUN is completely free for all registered shelters and rescue organizations. Our goal is to save lives through collaboration, not profit.
+
+6. What happens when a rescue clicks Interested?
+   The shelter receives an email notification with the rescue organization's name and contact email so they can coordinate the pull directly.
+
+7. How is shelter and rescue data protected?
+   We use secure authentication and encrypted connections to keep all organization data confidential. Passwords are never stored in plain text.
+
+8. Who do I contact for help?
+   Reach out via our contact page at dogsrun.net/contact or email us at admin@dogsrun.org. We're a small nonprofit team and will get back to you as soon as possible.
+
+At the bottom of the body, add a CTA box:
+- bg-[#fffbeb] rounded-xl p-8 text-center mt-12
+- Text: "Still have questions? We're happy to help."
+- Button: "Contact us" → links to /contact, styled bg-[#f59e0b] text-[#451a03] font-semibold px-6 py-2.5 rounded-lg
+
+---
+
+## PAGE 2: src/app/contact/page.tsx + src/app/api/contact/route.ts
+
+### src/app/contact/page.tsx
+'use client' component.
+
+Hero band (bg-[#fffbeb], border-b border-gray-200, py-12 px-8):
+- h1: "Contact us"
+- Subtitle: "Have a question or need help? We'll get back to you as soon as possible."
+
+Body (py-12 px-8):
+Two column layout (max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12):
+
+Left column (md:col-span-2) — contact form in a white card (border border-gray-100 rounded-xl p-8):
+Fields:
+- Name (text input, required)
+- Email (email input, required)
+- Subject (select dropdown, required):
+  - General question
+  - Shelter question
+  - Rescue question
+  - Technical issue
+  - Other
+- Message (textarea, rows=5, required)
+
+Submit button: full width, bg-[#f59e0b] text-[#451a03] font-semibold rounded-lg py-3
+Button text: "Send message" — on loading show "Sending..."
+
+On success: replace form with a success message:
+- Green checkmark circle (div w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4)
+- "Message sent!" heading
+- "Thanks for reaching out. We'll get back to you at {email} as soon as possible." text
+- "Back to home" link → /
+
+On error: show red error banner above form: "Something went wrong. Please try again or email us at admin@dogsrun.org"
+
+Right column (md:col-span-1) — contact info card (bg-[#fafaf9] border border-gray-100 rounded-xl p-6):
+- Section: "Get in touch"
+- Email: admin@dogsrun.org (styled as amber link)
+- Phone: (904) 923-4441
+- Section below: "Mailing address"
+- Dog Shelter & Rescue Unification Network, LLC
+- 221 W 9th St #896
+- Wilmington, DE 19801
+- Small note at bottom: "DOGSRUN is a 501(c)(3) nonprofit. EIN 993286395."
+
+### src/app/api/contact/route.ts
+POST handler:
+- Accepts: { name, email, subject, message }
+- Validates all fields present
+- Uses Resend to send email:
+  - from: alerts@dogsrun.net
+  - to: admin@dogsrun.org
+  - reply_to: sender's email
+  - subject: [DOGSRUN Contact] {subject} — from {name}
+  - HTML body: simple styled email with name, email, subject, message fields
+
+Return { success: true } on success, { error: '...' } on failure with appropriate status codes.
+
+---
+
+## Layout updates
+In src/app/layout.tsx footer, add FAQ and Contact to the nav links:
+- Already has: Browse Dogs, About, Contact
+- Add: FAQ (linking to /faq)
+- Make sure Contact links to /contact
+
+In src/components/navbar.tsx, do NOT add FAQ or Contact to the top nav — keep it clean with just Browse Dogs and About.
+
+---
+
+## Rules
+- No new npm dependencies
+- Keep all existing logic untouched
+- Use the existing Resend client pattern from src/app/api/alerts/route.ts
+- After changes show me which files were created/modified

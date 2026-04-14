@@ -9,6 +9,28 @@ const supabase = createClient(
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
+interface RescueOrg {
+  id: string;
+  name: string;
+  email: string;
+}
+
+interface RescueCriteria {
+  id: string;
+  rescue_id: string;
+  breeds: string[] | null;
+  max_age_years: number | null;
+  max_weight_lbs: number | null;
+  sex_preference: string | null;
+  accepts_mixes: boolean | null;
+  organizations: RescueOrg | null;
+}
+
+interface Match {
+  criteria: RescueCriteria;
+  org: RescueOrg;
+}
+
 export async function POST(req: NextRequest) {
   const { dog_id } = await req.json()
 
@@ -33,13 +55,13 @@ export async function POST(req: NextRequest) {
     .select('*, organizations(id, name, email)')
     .eq('is_active', true)
 
-  if (!criteriaList || criteriaList.length === 0) {
+  if (!criteriaList || (criteriaList as unknown as RescueCriteria[]).length === 0) {
     return NextResponse.json({ message: 'No active rescue criteria found' })
   }
 
-  const matches: any[] = []
+  const matches: Match[] = []
 
-  for (const criteria of criteriaList) {
+  for (const criteria of (criteriaList as unknown as RescueCriteria[])) {
     const org = criteria.organizations
     if (!org) continue
 
@@ -78,7 +100,7 @@ export async function POST(req: NextRequest) {
   // Send emails and log alerts
   const results = await Promise.allSettled(
     matches.map(async ({ criteria, org }) => {
-      const shelter = dog.organizations as any
+      const shelter = dog.organizations as unknown as { name: string; city: string; state: string }
 
       // Log the alert in the database first to get the ID for links
       const { data: alertData, error: alertError } = await supabase.from('alerts').insert({

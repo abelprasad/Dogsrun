@@ -4,9 +4,21 @@ import React, { useState } from 'react';
 import { createClient } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 
+interface RescueCriteria {
+  id?: string;
+  rescue_id?: string;
+  breeds?: string[];
+  max_age_years?: number | string;
+  max_weight_lbs?: number | string;
+  sex_preference?: string;
+  accepts_mixes?: boolean;
+  states_served?: string[];
+  is_active?: boolean;
+}
+
 interface CriteriaFormProps {
   rescueId: string;
-  initialCriteria?: any;
+  initialCriteria?: RescueCriteria;
 }
 
 export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaFormProps) {

@@ -6,11 +6,22 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import SignOutButton from '../../sign-out-button'
 
+interface DogForm {
+  name: string;
+  breed: string;
+  mix: boolean;
+  age_years: string;
+  weight_lbs: string;
+  sex: string;
+  color: string;
+  description: string;
+}
+
 export default function NewDogPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [photo, setPhoto] = useState<File | null>(null)
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<DogForm>({
     name: '',
     breed: '',
     mix: false,
@@ -21,13 +32,13 @@ export default function NewDogPage() {
     description: '',
   })
 
-  const field = (key: string, label: string, type = 'text', placeholder = '') => (
+  const field = (key: keyof DogForm, label: string, type = 'text', placeholder = '') => (
     <div>
       <label className="block text-sm font-semibold text-gray-700 mb-2">{label}</label>
       <input
         type={type}
         placeholder={placeholder}
-        value={(form as any)[key]}
+        value={form[key] as string}
         onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
         className="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] text-[#111] placeholder-[#9ca3af] transition-all text-sm"
       />

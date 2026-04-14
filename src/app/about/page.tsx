@@ -3,14 +3,14 @@ import Image from 'next/image'
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="bg-white">
       {/* Hero band */}
-      <header className="bg-[#fffbeb] border-b border-gray-200 py-12 px-8">
+      <header className="bg-[#fffbeb] border-b border-gray-200 py-16 px-8 relative z-10">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-[900] tracking-tight text-[#111] mb-4">
+          <h1 className="text-4xl md:text-6xl font-[900] tracking-tight text-[#111] mb-6 block">
             About DOGSRUN
           </h1>
-          <p className="text-base text-[#6b7280] max-w-2xl leading-relaxed">
+          <p className="text-lg md:text-xl text-[#6b7280] max-w-3xl leading-relaxed block">
             Connecting shelters and rescues to save more lives through real-time matching and seamless communication.
           </p>
         </div>
@@ -22,7 +22,7 @@ export default function AboutPage() {
           <div className="relative h-48 rounded-xl overflow-hidden border border-gray-100 shadow-sm">
             <Image
               src="https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg?auto=compress&cs=tinysrgb&w=600"
-              alt="Rescue volunteer"
+              alt="Dog photo 1"
               fill
               className="object-cover"
               unoptimized
@@ -31,7 +31,7 @@ export default function AboutPage() {
           <div className="relative h-48 rounded-xl overflow-hidden border border-gray-100 shadow-sm">
             <Image
               src="https://images.pexels.com/photos/2607544/pexels-photo-2607544.jpeg?auto=compress&cs=tinysrgb&w=600"
-              alt="Happy dog"
+              alt="Dog photo 2"
               fill
               className="object-cover"
               unoptimized
@@ -40,7 +40,7 @@ export default function AboutPage() {
           <div className="relative h-48 rounded-xl overflow-hidden border border-gray-100 shadow-sm">
             <Image
               src="https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg?auto=compress&cs=tinysrgb&w=600"
-              alt="Dog friends"
+              alt="Dog photo 3"
               fill
               className="object-cover"
               unoptimized
@@ -49,8 +49,8 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <main className="max-w-7xl mx-auto py-8 px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start mb-16">
+      <main className="max-w-7xl mx-auto py-8 px-8 pb-24">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start mb-24">
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-[#111]">Our Mission</h2>
             <p className="text-[#6b7280] leading-relaxed">

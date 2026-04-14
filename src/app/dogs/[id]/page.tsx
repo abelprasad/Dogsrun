@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase'
 import Link from 'next/link'
+import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import StatusBadge from '@/components/status-badge'
 
@@ -44,9 +45,9 @@ export default async function PublicDogProfilePage({ params }: { params: Promise
         <div className="bg-white rounded-xl border border-gray-100 overflow-hidden shadow-none">
           <div className="grid grid-cols-1 md:grid-cols-2">
             {/* Photo Section */}
-            <div className="aspect-square md:aspect-auto bg-[#fffbeb] flex items-center justify-center overflow-hidden border-r border-gray-100">
+            <div className="aspect-square md:aspect-auto bg-[#fffbeb] flex items-center justify-center relative overflow-hidden border-r border-gray-100">
               {dog.photo_url ? (
-                <img src={dog.photo_url} alt={dog.name} className="w-full h-full object-cover" />
+                <Image src={dog.photo_url} alt={dog.name} fill className="object-cover" unoptimized />
               ) : (
                 <div className="text-9xl font-[900] text-[#f59e0b]">
                   {dog.name?.[0] || 'D'}

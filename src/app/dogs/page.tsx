@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
+import Image from 'next/image'
 import StatusBadge from '@/components/status-badge'
 
 export default async function PublicDogsPage() {
@@ -47,10 +48,12 @@ export default async function PublicDogsPage() {
             >
               <div className="aspect-[4/3] bg-[#fffbeb] relative overflow-hidden">
                 {dog.photo_url ? (
-                  <img 
+                  <Image 
                     src={dog.photo_url} 
                     alt={dog.name} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    unoptimized
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-6xl font-[900] text-[#f59e0b]">

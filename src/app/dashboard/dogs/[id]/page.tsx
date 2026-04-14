@@ -1,10 +1,44 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
+import Image from 'next/image'
 import { notFound, redirect } from 'next/navigation'
-import StatusBadge from '@/components/status-badge'
+import StatusBadge, { DogStatus } from '@/components/status-badge'
 import StatusUpdater from './status-updater'
 import SignOutButton from '../../sign-out-button'
+
+interface Organization {
+  id: string;
+  name: string;
+  email: string;
+  city: string;
+  state: string;
+}
+
+interface Dog {
+  id: string;
+  name: string;
+  breed: string;
+  mix: boolean;
+  age_years: number;
+  weight_lbs: number;
+  sex: string;
+  color: string;
+  description: string;
+  photo_url: string;
+  status: string;
+  shelter_id: string;
+  organizations?: Organization;
+}
+
+interface Alert {
+  id: string;
+  dog_id: string;
+  rescue_id: string;
+  status: string;
+  sent_at: string;
+  organizations?: Organization;
+}
 
 export default async function DogProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -42,21 +76,25 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
     .eq('email', user.email)
     .single()
 
-  const { data: dog } = await supabase
+  const { data: dogData } = await supabase
     .from('dogs')
     .select('*, organizations(*)')
     .eq('id', id)
     .single()
 
-  if (!dog) {
+  if (!dogData) {
     notFound()
   }
 
-  const { data: alerts } = await supabase
+  const dog = dogData as unknown as Dog;
+
+  const { data: alertsData } = await supabase
     .from('alerts')
     .select('*, organizations!alerts_rescue_id_fkey(name, email, city, state)')
     .eq('dog_id', id)
     .order('sent_at', { ascending: false })
+
+  const alerts = (alertsData || []) as unknown as Alert[];
 
   const isShelter = userOrg?.type === 'shelter'
   const isDogShelter = isShelter && userOrg.id === dog.shelter_id
@@ -85,7 +123,7 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
             <p className="text-[#6b7280] font-bold">{dog.breed}{dog.mix ? ' mix' : ''}</p>
           </div>
           <div className="flex items-center gap-4">
-            <StatusBadge status={dog.status || 'available'} />
+            <StatusBadge status={(dog.status as DogStatus) || 'available'} />
           </div>
         </div>
       </header>
@@ -96,9 +134,9 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
           <div className="md:col-span-2 space-y-8">
             <div className="bg-white rounded-xl border border-gray-100 overflow-hidden shadow-none">
               <div className="grid grid-cols-1 md:grid-cols-2">
-                <div className="aspect-square md:aspect-auto bg-[#fffbeb] border-r border-gray-100 flex items-center justify-center overflow-hidden">
+                <div className="aspect-square md:aspect-auto bg-[#fffbeb] border-r border-gray-100 flex items-center justify-center relative overflow-hidden">
                   {dog.photo_url ? (
-                    <img src={dog.photo_url} alt={dog.name} className="w-full h-full object-cover" />
+                    <Image src={dog.photo_url} alt={dog.name} fill className="object-cover" unoptimized />
                   ) : (
                     <div className="text-8xl font-[900] text-[#f59e0b]">
                       {dog.name?.[0] || 'D'}
@@ -143,11 +181,11 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
                 </div>
                 <div className="divide-y divide-gray-100">
                   {alerts && alerts.length > 0 ? (
-                    alerts.map((alert: any) => (
+                    alerts.map((alert) => (
                       <div key={alert.id} className="px-8 py-5 flex items-center justify-between hover:bg-gray-50 transition-colors">
                         <div>
                           <p className="font-bold text-[#111] text-sm">{alert.organizations?.name}</p>
-                          <p className="text-xs text-[#6b7280]">{alert.organizations?.city}, {alert.organizations?.state}</p>
+                          <p className="text-xs text-[#6b7280]">{alert.organizations?.email} • {alert.organizations?.city}, {alert.organizations?.state}</p>
                         </div>
                         <div className="text-right">
                           <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded border ${

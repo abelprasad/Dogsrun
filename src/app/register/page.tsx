@@ -16,12 +16,16 @@ function RegisterForm() {
   const [success, setSuccess] = useState(false);
   const [email, setEmail] = useState('');
 
+  // We use a key on the component to handle typeParam changes, 
+  // but if the user manually clicks the tab, we still want to update state.
+  // The effect below is technically redundant if we use a key, but 
+  // since we want to avoid the lint error, we'll rely on the key for initial 
+  // sync and the buttons for manual sync.
+  
   useEffect(() => {
-    if (typeParam === 'rescue') {
-      setType('rescue');
-    } else if (typeParam === 'shelter') {
-      setType('shelter');
-    }
+    // This effect is now only for logging or other non-state-sync purposes 
+    // if needed, but to satisfy the lint rule we'll just remove the state sync 
+    // and rely on the 'key' prop in the parent.
   }, [typeParam]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -201,6 +205,19 @@ function RegisterForm() {
   );
 }
 
+function RegisterPageContent() {
+  const searchParams = useSearchParams();
+  const typeParam = searchParams.get('type');
+  
+  return (
+    <main className="py-8 px-8 flex items-center justify-center">
+      <Suspense fallback={<div className="text-[#6b7280] font-medium">Loading...</div>}>
+        <RegisterForm key={typeParam || 'default'} />
+      </Suspense>
+    </main>
+  );
+}
+
 export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-white">
@@ -214,11 +231,9 @@ export default function RegisterPage() {
         </div>
       </header>
 
-      <main className="py-8 px-8 flex items-center justify-center">
-        <Suspense fallback={<div className="text-[#6b7280] font-medium">Loading...</div>}>
-          <RegisterForm />
-        </Suspense>
-      </main>
+      <Suspense fallback={<div className="text-[#6b7280] font-medium text-center py-20">Loading...</div>}>
+        <RegisterPageContent />
+      </Suspense>
     </div>
   );
 }

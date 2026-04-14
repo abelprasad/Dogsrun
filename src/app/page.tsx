@@ -56,7 +56,7 @@ export default function Home() {
       </section>
 
       {/* How it works section */}
-      <section className="bg-[#fafaf9] border-t border-b border-gray-200 py-16 px-8">
+      <section className="bg-[#fafaf9] border-t border-b border-gray-200 py-16 px-8 mb-0">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-2xl font-black text-[#111] mb-2">How it works</h2>
           <p className="text-sm text-gray-500 mb-12 uppercase tracking-widest font-bold">Three steps to save more lives.</p>
@@ -82,7 +82,7 @@ export default function Home() {
       </section>
 
       {/* Band 3: White content body */}
-      <section className="bg-white py-16 px-8">
+      <section className="bg-white py-16 px-8 mt-0 border-t-0">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Shelter Card */}

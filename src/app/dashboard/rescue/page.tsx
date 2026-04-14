@@ -1,10 +1,39 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
+import Image from 'next/image'
 import { redirect } from 'next/navigation'
-import StatusBadge from '@/components/status-badge'
+import StatusBadge, { DogStatus } from '@/components/status-badge'
 import AlertActions from './alert-actions'
 import SignOutButton from '../sign-out-button'
+
+interface Organization {
+  id: string;
+  name: string;
+  email: string;
+  city: string;
+  state: string;
+}
+
+interface Dog {
+  id: string;
+  name: string;
+  breed: string;
+  age_years: number;
+  sex: string;
+  photo_url: string;
+  status: string;
+  organizations: Organization;
+}
+
+interface Alert {
+  id: string;
+  dog_id: string;
+  rescue_id: string;
+  status: string;
+  sent_at: string;
+  dogs: Dog;
+}
 
 export default async function RescuePortalPage() {
   const cookieStore = await cookies()
@@ -45,11 +74,13 @@ export default async function RescuePortalPage() {
     redirect('/dashboard')
   }
 
-  const { data: alerts } = await supabase
+  const { data: alertsData } = await supabase
     .from('alerts')
     .select('*, dogs(*, organizations(name, city, state))')
     .eq('rescue_id', org.id)
     .order('sent_at', { ascending: false, nullsFirst: false })
+
+  const alerts = (alertsData || []) as unknown as Alert[];
 
   return (
     <div className="min-h-screen bg-white">
@@ -80,14 +111,14 @@ export default async function RescuePortalPage() {
       <main className="max-w-7xl mx-auto py-8 px-8">
         <div className="space-y-6">
           {alerts && alerts.length > 0 ? (
-            alerts.map((alert: any) => (
+            alerts.map((alert) => (
               <div key={alert.id} className="bg-white rounded-xl border border-gray-100 overflow-hidden shadow-none hover:border-[#f59e0b]/30 transition-all">
                 <div className="p-8">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="flex items-start gap-6">
-                      <div className="w-16 h-16 rounded-lg bg-[#fffbeb] flex items-center justify-center text-2xl font-[900] text-[#f59e0b] flex-shrink-0 overflow-hidden">
+                      <div className="w-16 h-16 rounded-lg bg-[#fffbeb] flex items-center justify-center text-2xl font-[900] text-[#f59e0b] flex-shrink-0 overflow-hidden relative">
                         {alert.dogs?.photo_url ? (
-                          <img src={alert.dogs.photo_url} alt={alert.dogs.name} className="w-full h-full object-cover" />
+                          <Image src={alert.dogs.photo_url} alt={alert.dogs.name} fill className="object-cover" unoptimized />
                         ) : (
                           alert.dogs?.name?.[0] || 'D'
                         )}
@@ -95,7 +126,7 @@ export default async function RescuePortalPage() {
                       <div>
                         <div className="flex items-center gap-3 mb-1">
                           <h2 className="text-xl font-bold text-[#111]">{alert.dogs?.name || 'Unnamed Dog'}</h2>
-                          <StatusBadge status={alert.dogs?.status || 'available'} />
+                          <StatusBadge status={(alert.dogs?.status as DogStatus) || 'available'} />
                         </div>
                         <p className="text-sm text-[#6b7280] mb-2">
                           {alert.dogs?.breed || 'Unknown breed'} • {alert.dogs?.age_years ? `${alert.dogs?.age_years}y` : '—'} • {alert.dogs?.sex || '—'}

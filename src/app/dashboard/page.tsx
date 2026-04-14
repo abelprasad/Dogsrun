@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
+import Image from 'next/image'
 import { redirect } from 'next/navigation'
 import StatusBadge from '@/components/status-badge'
 import SignOutButton from './sign-out-button'
@@ -90,9 +91,9 @@ export default async function DashboardPage() {
           {dogs && dogs.length > 0 ? (
             dogs.map((dog) => (
               <div key={dog.id} className="bg-white border border-gray-100 rounded-xl overflow-hidden flex flex-col shadow-sm">
-                <div className="w-full h-36 bg-gray-100 overflow-hidden">
+                <div className="w-full h-36 bg-gray-100 overflow-hidden relative">
                   {dog.photo_url ? (
-                    <img src={dog.photo_url} alt={dog.name} className="w-full h-full object-cover" />
+                    <Image src={dog.photo_url} alt={dog.name} fill className="object-cover" unoptimized />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-300">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
