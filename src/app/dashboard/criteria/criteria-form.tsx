@@ -30,12 +30,12 @@ export default function CriteriaForm({ organizationId, initialCriteria }: Criter
 
     const payload = {
       organization_id: organizationId,
-      breeds: form.breeds.split(',').map(s => s.trim()).filter(Boolean),
+      breeds: form.breeds.split(',').map((s: string) => s.trim()).filter(Boolean),
       max_age_years: form.max_age_years ? parseInt(form.max_age_years.toString()) : null,
       max_weight_lbs: form.max_weight_lbs ? parseInt(form.max_weight_lbs.toString()) : null,
       sex_preference: form.sex_preference,
       accepts_mixes: form.accepts_mixes,
-      states_served: form.states_served.split(',').map(s => s.trim()).filter(Boolean),
+      states_served: form.states_served.split(',').map((s: string) => s.trim()).filter(Boolean),
       is_active: form.is_active,
     };
 
