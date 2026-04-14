@@ -37,15 +37,22 @@ export default function AboutPage() {
         </section>
 
         <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
-          <div className="max-w-3xl mx-auto">
-            <p className="text-2xl text-gray-600 leading-relaxed mb-12 italic">
-              "We are committed to improving the lives of shelter dogs by creating a collaborative network 
-              that helps rescues find dogs they can help, reducing overcrowding in shelters."
+          <div className="max-w-4xl mx-auto">
+            <p className="text-2xl text-gray-600 leading-relaxed mb-12">
+              At DOGSRUN, we bring together dog shelters and rescue organizations in a seamless network. 
+              Our platform enables shelters to easily share detailed information about dogs in need of homes, 
+              while rescues receive timely notifications tailored to their adoption criteria.
             </p>
+            <div className="bg-amber-50 rounded-[40px] p-10 border border-amber-100 mb-12">
+              <h2 className="text-3xl font-black text-gray-900 mb-6">Our Mission</h2>
+              <p className="text-xl text-gray-700 leading-relaxed font-medium">
+                We are committed to improving the lives of shelter dogs by creating a collaborative network that helps rescues find dogs they can help, which should reduce the burden of overcrowding in shelters. By connecting shelters and rescues, we help more dogs find loving homes faster and more efficiently and reduce unnecessary euthanasia of shelter dogs.
+              </p>
+            </div>
           </div>
           <div className="flex justify-center gap-4">
             <Link href="/register" className="px-8 py-4 bg-[#f59e0b] text-white rounded-2xl font-bold text-lg shadow-xl shadow-amber-200 hover:bg-[#d97706] transition-all">
-              Join the Network
+              Join Our Network
             </Link>
           </div>
         </section>
@@ -53,34 +60,53 @@ export default function AboutPage() {
         {/* How it Works Section */}
         <section className="py-24 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl font-black text-gray-900 mb-4">How it Works</h2>
-              <p className="text-gray-500">Matching the right dog with the right rescue in three simple steps.</p>
+            <div className="text-center mb-16 max-w-3xl mx-auto">
+              <h2 className="text-4xl font-black text-gray-900 mb-6">How It Works</h2>
+              <p className="text-xl text-gray-600 leading-relaxed">
+                Shelters log in to enter detailed profiles of dogs available for adoption. 
+                Rescues set their preferences and receive instant notifications when dogs matching their criteria become available. 
+                This streamlined communication helps save time and lives.
+              </p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
               <div className="bg-white p-10 rounded-[40px] shadow-sm border border-gray-100 flex flex-col items-center text-center">
-                <div className="w-16 h-16 rounded-2xl bg-amber-100 flex items-center justify-center text-[#f59e0b] text-2xl font-black mb-8">1</div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Shelters add dogs</h3>
-                <p className="text-gray-500 leading-relaxed">
-                  Shelters enter details for dogs that need specialized rescue support or are at risk of euthanasia.
+                <div className="w-16 h-16 rounded-2xl bg-amber-50 flex items-center justify-center text-[#f59e0b] mb-8">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-7.714 2.143L11 21l-2.286-6.857L1 12l7.714-2.143L11 3z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Success Stories</h3>
+                <p className="text-gray-500 leading-relaxed text-sm">
+                  Read inspiring stories of dogs who found their forever homes through our network, thanks to the dedication of shelters and rescues working together.
                 </p>
               </div>
               
               <div className="bg-white p-10 rounded-[40px] shadow-sm border border-gray-100 flex flex-col items-center text-center">
-                <div className="w-16 h-16 rounded-2xl bg-amber-100 flex items-center justify-center text-[#f59e0b] text-2xl font-black mb-8">2</div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4">System matches criteria</h3>
-                <p className="text-gray-500 leading-relaxed">
-                  Our system automatically matches dogs with rescue organizations based on their specific breed, age, and needs.
+                <div className="w-16 h-16 rounded-2xl bg-amber-50 flex items-center justify-center text-[#f59e0b] mb-8">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Community Focus</h3>
+                <p className="text-gray-500 leading-relaxed text-sm">
+                  We foster a supportive community where shelters and rescues share resources, knowledge, and support to improve animal welfare across regions.
                 </p>
               </div>
               
               <div className="bg-white p-10 rounded-[40px] shadow-sm border border-gray-100 flex flex-col items-center text-center">
-                <div className="w-16 h-16 rounded-2xl bg-amber-100 flex items-center justify-center text-[#f59e0b] text-2xl font-black mb-8">3</div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Rescues get alerts</h3>
-                <p className="text-gray-500 leading-relaxed">
-                  Rescues receive instant email alerts and can express interest with one click to start the pull process.
+                <div className="w-16 h-16 rounded-2xl bg-amber-50 flex items-center justify-center text-[#f59e0b] mb-8">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Get Involved</h3>
+                <p className="text-gray-500 leading-relaxed text-sm mb-6">
+                  Whether you are a shelter, rescue, or animal lover, join DOGSRUN to make a difference. Together, we can save more dogs and create happier lives.
                 </p>
+                <Link href="/register" className="inline-flex items-center px-6 py-2 border border-[#f59e0b] text-sm font-bold rounded-xl text-[#f59e0b] hover:bg-amber-50 transition-all">
+                  Register
+                </Link>
               </div>
             </div>
           </div>
