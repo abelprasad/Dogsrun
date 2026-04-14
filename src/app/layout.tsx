@@ -13,11 +13,30 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DOGSRUN",
-  description: "The fastest way to match shelter dogs with rescue organizations.",
+  title: 'DOGSRUN',
+  description: 'The fastest way for animal shelters to find specialized rescues for their most urgent dogs.',
   icons: {
     icon: '/favicon.svg',
   },
+  openGraph: {
+    title: 'DOGSRUN — Every dog deserves a run to safety.',
+    description: 'Real-time matching between shelters and rescue organizations. Instant alerts, seamless communication.',
+    url: 'https://dogsrun.net',
+    siteName: 'DOGSRUN',
+    images: [
+      {
+        url: 'https://dogsrun.net/dogsrun_og-image.png',
+        width: 1200,
+        height: 630,
+      }
+    ],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'DOGSRUN',
+    description: 'Real-time dog matching between shelters and rescues.',
+  }
 };
 
 export default function RootLayout({
