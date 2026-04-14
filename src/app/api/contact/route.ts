@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     await resend.emails.send({
       from: 'alerts@dogsrun.net',
       to: 'admin@dogsrun.org',
-      reply_to: email,
+      replyTo: email,
       subject: `[DOGSRUN Contact] ${subject} — from ${name}`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
