@@ -44,12 +44,12 @@ export default function StatusUpdater({ dogId, currentStatus }: StatusUpdaterPro
 
   return (
     <div className="flex flex-col gap-2">
-      <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Update Status</label>
+      <label className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-widest mb-1">Update Status</label>
       <select
         value={status}
         disabled={loading}
         onChange={(e) => handleStatusChange(e.target.value)}
-        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#f59e0b] focus:ring-2 focus:ring-amber-100 outline-none transition-all bg-white font-medium text-gray-900"
+        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] outline-none transition-all bg-white font-semibold text-[#111] text-sm"
       >
         {statuses.map((s) => (
           <option key={s.value} value={s.value}>
@@ -57,7 +57,7 @@ export default function StatusUpdater({ dogId, currentStatus }: StatusUpdaterPro
           </option>
         ))}
       </select>
-      {loading && <p className="text-[10px] text-[#f59e0b] animate-pulse">Updating...</p>}
+      {loading && <p className="text-[10px] text-[#f59e0b] animate-pulse uppercase font-bold tracking-widest">Updating...</p>}
     </div>
   );
 }

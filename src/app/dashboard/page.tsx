@@ -22,9 +22,6 @@ export default async function DashboardPage() {
               cookieStore.set(name, value, options)
             )
           } catch {
-            // The `setAll` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
           }
         },
       },
@@ -37,7 +34,6 @@ export default async function DashboardPage() {
     redirect('/auth/login')
   }
 
-  // Fetch organization
   const { data: org } = await supabase
     .from('organizations')
     .select('*')
@@ -45,7 +41,6 @@ export default async function DashboardPage() {
     .single()
 
   if (!org) {
-    // If user has no org profile, maybe they need to register it
     redirect('/register')
   }
 
@@ -53,129 +48,74 @@ export default async function DashboardPage() {
     redirect('/dashboard/rescue')
   }
 
-  // Fetch dogs for this shelter
   const { data: dogs } = await supabase
     .from('dogs')
     .select('*')
     .eq('shelter_id', org.id)
     .order('created_at', { ascending: false })
 
-  const stats = {
-    total: dogs?.length || 0,
-    urgent: dogs?.filter(d => d.status === 'urgent').length || 0,
-    placed: dogs?.filter(d => ['placed', 'adopted'].includes(d.status)).length || 0,
-  }
-
   return (
-    <div className="min-h-screen bg-white text-gray-900 font-sans antialiased">
-      {/* Navbar */}
-      <nav className="border-b border-gray-100 bg-white sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <Link href="/" className="text-2xl font-bold text-[#f59e0b] tracking-tight">DOGSRUN</Link>
-            <div className="hidden md:flex items-center gap-6">
-              <Link href="/dashboard" className="text-sm font-bold text-gray-900 border-b-2 border-[#f59e0b] pb-1">Dashboard</Link>
-              <Link href="/dashboard/dogs/new" className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">Add Dog</Link>
-            </div>
+    <div className="min-h-screen bg-white">
+      {/* Dashboard Sub-nav */}
+      <div className="bg-[#111] border-t border-white/5 py-2 px-8">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <div className="flex gap-6">
+            <Link href="/dashboard" className="text-xs font-bold text-[#f59e0b] uppercase tracking-widest">Dashboard</Link>
+            <Link href="/dashboard/dogs/new" className="text-xs font-bold text-[#9ca3af] hover:text-white uppercase tracking-widest transition-colors">Add Dog</Link>
           </div>
           <div className="flex items-center gap-4">
-             <div className="text-right hidden sm:block">
-              <p className="text-xs font-bold text-gray-900">{org.name}</p>
-              <p className="text-[10px] text-gray-500 uppercase tracking-wider">{org.type}</p>
-            </div>
-            <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-xs font-bold text-[#f59e0b]">
-              {org.name[0]}
-            </div>
+            <span className="text-xs font-bold text-[#9ca3af] uppercase tracking-widest">{org.name}</span>
             <SignOutButton />
           </div>
         </div>
-      </nav>
+      </div>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-4">
+      {/* Hero band */}
+      <header className="bg-[#fffbeb] border-b border-gray-200 py-12 px-8">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Shelter Dashboard</h1>
-            <p className="text-gray-500 mt-1">Manage your dogs and track rescue interest.</p>
+            <h1 className="text-4xl md:text-5xl font-[900] tracking-tight text-[#111] mb-2">
+              {org.name}
+            </h1>
+            <p className="text-[#6b7280]">Manage your dogs and track rescue interest.</p>
           </div>
-          <Link href="/dashboard/dogs/new" className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-sm font-bold rounded-xl shadow-lg text-white bg-[#f59e0b] hover:bg-[#d97706] transition-all transform active:scale-95">
-            + Add New Dog
+          <Link href="/dashboard/dogs/new" className="inline-block bg-[#f59e0b] text-[#451a03] font-semibold rounded-lg px-5 py-2.5 hover:bg-[#d97706] transition-colors">
+            + Add a dog
           </Link>
         </div>
+      </header>
 
-        {/* Stat Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-            <p className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Total Dogs</p>
-            <p className="text-4xl font-black text-gray-900">{stats.total}</p>
-          </div>
-          <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-            <p className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Urgent Need</p>
-            <p className="text-4xl font-black text-red-600">{stats.urgent}</p>
-          </div>
-          <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-            <p className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Saved / Placed</p>
-            <p className="text-4xl font-black text-green-600">{stats.placed}</p>
-          </div>
-        </div>
-
-        {/* Dogs Table */}
-        <div className="bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="bg-gray-50/50 border-b border-gray-100">
-                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Dog</th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Details</th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {dogs && dogs.length > 0 ? (
-                  dogs.map((dog) => (
-                    <tr key={dog.id} className="hover:bg-amber-50/30 transition-colors group">
-                      <td className="px-6 py-5">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center text-gray-400 font-bold">
-                            {dog.name?.[0] || 'D'}
-                          </div>
-                          <div>
-                            <p className="font-bold text-gray-900 group-hover:text-[#f59e0b] transition-colors">{dog.name || 'Unnamed'}</p>
-                            <p className="text-xs text-gray-500">{dog.breed || 'Unknown breed'}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-5">
-                        <p className="text-sm text-gray-600">{dog.age_years ? `${dog.age_years}y` : '—'} • {dog.sex || '—'} • {dog.weight_lbs ? `${dog.weight_lbs} lbs` : '—'}</p>
-                      </td>
-                      <td className="px-6 py-5">
-                        <StatusBadge status={dog.status || 'available'} />
-                      </td>
-                      <td className="px-6 py-5 text-right">
-                        <Link href={`/dashboard/dogs/${dog.id}`} className="inline-flex items-center justify-center px-4 py-2 border border-gray-200 text-xs font-bold rounded-xl text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm">
-                          View Profile
-                        </Link>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={4} className="px-6 py-20 text-center">
-                      <div className="flex flex-col items-center">
-                        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center text-gray-300 mb-4">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                          </svg>
-                        </div>
-                        <p className="text-gray-500 font-medium">No dogs added yet.</p>
-                        <Link href="/dashboard/dogs/new" className="text-[#f59e0b] font-bold mt-2 hover:underline">Add your first dog</Link>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+      <main className="max-w-7xl mx-auto py-8 px-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {dogs && dogs.length > 0 ? (
+            dogs.map((dog) => (
+              <div key={dog.id} className="bg-white border border-gray-100 rounded-xl p-6 flex flex-col justify-between">
+                <div>
+                  <div className="flex justify-between items-start mb-4">
+                    <h2 className="text-xl font-bold text-[#111]">{dog.name}</h2>
+                    <StatusBadge status={dog.status || 'available'} />
+                  </div>
+                  <p className="text-sm text-[#6b7280] mb-4">{dog.breed || 'Unknown breed'}</p>
+                  <div className="flex gap-4 text-xs font-semibold text-[#9ca3af] mb-6">
+                    <span>{dog.age_years ? `${dog.age_years}y` : '—'}</span>
+                    <span>{dog.sex || '—'}</span>
+                    <span>{dog.weight_lbs ? `${dog.weight_lbs} lbs` : '—'}</span>
+                  </div>
+                </div>
+                <Link 
+                  href={`/dashboard/dogs/${dog.id}`} 
+                  className="block w-full text-center border border-[#d1d5db] text-[#374151] bg-transparent font-semibold rounded-lg px-4 py-2 hover:bg-gray-50 transition-colors text-sm"
+                >
+                  Manage Dog
+                </Link>
+              </div>
+            ))
+          ) : (
+            <div className="col-span-full py-20 bg-[#fffbeb] rounded-xl border border-dashed border-gray-200 text-center">
+              <p className="text-[#6b7280] mb-4">No dogs listed yet.</p>
+              <Link href="/dashboard/dogs/new" className="text-[#f59e0b] font-bold hover:underline">Add your first dog</Link>
+            </div>
+          )}
         </div>
       </main>
     </div>

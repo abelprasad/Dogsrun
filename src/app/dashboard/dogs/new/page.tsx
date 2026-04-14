@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import SignOutButton from '../../sign-out-button'
 
 export default function NewDogPage() {
   const router = useRouter()
@@ -21,13 +23,13 @@ export default function NewDogPage() {
 
   const field = (key: string, label: string, type = 'text', placeholder = '') => (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+      <label className="block text-sm font-semibold text-gray-700 mb-2">{label}</label>
       <input
         type={type}
         placeholder={placeholder}
         value={(form as any)[key]}
         onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
-        className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-100 focus:border-[#f59e0b] text-gray-900 placeholder-gray-400 transition-all"
+        className="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] text-[#111] placeholder-[#9ca3af] transition-all text-sm"
       />
     </div>
   )
@@ -42,7 +44,7 @@ export default function NewDogPage() {
 
     const { data: org } = await supabase
       .from('organizations')
-      .select('id')
+      .select('id, name')
       .eq('email', user.email)
       .single()
 
@@ -100,19 +102,29 @@ export default function NewDogPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <nav className="bg-white border-b border-gray-100 px-6 h-16 flex justify-between items-center sticky top-0 z-50">
-        <h1 className="text-2xl font-bold text-[#f59e0b]">DOGSRUN</h1>
-        <button onClick={() => router.push('/dashboard')} className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">
-          ← Back to dashboard
-        </button>
-      </nav>
-      <main className="max-w-2xl mx-auto px-6 py-12">
-        <div className="mb-8">
-          <h2 className="text-3xl font-black text-gray-900">Add a dog</h2>
-          <p className="text-gray-500 mt-2 text-lg">Help this dog find the perfect rescue match.</p>
+      {/* Dashboard Sub-nav */}
+      <div className="bg-[#111] border-t border-white/5 py-2 px-8">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <div className="flex gap-6">
+            <Link href="/dashboard" className="text-xs font-bold text-[#9ca3af] hover:text-white uppercase tracking-widest transition-colors">Dashboard</Link>
+            <Link href="/dashboard/dogs/new" className="text-xs font-bold text-[#f59e0b] uppercase tracking-widest">Add Dog</Link>
+          </div>
+          <SignOutButton />
         </div>
-        
-        <form onSubmit={handleSubmit} className="bg-white rounded-3xl border border-gray-100 shadow-xl p-8 space-y-8">
+      </div>
+
+      {/* Hero band */}
+      <header className="bg-[#fffbeb] border-b border-gray-200 py-12 px-8">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-4xl md:text-5xl font-[900] tracking-tight text-[#111] mb-2">
+            Add a dog
+          </h1>
+          <p className="text-[#6b7280]">Help this dog find the perfect rescue match.</p>
+        </div>
+      </header>
+
+      <main className="max-w-3xl mx-auto py-8 px-8">
+        <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-100 p-8 space-y-8 shadow-none">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {field('name', 'Dog Name', 'text', 'Buddy')}
             {field('breed', 'Primary Breed', 'text', 'Labrador')}
@@ -125,11 +137,11 @@ export default function NewDogPage() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Sex</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Sex</label>
               <select
                 value={form.sex}
                 onChange={e => setForm(f => ({ ...f, sex: e.target.value }))}
-                className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-100 focus:border-[#f59e0b] text-gray-900 transition-all bg-white"
+                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] text-[#111] transition-all bg-white text-sm"
               >
                 <option value="male">Male</option>
                 <option value="female">Female</option>
@@ -139,30 +151,30 @@ export default function NewDogPage() {
             {field('color', 'Color/Markings', 'text', 'Black and white')}
           </div>
           
-          <div className="flex items-center gap-3 p-4 bg-amber-50 rounded-2xl border border-amber-100">
+          <div className="flex items-center gap-3 p-4 bg-[#fffbeb] rounded-lg border border-gray-100">
             <input
               type="checkbox"
               id="mix"
               checked={form.mix}
               onChange={e => setForm(f => ({ ...f, mix: e.target.checked }))}
-              className="w-5 h-5 rounded border-gray-300 text-[#f59e0b] focus:ring-[#f59e0b]"
+              className="w-4 h-4 rounded border-gray-300 text-[#f59e0b] focus:ring-[#f59e0b]"
             />
-            <label htmlFor="mix" className="text-sm font-bold text-amber-900 cursor-pointer">This is a mixed breed dog</label>
+            <label htmlFor="mix" className="text-sm font-semibold text-[#111] cursor-pointer">This is a mixed breed dog</label>
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description & Medical Notes</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Description & Medical Notes</label>
             <textarea
               value={form.description}
               onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
               placeholder="Any relevant info about behavior, medical needs, or urgency..."
               rows={4}
-              className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-100 focus:border-[#f59e0b] text-gray-900 placeholder-gray-400 transition-all"
+              className="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] text-[#111] placeholder-[#9ca3af] transition-all text-sm"
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">Dog Photo</label>
+          <div className="space-y-4">
+            <label className="block text-sm font-semibold text-gray-700">Dog Photo</label>
             <div className="relative group">
               <input
                 type="file"
@@ -170,13 +182,13 @@ export default function NewDogPage() {
                 onChange={e => setPhoto(e.target.files?.[0] || null)}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
               />
-              <div className="border-2 border-dashed border-amber-300 bg-amber-50/30 rounded-2xl p-8 text-center group-hover:bg-amber-50 transition-colors">
+              <div className="border-2 border-dashed border-gray-200 bg-gray-50/50 rounded-lg p-8 text-center group-hover:bg-gray-50 transition-colors">
                 {photo ? (
-                  <p className="text-amber-900 font-bold">{photo.name}</p>
+                  <p className="text-[#111] font-bold text-sm">{photo.name}</p>
                 ) : (
                   <>
-                    <p className="text-amber-900 font-bold">Click to upload photo</p>
-                    <p className="text-xs text-gray-500 mt-1">Accepts PNG, JPG, or WEBP (Max 5MB)</p>
+                    <p className="text-[#111] font-bold text-sm">Click to upload photo</p>
+                    <p className="text-xs text-[#9ca3af] mt-1 uppercase tracking-widest">PNG, JPG, or WEBP (Max 5MB)</p>
                   </>
                 )}
               </div>
@@ -186,7 +198,7 @@ export default function NewDogPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#f59e0b] text-white py-4 rounded-xl font-black text-lg shadow-lg hover:bg-[#d97706] disabled:opacity-50 transform transition active:scale-[0.98]"
+            className="w-full bg-[#f59e0b] text-[#451a03] py-3 rounded-lg font-bold text-lg hover:bg-[#d97706] disabled:opacity-50 transition-colors"
           >
             {loading ? 'Adding Dog...' : 'Post to Network'}
           </button>

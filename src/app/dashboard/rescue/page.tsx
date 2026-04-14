@@ -23,7 +23,6 @@ export default async function RescuePortalPage() {
               cookieStore.set(name, value, options)
             )
           } catch {
-            // Ignored.
           }
         },
       },
@@ -36,7 +35,6 @@ export default async function RescuePortalPage() {
     redirect('/auth/login')
   }
 
-  // Fetch organization
   const { data: org } = await supabase
     .from('organizations')
     .select('*')
@@ -47,7 +45,6 @@ export default async function RescuePortalPage() {
     redirect('/dashboard')
   }
 
-  // Fetch incoming alerts with dog info
   const { data: alerts } = await supabase
     .from('alerts')
     .select('*, dogs(*, organizations(name, city, state))')
@@ -55,44 +52,40 @@ export default async function RescuePortalPage() {
     .order('sent_at', { ascending: false, nullsFirst: false })
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 font-sans antialiased">
-      {/* Navbar */}
-      <nav className="border-b border-gray-100 bg-white sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <Link href="/" className="text-2xl font-bold text-[#f59e0b] tracking-tight">DOGSRUN</Link>
-            <div className="hidden md:flex items-center gap-6">
-              <Link href="/dashboard/rescue" className="text-sm font-bold text-gray-900 border-b-2 border-[#f59e0b] pb-1">Incoming Alerts</Link>
-              <Link href="/dashboard/criteria" className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">Matching Criteria</Link>
-            </div>
+    <div className="min-h-screen bg-white">
+      {/* Dashboard Sub-nav */}
+      <div className="bg-[#111] border-t border-white/5 py-2 px-8">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <div className="flex gap-6">
+            <Link href="/dashboard/rescue" className="text-xs font-bold text-[#f59e0b] uppercase tracking-widest">Incoming Alerts</Link>
+            <Link href="/dashboard/criteria" className="text-xs font-bold text-[#9ca3af] hover:text-white uppercase tracking-widest transition-colors">Matching Criteria</Link>
           </div>
           <div className="flex items-center gap-4">
-            <div className="text-right hidden sm:block">
-              <p className="text-xs font-bold text-gray-900">{org.name}</p>
-              <p className="text-[10px] text-gray-500 uppercase tracking-wider">Rescue Portal</p>
-            </div>
-            <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-xs font-bold text-[#f59e0b]">
-              {org.name[0]}
-            </div>
+            <span className="text-xs font-bold text-[#9ca3af] uppercase tracking-widest">{org.name}</span>
             <SignOutButton />
           </div>
         </div>
-      </nav>
+      </div>
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="mb-10">
-          <h1 className="text-3xl font-extrabold text-gray-900">Rescue Dashboard</h1>
-          <p className="text-gray-600 mt-2">New dog matches based on your organization's criteria.</p>
+      {/* Hero band */}
+      <header className="bg-[#fffbeb] border-b border-gray-200 py-12 px-8">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-4xl md:text-5xl font-[900] tracking-tight text-[#111] mb-2">
+            {org.name || 'Rescue Portal'}
+          </h1>
+          <p className="text-[#6b7280]">New dog matches based on your organization&apos;s criteria.</p>
         </div>
+      </header>
 
+      <main className="max-w-7xl mx-auto py-8 px-8">
         <div className="space-y-6">
           {alerts && alerts.length > 0 ? (
             alerts.map((alert: any) => (
-              <div key={alert.id} className="bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden hover:border-amber-200 transition-all group">
+              <div key={alert.id} className="bg-white rounded-xl border border-gray-100 overflow-hidden shadow-none hover:border-[#f59e0b]/30 transition-all">
                 <div className="p-8">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="flex items-start gap-6">
-                      <div className="w-20 h-20 rounded-3xl bg-amber-50 flex items-center justify-center text-3xl font-black text-[#f59e0b] flex-shrink-0 overflow-hidden">
+                      <div className="w-16 h-16 rounded-lg bg-[#fffbeb] flex items-center justify-center text-2xl font-[900] text-[#f59e0b] flex-shrink-0 overflow-hidden">
                         {alert.dogs?.photo_url ? (
                           <img src={alert.dogs.photo_url} alt={alert.dogs.name} className="w-full h-full object-cover" />
                         ) : (
@@ -100,18 +93,15 @@ export default async function RescuePortalPage() {
                         )}
                       </div>
                       <div>
-                        <div className="flex items-center gap-3 mb-2">
-                          <h2 className="text-2xl font-black text-gray-900">{alert.dogs?.name || 'Unnamed Dog'}</h2>
+                        <div className="flex items-center gap-3 mb-1">
+                          <h2 className="text-xl font-bold text-[#111]">{alert.dogs?.name || 'Unnamed Dog'}</h2>
                           <StatusBadge status={alert.dogs?.status || 'available'} />
-                          {alert.dogs?.status === 'urgent' && (
-                            <span className="animate-pulse bg-red-100 text-red-600 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Urgent</span>
-                          )}
                         </div>
-                        <p className="text-gray-500 font-medium mb-3">
+                        <p className="text-sm text-[#6b7280] mb-2">
                           {alert.dogs?.breed || 'Unknown breed'} • {alert.dogs?.age_years ? `${alert.dogs?.age_years}y` : '—'} • {alert.dogs?.sex || '—'}
                         </p>
-                        <p className="text-xs text-gray-400">
-                          Listed by <span className="font-bold text-gray-700">{alert.dogs?.organizations?.name}</span> • {alert.dogs?.organizations?.city}, {alert.dogs?.organizations?.state}
+                        <p className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-widest">
+                          Listed by <span className="text-[#111]">{alert.dogs?.organizations?.name}</span> • {alert.dogs?.organizations?.city}, {alert.dogs?.organizations?.state}
                         </p>
                       </div>
                     </div>
@@ -120,32 +110,19 @@ export default async function RescuePortalPage() {
                       <AlertActions alertId={alert.id} currentStatus={alert.status} />
                     </div>
                   </div>
-
-                  {alert.dogs?.description && (
-                    <div className="mt-8 pt-6 border-t border-gray-100">
-                      <p className="text-sm text-gray-600 leading-relaxed italic">
-                        "{alert.dogs.description.substring(0, 180)}{alert.dogs.description.length > 180 ? '...' : ''}"
-                      </p>
-                    </div>
-                  )}
                 </div>
                 
                 <div className="bg-gray-50/50 px-8 py-3 border-t border-gray-100 flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Received {new Date(alert.sent_at).toLocaleDateString()}</span>
+                  <span className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-widest">Received {new Date(alert.sent_at).toLocaleDateString()}</span>
                   <Link href={`/dashboard/dogs/${alert.dog_id}`} className="text-xs font-bold text-[#f59e0b] hover:underline">View Full Profile →</Link>
                 </div>
               </div>
             ))
           ) : (
-            <div className="bg-white py-32 rounded-3xl border border-gray-100 text-center shadow-inner">
-              <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center text-gray-300 mx-auto mb-6">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">No alerts yet</h3>
-              <p className="text-gray-500 max-w-sm mx-auto">Make sure your matching criteria are set up to start receiving dog matches.</p>
-              <Link href="/dashboard/criteria" className="inline-flex items-center px-6 py-3 mt-8 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all shadow-sm">
+            <div className="py-20 bg-[#fffbeb] rounded-xl border border-dashed border-gray-200 text-center">
+              <h3 className="text-lg font-bold text-[#111] mb-2">No alerts yet</h3>
+              <p className="text-[#6b7280] max-w-sm mx-auto mb-8">Make sure your matching criteria are set up to start receiving dog matches.</p>
+              <Link href="/dashboard/criteria" className="inline-block bg-[#111] text-white font-semibold rounded-lg px-5 py-2.5 hover:bg-black transition-colors">
                 Manage Criteria
               </Link>
             </div>

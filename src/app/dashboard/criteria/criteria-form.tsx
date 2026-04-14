@@ -54,18 +54,18 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
 
   if (!isEditing && initialCriteria) {
     return (
-      <div className="bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden">
+      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden shadow-none">
         <div className="p-8 space-y-8">
           <div className="flex justify-between items-start">
             <div className="flex items-center gap-3">
-              <div className={`w-3 h-3 rounded-full ${initialCriteria.is_active ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-              <span className="text-sm font-bold text-gray-500 uppercase tracking-wider">
+              <div className={`w-2 h-2 rounded-full ${initialCriteria.is_active ? 'bg-[#166534]' : 'bg-[#6b7280]'}`}></div>
+              <span className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-widest">
                 {initialCriteria.is_active ? 'Active' : 'Inactive'}
               </span>
             </div>
             <button
               onClick={() => setIsEditing(true)}
-              className="text-sm font-bold text-[#f59e0b] hover:underline"
+              className="text-sm font-bold text-[#f59e0b] hover:underline transition-colors"
             >
               Edit Criteria
             </button>
@@ -73,31 +73,31 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
-              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Target Breeds</h3>
+              <h3 className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-widest mb-4">Target Breeds</h3>
               <div className="flex flex-wrap gap-2">
                 {initialCriteria.breeds && initialCriteria.breeds.length > 0 ? (
                   initialCriteria.breeds.map((breed: string) => (
-                    <span key={breed} className="px-3 py-1 bg-amber-50 text-[#f59e0b] text-sm font-bold rounded-lg border border-amber-100">
+                    <span key={breed} className="px-3 py-1 bg-[#fffbeb] text-[#451a03] text-xs font-bold rounded border border-gray-100">
                       {breed}
                     </span>
                   ))
                 ) : (
-                  <span className="text-gray-500 text-sm italic">All breeds accepted</span>
+                  <span className="text-[#6b7280] text-sm italic">All breeds accepted</span>
                 )}
               </div>
             </div>
 
             <div>
-              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Location Focus</h3>
+              <h3 className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-widest mb-4">Location Focus</h3>
               <div className="flex flex-wrap gap-2">
                 {initialCriteria.states_served && initialCriteria.states_served.length > 0 ? (
                   initialCriteria.states_served.map((state: string) => (
-                    <span key={state} className="px-3 py-1 bg-gray-50 text-gray-700 text-sm font-bold rounded-lg border border-gray-100">
+                    <span key={state} className="px-3 py-1 bg-gray-50 text-[#111] text-xs font-bold rounded border border-gray-100">
                       {state}
                     </span>
                   ))
                 ) : (
-                  <span className="text-gray-500 text-sm italic">No specific states set</span>
+                  <span className="text-[#6b7280] text-sm italic">No specific states set</span>
                 )}
               </div>
             </div>
@@ -105,24 +105,17 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-8 border-t border-gray-50">
             <div>
-              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Max Age</h3>
-              <p className="text-xl font-bold text-gray-900">{initialCriteria.max_age_years ? `${initialCriteria.max_age_years} years` : 'Any age'}</p>
+              <h3 className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-widest mb-2">Max Age</h3>
+              <p className="text-lg font-bold text-[#111]">{initialCriteria.max_age_years ? `${initialCriteria.max_age_years} years` : 'Any age'}</p>
             </div>
             <div>
-              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Max Weight</h3>
-              <p className="text-xl font-bold text-gray-900">{initialCriteria.max_weight_lbs ? `${initialCriteria.max_weight_lbs} lbs` : 'Any weight'}</p>
+              <h3 className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-widest mb-2">Max Weight</h3>
+              <p className="text-lg font-bold text-[#111]">{initialCriteria.max_weight_lbs ? `${initialCriteria.max_weight_lbs} lbs` : 'Any weight'}</p>
             </div>
             <div>
-              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Sex Preference</h3>
-              <p className="text-xl font-bold text-gray-900 capitalize">{initialCriteria.sex_preference || 'Any'}</p>
+              <h3 className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-widest mb-2">Sex Preference</h3>
+              <p className="text-lg font-bold text-[#111] capitalize">{initialCriteria.sex_preference || 'Any'}</p>
             </div>
-          </div>
-
-          <div className="pt-8 border-t border-gray-50 flex items-center gap-3">
-            <div className={`w-10 h-6 rounded-full relative ${initialCriteria.accepts_mixes ? 'bg-green-500' : 'bg-gray-200'}`}>
-              <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${initialCriteria.accepts_mixes ? 'left-5' : 'left-1'}`}></div>
-            </div>
-            <span className="font-bold text-gray-700">Accepts Mixed Breeds</span>
           </div>
         </div>
       </div>
@@ -130,58 +123,58 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-3xl border border-gray-100 shadow-xl p-8 space-y-8">
+    <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-100 p-8 space-y-8 shadow-none">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-bold text-gray-700 mb-2">Target Breeds (comma separated)</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">Target Breeds (comma separated)</label>
           <input
             type="text"
             placeholder="Golden Retriever, Lab, Poodle"
             value={form.breeds}
             onChange={e => setForm({ ...form, breeds: e.target.value })}
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#f59e0b] focus:ring-2 focus:ring-amber-100 outline-none transition-all text-gray-900 placeholder-gray-400"
+            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] outline-none transition-all text-[#111] placeholder-[#9ca3af] text-sm"
           />
-          <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-wider font-bold">Leave empty to match all breeds</p>
+          <p className="text-[10px] text-[#9ca3af] mt-1 uppercase tracking-widest font-bold">Leave empty to match all breeds</p>
         </div>
         <div>
-          <label className="block text-sm font-bold text-gray-700 mb-2">States Served (comma separated)</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">States Served (comma separated)</label>
           <input
             type="text"
             placeholder="TX, CA, NY"
             value={form.states_served}
             onChange={e => setForm({ ...form, states_served: e.target.value })}
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#f59e0b] focus:ring-2 focus:ring-amber-100 outline-none transition-all text-gray-900 placeholder-gray-400"
+            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] outline-none transition-all text-[#111] placeholder-[#9ca3af] text-sm uppercase"
           />
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div>
-          <label className="block text-sm font-bold text-gray-700 mb-2">Max Age (years)</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">Max Age (years)</label>
           <input
             type="number"
             placeholder="Any"
             value={form.max_age_years}
             onChange={e => setForm({ ...form, max_age_years: e.target.value })}
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#f59e0b] focus:ring-2 focus:ring-amber-100 outline-none transition-all text-gray-900 placeholder-gray-400"
+            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] outline-none transition-all text-[#111] placeholder-[#9ca3af] text-sm"
           />
         </div>
         <div>
-          <label className="block text-sm font-bold text-gray-700 mb-2">Max Weight (lbs)</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">Max Weight (lbs)</label>
           <input
             type="number"
             placeholder="Any"
             value={form.max_weight_lbs}
             onChange={e => setForm({ ...form, max_weight_lbs: e.target.value })}
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#f59e0b] focus:ring-2 focus:ring-amber-100 outline-none transition-all text-gray-900 placeholder-gray-400"
+            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] outline-none transition-all text-[#111] placeholder-[#9ca3af] text-sm"
           />
         </div>
         <div>
-          <label className="block text-sm font-bold text-gray-700 mb-2">Sex Preference</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">Sex Preference</label>
           <select
             value={form.sex_preference}
             onChange={e => setForm({ ...form, sex_preference: e.target.value })}
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#f59e0b] focus:ring-2 focus:ring-amber-100 outline-none transition-all text-gray-900 bg-white"
+            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] outline-none transition-all text-[#111] bg-white text-sm"
           >
             <option value="any">Any</option>
             <option value="male">Male</option>
@@ -196,9 +189,9 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
             type="checkbox"
             checked={form.accepts_mixes}
             onChange={e => setForm({ ...form, accepts_mixes: e.target.checked })}
-            className="w-5 h-5 rounded border-gray-300 text-[#f59e0b] focus:ring-[#f59e0b]"
+            className="w-4 h-4 rounded border-gray-300 text-[#f59e0b] focus:ring-[#f59e0b]"
           />
-          <span className="text-sm font-bold text-gray-700 group-hover:text-gray-900 transition-colors">Accepts Mixed Breeds</span>
+          <span className="text-sm font-semibold text-gray-700 group-hover:text-[#111] transition-colors">Accepts Mixed Breeds</span>
         </label>
 
         <label className="flex items-center gap-3 cursor-pointer group">
@@ -206,9 +199,9 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
             type="checkbox"
             checked={form.is_active}
             onChange={e => setForm({ ...form, is_active: e.target.checked })}
-            className="w-5 h-5 rounded border-gray-300 text-[#f59e0b] focus:ring-[#f59e0b]"
+            className="w-4 h-4 rounded border-gray-300 text-[#f59e0b] focus:ring-[#f59e0b]"
           />
-          <span className="text-sm font-bold text-gray-700 group-hover:text-gray-900 transition-colors">Criteria is Active</span>
+          <span className="text-sm font-semibold text-gray-700 group-hover:text-[#111] transition-colors">Criteria is Active</span>
         </label>
       </div>
 
@@ -216,7 +209,7 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
         <button
           type="submit"
           disabled={loading}
-          className="flex-1 bg-[#f59e0b] text-white py-4 rounded-xl font-black text-lg shadow-lg hover:bg-[#d97706] disabled:opacity-50 transform transition active:scale-[0.98]"
+          className="flex-1 bg-[#111] text-white py-2.5 rounded-lg font-semibold hover:bg-black transition-colors disabled:opacity-50"
         >
           {loading ? 'Saving...' : 'Save Criteria'}
         </button>
@@ -224,7 +217,7 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
           <button
             type="button"
             onClick={() => setIsEditing(false)}
-            className="px-8 py-4 border border-gray-200 text-gray-500 font-bold rounded-xl hover:bg-gray-50 transition-colors"
+            className="px-8 py-2.5 border border-gray-300 text-[#374151] bg-transparent font-semibold rounded-lg hover:bg-gray-50 transition-colors"
           >
             Cancel
           </button>

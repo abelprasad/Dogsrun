@@ -22,7 +22,6 @@ export default async function CriteriaPage() {
               cookieStore.set(name, value, options)
             )
           } catch {
-            // Ignored.
           }
         },
       },
@@ -35,7 +34,6 @@ export default async function CriteriaPage() {
     redirect('/auth/login')
   }
 
-  // Fetch organization by email as requested
   const { data: org } = await supabase
     .from('organizations')
     .select('*')
@@ -46,53 +44,44 @@ export default async function CriteriaPage() {
     redirect('/dashboard')
   }
 
-  // Fetch rescue criteria
   const { data: criteria } = await supabase
     .from('rescue_criteria')
     .select('*')
     .eq('rescue_id', org.id)
     .maybeSingle()
 
-  const backLink = '/dashboard/rescue'
-
   return (
-    <div className="min-h-screen bg-white text-gray-900 font-sans antialiased">
-      {/* Navbar */}
-      <nav className="border-b border-gray-100 bg-white sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <Link href="/" className="text-2xl font-bold text-[#f59e0b] tracking-tight">DOGSRUN</Link>
-            <div className="hidden md:flex items-center gap-6">
-              <Link href={backLink} className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">Incoming Alerts</Link>
-              <span className="text-sm font-bold text-gray-900 border-b-2 border-[#f59e0b] pb-1">Matching Criteria</span>
-            </div>
+    <div className="min-h-screen bg-white">
+      {/* Dashboard Sub-nav */}
+      <div className="bg-[#111] border-t border-white/5 py-2 px-8">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <div className="flex gap-6">
+            <Link href="/dashboard/rescue" className="text-xs font-bold text-[#9ca3af] hover:text-white uppercase tracking-widest transition-colors">Incoming Alerts</Link>
+            <Link href="/dashboard/criteria" className="text-xs font-bold text-[#f59e0b] uppercase tracking-widest">Matching Criteria</Link>
           </div>
           <div className="flex items-center gap-4">
-             <div className="text-right hidden sm:block">
-              <p className="text-xs font-bold text-gray-900">{org.name}</p>
-              <p className="text-[10px] text-gray-500 uppercase tracking-wider">Rescue Portal</p>
-            </div>
-            <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-xs font-bold text-[#f59e0b]">
-              {org.name[0]}
-            </div>
+            <span className="text-xs font-bold text-[#9ca3af] uppercase tracking-widest">{org.name}</span>
             <SignOutButton />
           </div>
         </div>
-      </nav>
+      </div>
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-4">
-          <div>
-            <h1 className="text-3xl font-extrabold text-gray-900">Matching Criteria</h1>
-            <p className="text-gray-600 mt-2">Define which dogs your rescue organization can support.</p>
-          </div>
+      {/* Hero band */}
+      <header className="bg-[#fffbeb] border-b border-gray-200 py-12 px-8">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-4xl md:text-5xl font-[900] tracking-tight text-[#111] mb-2">
+            Matching criteria
+          </h1>
+          <p className="text-[#6b7280]">Define which dogs your rescue organization can support.</p>
         </div>
+      </header>
 
+      <main className="max-w-4xl mx-auto py-8 px-8">
         <CriteriaForm rescueId={org.id} initialCriteria={criteria} />
         
         {!criteria && (
-          <p className="mt-8 text-center text-sm text-gray-400">
-            If you need help setting up your criteria, please contact <Link href="mailto:support@dogsrun.org" className="text-[#f59e0b] hover:underline">support@dogsrun.org</Link>.
+          <p className="mt-8 text-center text-xs text-[#9ca3af] uppercase tracking-widest font-bold">
+            Need help? Contact <Link href="mailto:support@dogsrun.net" className="text-[#f59e0b] hover:underline transition-colors">support@dogsrun.net</Link>
           </p>
         )}
       </main>

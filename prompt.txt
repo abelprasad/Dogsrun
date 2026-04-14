@@ -1,71 +1,115 @@
-Install Playwright and run a full end-to-end test of the DOGSRUN website.
+Redesign the entire DOGSRUN frontend to match a cohesive 3-tone theme consistently across all pages.
 
-Step 1 - Install:
-npm install -D @playwright/test
-npx playwright install chromium
+## Design System
 
-Step 2 - Create file tests/e2e.spec.ts with these tests:
+### Colors
+- Dark nav/footer: #111 (near-black)
+- Hero/accent backgrounds: #fffbeb (amber-tinted cream)
+- Body/cards: #ffffff (white)
+- Accent: #f59e0b (amber) — CTAs, highlights, mark tags, badges only
+- Accent text on amber: #451a03
+- Body text: #111 (headings), #6b7280 (body), #9ca3af (muted/nav links)
+- Borders: #e5e7eb (default), #d1d5db (inputs/buttons)
 
-import { test, expect } from '@playwright/test'
+### Typography
+- Headings: font-weight 900, tracking-tight, color #111
+- The word "run" or key brand word on hero pages: wrapped in <mark style="background:#f59e0b; color:#111; padding:0 4px; border-radius:3px; font-style:normal;">
+- Nav wordmark: font-weight 600, letter-spacing wider
+- Body: text-sm or text-base, color #6b7280, line-height relaxed
 
-test('homepage loads with gradient hero', async ({ page }) => {
-  await page.goto('https://dogsrun.net')
-  await expect(page.locator('text=Every dog deserves a')).toBeVisible()
-  await expect(page.locator('text=Get Started')).toBeVisible()
-  await expect(page.locator('text=Browse Dogs')).toBeVisible()
-})
+### Nav (appears on every page)
+- Background: #111
+- Logo: amber circle + "DOGSRUN" in white
+- Links: #9ca3af
+- Register button: bg #f59e0b, text #451a03, font-weight 600, rounded-lg
+- Login: #9ca3af plain link
 
-test('dogs page shows all dogs', async ({ page }) => {
-  await page.goto('https://dogsrun.net/dogs')
-  await expect(page.locator('text=Dogs looking for a second chance')).toBeVisible()
-  const cards = page.locator('a[href^="/dogs/"]')
-  const count = await cards.count()
-  expect(count).toBeGreaterThan(3)
-})
+### Cards
+- bg white, border border-gray-100, rounded-xl, shadow-none, p-6
+- Headings: font-weight 700, color #111
+- Body: text-sm, color #6b7280
 
-test('about page loads', async ({ page }) => {
-  await page.goto('https://dogsrun.net/about')
-  await expect(page.locator('text=Connecting shelters and rescues')).toBeVisible()
-  await expect(page.locator('text=Our Mission')).toBeVisible()
-})
+### Buttons
+- Primary: bg #111, text white, font-weight 600, rounded-lg, px-5 py-2.5
+- Accent: bg #f59e0b, text #451a03, font-weight 600, rounded-lg, px-5 py-2.5
+- Ghost: border border-gray-300, text #374151, bg transparent, rounded-lg, px-5 py-2.5
 
-test('register page loads with shelter and rescue tabs', async ({ page }) => {
-  await page.goto('https://dogsrun.net/register')
-  await expect(page.locator('text=Shelter')).toBeVisible()
-  await expect(page.locator('text=Rescue')).toBeVisible()
-})
+### Status badges
+- Available: bg #dcfce7, text #166534
+- Pending: bg #fef3c7, text #92400e
+- Adopted: bg #e0e7ff, text #3730a3
+- Deceased/transferred: bg #f3f4f6, text #6b7280
 
-test('login page loads', async ({ page }) => {
-  await page.goto('https://dogsrun.net/auth/login')
-  await expect(page.locator('input[type="email"]')).toBeVisible()
-  await expect(page.locator('input[type="password"]')).toBeVisible()
-})
+### Page structure pattern
+Every page should follow this band pattern:
+1. Dark nav (#111) — shared component
+2. Page hero band (#fffbeb, border-bottom border-gray-200) — page title + short description, py-12 px-8
+3. White content body — cards, forms, tables, py-8 px-8
 
-test('shelter dashboard requires auth', async ({ page }) => {
-  await page.goto('https://dogsrun.net/dashboard')
-  await expect(page).toHaveURL(/login|auth/)
-})
+---
 
-test('rescue dashboard requires auth', async ({ page }) => {
-  await page.goto('https://dogsrun.net/dashboard/rescue')
-  await expect(page).toHaveURL(/login|auth/)
-})
+## Files to update
 
-test('public dog profile loads', async ({ page }) => {
-  await page.goto('https://dogsrun.net/dogs')
-  const firstDog = page.locator('a[href^="/dogs/"]').first()
-  await firstDog.click()
-  await expect(page.locator('text=Interested in rescuing')).toBeVisible()
-})
+Apply the theme to ALL of these files:
 
-Step 3 - Create playwright.config.ts:
-import { defineConfig } from '@playwright/test'
-export default defineConfig({
-  timeout: 30000,
-  use: { headless: true }
-})
+### src/app/page.tsx
+- Band 1: dark nav
+- Band 2: amber hero — headline "Every dog deserves a run to safety." with <mark> on "run", 2-col grid layout (headline left, descriptor right), two buttons below (Get started → /register, Browse dogs → /dogs)
+- Band 3: white — 2 card grid (shelter card with amber CTA → /register?type=shelter, rescue card with ghost CTA → /register?type=rescue)
 
-Step 4 - Run:
-npx playwright test --reporter=line
+### src/app/dogs/page.tsx
+- Hero band: "Available dogs" heading + "Dogs currently in the network looking for rescue pulls." subtext
+- Body: existing dog grid, each dog card restyled to match card spec above
 
-Report all results including passes and failures.
+### src/app/dogs/[id]/page.tsx
+- Hero band: dog name + breed as heading, status badge in hero
+- Body: dog details + photo in white card, action buttons use new button styles
+
+### src/app/about/page.tsx
+- Hero band: "About DOGSRUN" heading + one-line mission
+- Body: existing content restyled, any CTAs use accent button style
+
+### src/app/auth/login/page.tsx
+- Hero band: "Welcome back" heading
+- Body: login form in a centered white card (max-w-md mx-auto), inputs with border-gray-200, labels text-gray-700, primary submit button uses #111 bg
+
+### src/app/register/page.tsx
+- Hero band: "Join the network" heading
+- Body: registration form in centered white card, shelter/rescue tabs restyled — active tab uses amber underline or amber bg pill, not default browser styles
+
+### src/app/dashboard/page.tsx (shelter)
+- Dark nav
+- Hero band: "Your dashboard" or shelter org name as heading
+- Body: dog cards grid, "Add a dog" button uses accent style (#f59e0b)
+
+### src/app/dashboard/rescue/page.tsx
+- Hero band: rescue org name or "Rescue portal"
+- Body: alerts feed, Interested button uses accent (#f59e0b), Pass button uses ghost style
+
+### src/app/dashboard/criteria/page.tsx
+- Hero band: "Matching criteria"
+- Body: criteria form in white card, save button uses #111 primary style
+
+### src/app/dashboard/dogs/new/page.tsx
+- Hero band: "Add a dog"
+- Body: intake form in white card, submit button accent style
+
+### src/app/dashboard/dogs/[id]/page.tsx
+- Hero band: dog name as heading + status badge
+- Body: dog detail card + status updater, buttons match new styles
+
+---
+
+## Rules
+- Do not add any new npm dependencies
+- Keep all existing logic, API calls, Supabase queries, and server/client component designations unchanged
+- Only change classNames, inline styles, and layout structure
+- Remove all bg-amber-50, from-amber-50, to-yellow-50, gradient classes, and warm cream backgrounds — replace with #fffbeb for hero bands only
+- Replace all amber-* Tailwind classes:
+  - bg-amber-500 → bg-[#f59e0b]
+  - hover:bg-amber-600 → hover:bg-[#d97706]
+  - text-amber-600 → text-[#f59e0b]
+  - text-amber-700 → text-[#d97706]
+  - border-amber-500 → border-[#f59e0b]
+- After all changes, run: grep -r "amber\|from-amber\|to-yellow\|bg-yellow" src/ to confirm no old color classes remain
+- Show me a summary of which files were changed

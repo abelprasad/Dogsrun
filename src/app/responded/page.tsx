@@ -2,24 +2,34 @@ import Link from 'next/link'
 
 export default function RespondedPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-6">
-      <div className="max-w-md w-full bg-white rounded-3xl p-10 shadow-xl border border-gray-100 text-center">
-        <div className="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center text-[#f59e0b] mx-auto mb-6">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-          </svg>
+    <div className="min-h-screen bg-white">
+      {/* Hero band */}
+      <header className="bg-[#fffbeb] border-b border-gray-200 py-12 px-8">
+        <div className="max-w-7xl mx-auto text-center">
+          <h1 className="text-4xl md:text-5xl font-[900] tracking-tight text-[#111] mb-4">
+            Response Received
+          </h1>
         </div>
-        <h1 className="text-3xl font-black text-gray-900 mb-4">Response Received</h1>
-        <p className="text-gray-500 mb-10 leading-relaxed text-lg">
-          Thanks for your response. We've notified the shelter and they'll be in touch.
-        </p>
-        <Link 
-          href="/auth/login" 
-          className="inline-block w-full bg-[#f59e0b] text-white py-4 rounded-xl font-bold hover:bg-[#d97706] transition-colors"
-        >
-          Go to Rescue Portal
-        </Link>
-      </div>
+      </header>
+
+      <main className="py-8 px-8 flex items-center justify-center">
+        <div className="max-w-md w-full bg-white border border-gray-100 rounded-xl p-8 text-center">
+          <div className="w-16 h-16 bg-[#fffbeb] rounded-full flex items-center justify-center mx-auto mb-6 text-[#f59e0b]">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <p className="text-[#6b7280] mb-10 leading-relaxed">
+            Thanks for your response. We&apos;ve notified the shelter and they&apos;ll be in touch soon.
+          </p>
+          <Link 
+            href="/auth/login" 
+            className="inline-block w-full bg-[#111] text-white py-3 rounded-lg font-semibold hover:bg-black transition-colors"
+          >
+            Go to Rescue Portal
+          </Link>
+        </div>
+      </main>
     </div>
   )
 }

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import StatusBadge from '@/components/status-badge'
 import StatusUpdater from './status-updater'
+import SignOutButton from '../../sign-out-button'
 
 export default async function DogProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -23,7 +24,6 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
               cookieStore.set(name, value, options)
             )
           } catch {
-            // Can be ignored if you have middleware refreshing user sessions.
           }
         },
       },
@@ -36,14 +36,12 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
     redirect('/auth/login')
   }
 
-  // Fetch current user's organization
   const { data: userOrg } = await supabase
     .from('organizations')
     .select('*')
     .eq('email', user.email)
     .single()
 
-  // Fetch dog details
   const { data: dog } = await supabase
     .from('dogs')
     .select('*, organizations(*)')
@@ -54,7 +52,6 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
     notFound()
   }
 
-  // Fetch alert history for this dog
   const { data: alerts } = await supabase
     .from('alerts')
     .select('*, organizations!alerts_rescue_id_fkey(name, email, city, state)')
@@ -66,98 +63,107 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
   const backLink = userOrg?.type === 'rescue' ? '/dashboard/rescue' : '/dashboard'
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 font-sans antialiased">
-      {/* Navbar */}
-      <nav className="border-b border-gray-100 bg-white sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <Link href="/" className="text-2xl font-bold text-[#f59e0b] tracking-tight">DOGSRUN</Link>
-            <div className="hidden md:flex items-center gap-6">
-              <Link href={backLink} className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">Dashboard</Link>
-              <span className="text-sm font-bold text-gray-900 border-b-2 border-[#f59e0b] pb-1">Dog Profile</span>
-            </div>
+    <div className="min-h-screen bg-white">
+      {/* Dashboard Sub-nav */}
+      <div className="bg-[#111] border-t border-white/5 py-2 px-8">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <div className="flex gap-6">
+            <Link href={backLink} className="text-xs font-bold text-[#9ca3af] hover:text-white uppercase tracking-widest transition-colors">Dashboard</Link>
+            <span className="text-xs font-bold text-[#f59e0b] uppercase tracking-widest">Dog Profile</span>
           </div>
-          <Link href={backLink} className="text-sm font-bold text-gray-500 hover:text-[#f59e0b] transition-colors">
-            ← Back to Dashboard
-          </Link>
+          <SignOutButton />
         </div>
-      </nav>
+      </div>
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      {/* Hero band */}
+      <header className="bg-[#fffbeb] border-b border-gray-200 py-12 px-8">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <h1 className="text-4xl md:text-5xl font-[900] tracking-tight text-[#111] mb-2">
+              {dog.name}
+            </h1>
+            <p className="text-[#6b7280] font-bold">{dog.breed}{dog.mix ? ' mix' : ''}</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <StatusBadge status={dog.status || 'available'} />
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto py-8 px-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Main Info */}
           <div className="md:col-span-2 space-y-8">
-            <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-xl overflow-hidden relative">
-               <div className="absolute top-0 right-0 p-8">
-                <StatusBadge status={dog.status || 'available'} />
-              </div>
-              <div className="flex flex-col gap-6">
-                <div className="w-24 h-24 rounded-3xl bg-amber-50 flex items-center justify-center text-4xl font-black text-[#f59e0b] overflow-hidden">
+            <div className="bg-white rounded-xl border border-gray-100 overflow-hidden shadow-none">
+              <div className="grid grid-cols-1 md:grid-cols-2">
+                <div className="aspect-square md:aspect-auto bg-[#fffbeb] border-r border-gray-100 flex items-center justify-center overflow-hidden">
                   {dog.photo_url ? (
                     <img src={dog.photo_url} alt={dog.name} className="w-full h-full object-cover" />
                   ) : (
-                    dog.name?.[0] || 'D'
+                    <div className="text-8xl font-[900] text-[#f59e0b]">
+                      {dog.name?.[0] || 'D'}
+                    </div>
                   )}
                 </div>
-                <div>
-                  <h1 className="text-4xl font-black text-gray-900 mb-2">{dog.name || 'Unnamed Dog'}</h1>
-                  <p className="text-xl text-gray-500 font-medium">{dog.breed || 'Unknown breed'}{dog.mix ? ' mix' : ''}</p>
-                </div>
-                
-                <div className="grid grid-cols-3 gap-4 py-6 border-y border-gray-100">
-                  <div>
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Age</p>
-                    <p className="text-lg font-bold text-gray-900">{dog.age_years ? `${dog.age_years} years` : '—'}</p>
+                <div className="p-8 space-y-8">
+                  <div className="grid grid-cols-2 gap-y-6 gap-x-8">
+                    <div>
+                      <p className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-widest mb-1">Age</p>
+                      <p className="text-lg font-bold text-[#111]">{dog.age_years ? `${dog.age_years}y` : '—'}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-widest mb-1">Sex</p>
+                      <p className="text-lg font-bold text-[#111] capitalize">{dog.sex || '—'}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-widest mb-1">Weight</p>
+                      <p className="text-lg font-bold text-[#111]">{dog.weight_lbs ? `${dog.weight_lbs} lbs` : '—'}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-widest mb-1">Color</p>
+                      <p className="text-lg font-bold text-[#111] capitalize">{dog.color || '—'}</p>
+                    </div>
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Sex</p>
-                    <p className="text-lg font-bold text-gray-900">{dog.sex || '—'}</p>
+                    <h3 className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-widest mb-2">Description / Notes</h3>
+                    <p className="text-sm text-[#6b7280] leading-relaxed italic">
+                      &quot;{dog.description || "No additional notes provided for this dog."}&quot;
+                    </p>
                   </div>
-                  <div>
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Weight</p>
-                    <p className="text-lg font-bold text-gray-900">{dog.weight_lbs ? `${dog.weight_lbs} lbs` : '—'}</p>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Description / Notes</h3>
-                  <p className="text-gray-700 leading-relaxed bg-gray-50 p-6 rounded-2xl border border-gray-100">
-                    {dog.description || 'No additional notes provided for this dog.'}
-                  </p>
                 </div>
               </div>
             </div>
 
-            {/* Alert History (Only for the shelter that owns the dog) */}
+            {/* Alert History */}
             {isDogShelter && (
-              <div className="bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden">
-                <div className="px-8 py-6 border-b border-gray-100 flex items-center justify-between">
-                  <h3 className="text-lg font-bold text-gray-900">Rescue Alerts</h3>
-                  <span className="text-xs font-bold bg-gray-100 text-gray-600 px-2 py-1 rounded-full">{alerts?.length || 0} alerts sent</span>
+              <div className="bg-white rounded-xl border border-gray-100 overflow-hidden shadow-none">
+                <div className="px-8 py-4 border-b border-gray-100 flex items-center justify-between">
+                  <h3 className="text-sm font-[900] text-[#111] uppercase tracking-widest">Rescue Alerts</h3>
+                  <span className="text-[10px] font-bold bg-[#fffbeb] text-[#451a03] px-2 py-1 rounded border border-gray-100">{alerts?.length || 0} alerts sent</span>
                 </div>
                 <div className="divide-y divide-gray-100">
                   {alerts && alerts.length > 0 ? (
                     alerts.map((alert: any) => (
                       <div key={alert.id} className="px-8 py-5 flex items-center justify-between hover:bg-gray-50 transition-colors">
                         <div>
-                          <p className="font-bold text-gray-900">{alert.organizations?.name}</p>
-                          <p className="text-xs text-gray-500">{alert.organizations?.email} • {alert.organizations?.city}, {alert.organizations?.state}</p>
+                          <p className="font-bold text-[#111] text-sm">{alert.organizations?.name}</p>
+                          <p className="text-xs text-[#6b7280]">{alert.organizations?.city}, {alert.organizations?.state}</p>
                         </div>
                         <div className="text-right">
-                          <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-md border ${
-                            alert.status === 'sent' ? 'bg-amber-50 text-amber-700 border-amber-100' :
-                            alert.status === 'responded' ? 'bg-green-50 text-green-700 border-green-100' :
-                            alert.status === 'declined' ? 'bg-red-50 text-red-700 border-red-100' :
-                            'bg-gray-50 text-gray-700 border-gray-100'
+                          <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded border ${
+                            alert.status === 'sent' ? 'bg-[#fffbeb] text-[#451a03] border-gray-100' :
+                            alert.status === 'responded' ? 'bg-[#dcfce7] text-[#166534] border-[#166534]/10' :
+                            alert.status === 'declined' ? 'bg-[#f3f4f6] text-[#6b7280] border-gray-100' :
+                            'bg-gray-50 text-[#111] border-gray-100'
                           }`}>
                             {alert.status}
                           </span>
-                          <p className="text-[10px] text-gray-400 mt-1">{alert.sent_at ? new Date(alert.sent_at).toLocaleDateString() : 'Pending'}</p>
+                          <p className="text-[10px] text-[#9ca3af] mt-1 uppercase font-bold tracking-widest">{alert.sent_at ? new Date(alert.sent_at).toLocaleDateString() : 'Pending'}</p>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <div className="px-8 py-10 text-center text-gray-500">
+                    <div className="px-8 py-10 text-center text-[#6b7280] text-sm italic">
                       No rescue alerts have been sent for this dog yet.
                     </div>
                   )}
@@ -169,27 +175,27 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
           {/* Sidebar */}
           <div className="space-y-6">
             {isDogShelter && (
-              <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-xl">
+              <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-none">
                 <StatusUpdater dogId={dog.id} currentStatus={dog.status || 'available'} />
               </div>
             )}
 
-            <div className="bg-amber-50 p-6 rounded-3xl border border-amber-100">
-              <h3 className="text-xs font-bold text-[#b45309] uppercase tracking-widest mb-4">Shelter Information</h3>
-              <p className="font-bold text-gray-900 mb-1">{dog.organizations?.name}</p>
-              <p className="text-sm text-gray-600 mb-4">{dog.organizations?.city}, {dog.organizations?.state}</p>
-              <p className="text-xs text-gray-500 leading-tight">
-                {isDogShelter ? 'This dog is currently listed by your shelter.' : 'Contact this shelter to inquire about this dog.'}
+            <div className="bg-[#fffbeb] p-6 rounded-xl border border-gray-100">
+              <h3 className="text-[10px] font-bold text-[#451a03] uppercase tracking-widest mb-4">Location</h3>
+              <p className="font-bold text-[#111] mb-1">{dog.organizations?.name}</p>
+              <p className="text-sm text-[#6b7280] mb-4">{dog.organizations?.city}, {dog.organizations?.state}</p>
+              <p className="text-[10px] text-[#9ca3af] leading-tight uppercase font-bold tracking-widest">
+                {isDogShelter ? 'Your Listing' : 'Contact Shelter'}
               </p>
             </div>
 
             {isDogShelter && (
-              <div className="bg-gray-900 p-6 rounded-3xl border border-gray-800 text-white shadow-xl">
-                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Quick Actions</h3>
+              <div className="bg-[#111] p-6 rounded-xl border border-white/5 text-white">
+                <h3 className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-widest mb-4">Management</h3>
                 <div className="space-y-3">
-                  <button className="w-full py-3 bg-gray-800 hover:bg-gray-700 rounded-xl text-xs font-bold transition-colors">Edit Details</button>
-                  <button className="w-full py-3 bg-gray-800 hover:bg-gray-700 rounded-xl text-xs font-bold transition-colors">Share Profile</button>
-                  <button className="w-full py-3 bg-red-900/50 hover:bg-red-900/80 text-red-200 rounded-xl text-xs font-bold transition-colors">Mark as Urgent</button>
+                  <button className="w-full py-2 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-semibold transition-colors">Edit Details</button>
+                  <button className="w-full py-2 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-semibold transition-colors">Share Profile</button>
+                  <button className="w-full py-2 bg-red-900/30 hover:bg-red-900/50 text-red-200 rounded-lg text-xs font-semibold transition-colors border border-red-900/20">Mark as Urgent</button>
                 </div>
               </div>
             )}
