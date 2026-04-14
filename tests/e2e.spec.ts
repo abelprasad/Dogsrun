@@ -1,18 +1,10 @@
-Install Playwright and run a full end-to-end test of the DOGSRUN website.
-
-Step 1 - Install:
-npm install -D @playwright/test
-npx playwright install chromium
-
-Step 2 - Create file tests/e2e.spec.ts with these tests:
-
 import { test, expect } from '@playwright/test'
 
 test('homepage loads with gradient hero', async ({ page }) => {
   await page.goto('https://dogsrun.net')
   await expect(page.locator('text=Every dog deserves a')).toBeVisible()
-  await expect(page.locator('text=Get Started')).toBeVisible()
-  await expect(page.locator('text=Browse Dogs')).toBeVisible()
+  await expect(page.locator('text=Get Started').first()).toBeVisible()
+  await expect(page.locator('text=Browse Dogs').first()).toBeVisible()
 })
 
 test('dogs page shows all dogs', async ({ page }) => {
@@ -25,14 +17,14 @@ test('dogs page shows all dogs', async ({ page }) => {
 
 test('about page loads', async ({ page }) => {
   await page.goto('https://dogsrun.net/about')
-  await expect(page.locator('text=Connecting shelters and rescues')).toBeVisible()
+  await expect(page.locator('text=Connecting shelters and rescues').first()).toBeVisible()
   await expect(page.locator('text=Our Mission')).toBeVisible()
 })
 
 test('register page loads with shelter and rescue tabs', async ({ page }) => {
   await page.goto('https://dogsrun.net/register')
-  await expect(page.locator('text=Shelter')).toBeVisible()
-  await expect(page.locator('text=Rescue')).toBeVisible()
+  await expect(page.locator('text=Shelter').first()).toBeVisible()
+  await expect(page.locator('text=Rescue').first()).toBeVisible()
 })
 
 test('login page loads', async ({ page }) => {
@@ -57,15 +49,3 @@ test('public dog profile loads', async ({ page }) => {
   await firstDog.click()
   await expect(page.locator('text=Interested in rescuing')).toBeVisible()
 })
-
-Step 3 - Create playwright.config.ts:
-import { defineConfig } from '@playwright/test'
-export default defineConfig({
-  timeout: 30000,
-  use: { headless: true }
-})
-
-Step 4 - Run:
-npx playwright test --reporter=line
-
-Report all results including passes and failures.
