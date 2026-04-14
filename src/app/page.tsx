@@ -33,9 +33,9 @@ export default function Home() {
       {/* Hero Section */}
       <header className="relative h-[600px] flex items-center justify-center overflow-hidden">
         <img 
-          src="https://images.pexels.com/photos/13349425/pexels-photo-13349425.jpeg?auto=compress&cs=tinysrgb&w=1600"
+          src="https://images.pexels.com/photos/4034260/pexels-photo-4034260.jpeg?auto=compress&cs=tinysrgb&w=1600"
           alt="Dog background"
-          className="absolute inset-0 w-full h-full object-cover object-[center_20%]"
+          className="absolute inset-0 w-full h-full object-cover object-[center_40%]"
         />
         <div className="absolute inset-0 bg-black/50 z-10"></div>
         
