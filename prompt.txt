@@ -1,28 +1,22 @@
-Update all public pages in the DOGSRUN Next.js app with these specific Pexels photo URLs. These are the exact images to use — do not substitute any others.
+In src/app/dogs/page.tsx, the page is a server component but it's using the browser Supabase client from '@/lib/supabase'. This causes it to only return 1 row due to RLS/auth context issues.
 
-Homepage hero (src/app/page.tsx):
-- Full viewport hero section with background image
-- URL: https://images.pexels.com/photos/13349425/pexels-photo-13349425.jpeg?auto=compress&cs=tinysrgb&w=1600
-- Dark overlay bg-black/50, white headline text
-- Headline: "Every dog deserves a run to safety."
-- Subheadline: "The fastest way for shelters to find rescues for their most urgent dogs."
-- Two buttons: amber "Get Started" + white outlined "Browse Dogs"
-- Section height: min-h-screen
+Replace the import and client initialization with the server client:
 
-About page hero (src/app/about/page.tsx):
-- URL: https://images.pexels.com/photos/3628100/pexels-photo-3628100.jpeg?auto=compress&cs=tinysrgb&w=1600
-- Full width, h-96, object-cover, dark overlay, white headline "Connecting shelters and rescues"
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 
-Shelter section image (homepage and/or about):
-- URL: https://images.pexels.com/photos/16583180/pexels-photo-16583180.jpeg?auto=compress&cs=tinysrgb&w=1200
-- Use in the "Built for Shelters" or "How it works" section, rounded-2xl, object-cover
+Then inside the function:
+const cookieStore = cookies()
+const supabase = createServerClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  {
+    cookies: {
+      get(name: string) {
+        return cookieStore.get(name)?.value
+      },
+    },
+  }
+)
 
-Rescue section image (homepage and/or about):
-- URL: https://images.pexels.com/photos/6298625/pexels-photo-6298625.jpeg?auto=compress&cs=tinysrgb&w=1200
-- Use in the "Built for Rescues" section, rounded-2xl, object-cover
-
-Dogs page hero (src/app/dogs/page.tsx):
-- URL: https://images.pexels.com/photos/3628100/pexels-photo-3628100.jpeg?auto=compress&cs=tinysrgb&w=1600
-- Full width banner h-80, dark overlay, white headline "Dogs looking for a second chance"
-
-Use <img> tags not next/image. Keep all existing functionality intact. 
+Keep everything else exactly the same.
