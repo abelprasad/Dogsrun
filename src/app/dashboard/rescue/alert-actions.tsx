@@ -27,6 +27,13 @@ export default function AlertActions({ alertId, currentStatus }: AlertActionsPro
       alert('Failed to update: ' + error.message);
     } else {
       setStatus(newStatus);
+      if (newStatus === 'responded') {
+        await fetch('/api/notify-shelter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ alert_id: alertId }),
+        });
+      }
       router.refresh();
     }
     setLoading(false);

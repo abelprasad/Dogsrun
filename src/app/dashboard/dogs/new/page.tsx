@@ -43,7 +43,7 @@ export default function NewDogPage() {
     const { data: org } = await supabase
       .from('organizations')
       .select('id')
-      .eq('id', user.id)
+      .eq('email', user.email)
       .single()
 
     if (!org) {

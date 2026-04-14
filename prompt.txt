@@ -1,25 +1,49 @@
-I'm building a Next.js 15 app with Supabase. I need to make the rescue criteria page fully editable.
+I'm building a Next.js 15 app with Supabase. I need to add several public-facing pages to the site.
 
-File to edit: src/app/dashboard/criteria/page.tsx
+## 1. Public dogs page at /dogs
+File: src/app/dogs/page.tsx
 
-The rescue_criteria table schema:
-- id (uuid)
-- rescue_id (uuid → organizations.id)
-- breeds (text[])
-- max_age_years (integer)
-- max_weight_lbs (integer)
-- sex_preference (text: 'male'|'female'|'any')
-- accepts_mixes (boolean)
-- states_served (text[])
-- is_active (boolean)
-- created_at
+- Fetch all dogs where status = 'available' from Supabase (no auth required, use anon key)
+- Display in a responsive grid (3 columns desktop, 2 tablet, 1 mobile)
+- Each card shows: photo (or amber letter avatar fallback), name, breed, age, weight, sex, shelter name (join with organizations)
+- Card links to /dogs/[id] (public dog profile)
+- Page title: "Dogs available for rescue"
+- Subtitle: "These dogs are waiting for a rescue organization to give them a second chance."
 
-The org lookup always uses .eq('email', user.email) NOT .eq('id', user.id) because organizations.id is separate from the Supabase auth user UUID.
+## 2. Public dog profile at /dogs/[id]
+File: src/app/dogs/[id]/page.tsx
 
-Requirements:
-- If no criteria exist, show a form to create them
-- If criteria exist, show the current values with an Edit button
-- Editable fields: breeds (comma-separated input that saves as array), max_age_years, max_weight_lbs, sex_preference (dropdown: any/male/female), accepts_mixes (checkbox), states_served (comma-separated), is_active (toggle)
-- On save, upsert to rescue_criteria table
-- Use the existing design system: white bg, amber #f59e0b accents, gray-900 text, rounded-xl cards, Tailwind CSS
-- Use the Supabase browser client from @/lib/supabase
+- Fetch dog by id + shelter name
+- Show: large photo, name, breed, age, weight, sex, color, notes, shelter name + city/state
+- Status badge (available/pending)
+- CTA button: "Interested in rescuing?" → links to /register?type=rescue
+- Back link to /dogs
+
+## 3. About page at /about
+File: src/app/about/page.tsx
+
+Content to include:
+- Hero: "Connecting shelters and rescues" 
+- Mission: "We are committed to improving the lives of shelter dogs by creating a collaborative network that helps rescues find dogs they can help, reducing overcrowding in shelters."
+- How it works: 3 steps — Shelters add dogs → System matches criteria → Rescues get instant alerts
+- Nonprofit info footer section: "Dog Shelter & Rescue Unification Network, LLC, is a 501(c3) nonprofit charity. EIN 993286395. Mailing address: 221 W 9th St #896, Wilmington, DE 19801. Phone: 904-923-4441"
+
+## 4. Update homepage navigation
+File: src/app/page.tsx
+
+Add navigation links to the header:
+- "Browse Dogs" → /dogs
+- "About" → /about
+- Keep existing "Login" and "Register" buttons
+
+## 5. Add footer to layout
+File: src/app/layout.tsx
+
+Add a simple footer to all pages:
+- Left: "© 2026 DOGSRUN — Dog Shelter & Rescue Unification Network"
+- Center: links — Browse Dogs, About, Contact
+- Right: "EIN 993286395 | 501(c)(3) nonprofit"
+- Border-top border-gray-100, py-8, text-gray-500 text-sm
+
+Use the existing design system throughout: white bg, amber #f59e0b accents, gray-900 headings, gray-500 body, rounded-xl cards, Tailwind CSS.
+RLS is disabled on dogs and organizations tables so anon reads will work fine.

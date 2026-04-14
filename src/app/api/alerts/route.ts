@@ -80,6 +80,17 @@ export async function POST(req: NextRequest) {
     matches.map(async ({ criteria, org }) => {
       const shelter = dog.organizations as any
 
+      // Log the alert in the database first to get the ID for links
+      const { data: alertData, error: alertError } = await supabase.from('alerts').insert({
+        dog_id: dog.id,
+        rescue_id: org.id,
+        criteria_id: criteria.id,
+        status: 'sent',
+        sent_at: new Date().toISOString(),
+      }).select().single()
+
+      if (alertError || !alertData) throw alertError
+
       // Send email via Resend
       await resend.emails.send({
         from: 'DOGSRUN Alerts <alerts@dogsrun.net>',
@@ -129,19 +140,27 @@ export async function POST(req: NextRequest) {
                     <td style="padding: 12px 16px; color: #111827; font-size: 16px;">${shelter?.name ?? '—'}, ${shelter?.city ?? ''} ${shelter?.state ?? ''}</td>
                   </tr>
                 </table>
+
+                <div style="text-align: center; margin-bottom: 32px;">
+                  <a href="https://dogsrun.net/api/respond?alert_id=${alertData.id}&action=interested" 
+                     style="background-color: #f59e0b; color: #ffffff; padding: 16px 32px; border-radius: 12px; text-decoration: none; display: inline-block; font-weight: 700; font-size: 16px; margin-right: 8px;">
+                    Interested
+                  </a>
+                  <a href="https://dogsrun.net/api/respond?alert_id=${alertData.id}&action=pass" 
+                     style="background-color: #f3f4f6; color: #4b5563; padding: 16px 32px; border-radius: 12px; text-decoration: none; display: inline-block; font-weight: 700; font-size: 16px;">
+                    Pass
+                  </a>
+                </div>
                 
                 <div style="text-align: center;">
-                  <a href="https://dogsrun.vercel.app/dashboard/rescue" 
-                     style="background-color: #f59e0b; color: #ffffff; padding: 16px 32px; border-radius: 12px; text-decoration: none; display: inline-block; font-weight: 700; font-size: 16px; box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.4);">
-                    View on DOGSRUN
-                  </a>
+                  <a href="https://dogsrun.net/dashboard/rescue" style="color: #f59e0b; text-decoration: underline; font-size: 14px; font-weight: 600;">View all matches on your dashboard</a>
                 </div>
               </div>
               
               <!-- Footer -->
               <div style="background-color: #f9fafb; padding: 24px 40px; border-top: 1px solid #e5e7eb; text-align: center;">
                 <p style="color: #9ca3af; font-size: 12px; line-height: 18px; margin: 0;">
-                  You received this alert because your rescue organization has active matching criteria on DOGSRUN. To update your criteria, <a href="https://dogsrun.vercel.app/dashboard/rescue" style="color: #f59e0b; text-decoration: underline;">log in to your rescue portal</a>.
+                  You received this alert because your rescue organization has active matching criteria on DOGSRUN. To update your criteria, <a href="https://dogsrun.net/dashboard/rescue" style="color: #f59e0b; text-decoration: underline;">log in to your rescue portal</a>.
                 </p>
               </div>
             </div>
@@ -150,15 +169,6 @@ export async function POST(req: NextRequest) {
             </div>
           </div>
         `,
-      })
-
-      // Log the alert in the database
-      await supabase.from('alerts').insert({
-        dog_id: dog.id,
-        rescue_id: org.id,
-        criteria_id: criteria.id,
-        status: 'sent',
-        sent_at: new Date().toISOString(),
       })
     })
   )

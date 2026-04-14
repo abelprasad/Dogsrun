@@ -40,7 +40,7 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
   const { data: userOrg } = await supabase
     .from('organizations')
     .select('*')
-    .eq('id', user.id)
+    .eq('email', user.email)
     .single()
 
   // Fetch dog details
@@ -57,9 +57,9 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
   // Fetch alert history for this dog
   const { data: alerts } = await supabase
     .from('alerts')
-    .select('*, organizations!alerts_rescue_id_fkey(name, city, state)')
+    .select('*, organizations!alerts_rescue_id_fkey(name, email, city, state)')
     .eq('dog_id', id)
-    .order('created_at', { ascending: false })
+    .order('sent_at', { ascending: false })
 
   const isShelter = userOrg?.type === 'shelter'
   const isDogShelter = isShelter && userOrg.id === dog.shelter_id
@@ -132,7 +132,7 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
             {isDogShelter && (
               <div className="bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden">
                 <div className="px-8 py-6 border-b border-gray-100 flex items-center justify-between">
-                  <h3 className="text-lg font-bold text-gray-900">Rescue Outreach</h3>
+                  <h3 className="text-lg font-bold text-gray-900">Rescue Alerts</h3>
                   <span className="text-xs font-bold bg-gray-100 text-gray-600 px-2 py-1 rounded-full">{alerts?.length || 0} alerts sent</span>
                 </div>
                 <div className="divide-y divide-gray-100">
@@ -141,17 +141,18 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
                       <div key={alert.id} className="px-8 py-5 flex items-center justify-between hover:bg-gray-50 transition-colors">
                         <div>
                           <p className="font-bold text-gray-900">{alert.organizations?.name}</p>
-                          <p className="text-xs text-gray-500">{alert.organizations?.city}, {alert.organizations?.state}</p>
+                          <p className="text-xs text-gray-500">{alert.organizations?.email} • {alert.organizations?.city}, {alert.organizations?.state}</p>
                         </div>
                         <div className="text-right">
                           <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-md border ${
                             alert.status === 'sent' ? 'bg-amber-50 text-amber-700 border-amber-100' :
                             alert.status === 'responded' ? 'bg-green-50 text-green-700 border-green-100' :
+                            alert.status === 'declined' ? 'bg-red-50 text-red-700 border-red-100' :
                             'bg-gray-50 text-gray-700 border-gray-100'
                           }`}>
                             {alert.status}
                           </span>
-                          <p className="text-[10px] text-gray-400 mt-1">{new Date(alert.created_at).toLocaleDateString()}</p>
+                          <p className="text-[10px] text-gray-400 mt-1">{alert.sent_at ? new Date(alert.sent_at).toLocaleDateString() : 'Pending'}</p>
                         </div>
                       </div>
                     ))
