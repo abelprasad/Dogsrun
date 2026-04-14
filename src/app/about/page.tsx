@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function AboutPage() {
   return (
@@ -14,6 +15,39 @@ export default function AboutPage() {
           </p>
         </div>
       </header>
+
+      {/* Photo strip */}
+      <section className="bg-white px-8 py-8">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="relative h-48 rounded-xl overflow-hidden border border-gray-100 shadow-sm">
+            <Image
+              src="https://images.pexels.com/photos/6298625/pexels-photo-6298625.jpeg?auto=compress&cs=tinysrgb&w=600"
+              alt="Rescue volunteer"
+              fill
+              className="object-cover"
+              unoptimized
+            />
+          </div>
+          <div className="relative h-48 rounded-xl overflow-hidden border border-gray-100 shadow-sm">
+            <Image
+              src="https://images.pexels.com/photos/4498198/pexels-photo-4498198.jpeg?auto=compress&cs=tinysrgb&w=600"
+              alt="Happy dog"
+              fill
+              className="object-cover"
+              unoptimized
+            />
+          </div>
+          <div className="relative h-48 rounded-xl overflow-hidden border border-gray-100 shadow-sm">
+            <Image
+              src="https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg?auto=compress&cs=tinysrgb&w=600"
+              alt="Dog friends"
+              fill
+              className="object-cover"
+              unoptimized
+            />
+          </div>
+        </div>
+      </section>
 
       <main className="max-w-7xl mx-auto py-8 px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start mb-16">
