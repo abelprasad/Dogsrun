@@ -29,7 +29,7 @@ export default function Home() {
         <img 
           src="https://images.pexels.com/photos/13349425/pexels-photo-13349425.jpeg?auto=compress&cs=tinysrgb&w=1600"
           alt="Dog background"
-          className="absolute inset-0 w-full h-full object-cover object-[center_30%]"
+          className="absolute inset-0 w-full h-full object-cover object-[center_60%]"
         />
         <div className="absolute inset-0 bg-black/50 z-10"></div>
         
@@ -135,7 +135,7 @@ export default function Home() {
           </div>
           <div className="relative aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl">
             <img 
-              src="https://images.pexels.com/photos/1629781/pexels-photo-1629781.jpeg?auto=compress&cs=tinysrgb&w=1200"
+              src="https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg?auto=compress&cs=tinysrgb&w=1200"
               alt="Shelter dogs"
               className="w-full h-full object-cover"
             />
