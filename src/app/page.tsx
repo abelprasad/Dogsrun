@@ -31,31 +31,22 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <header className="relative h-[600px] flex items-center justify-center overflow-hidden">
-        <img 
-          src="https://images.pexels.com/photos/4034260/pexels-photo-4034260.jpeg?auto=compress&cs=tinysrgb&w=1600"
-          alt="Dog background"
-          className="absolute inset-0 w-full h-full object-cover object-[center_40%]"
-        />
-        <div className="absolute inset-0 bg-black/50 z-10"></div>
-        
-        <div className="relative z-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-white mb-6">
-            Every dog deserves a <span className="text-[#f59e0b]">run</span> to safety.
+      <section className="bg-gradient-to-br from-amber-50 via-white to-orange-50 py-32 px-4">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-5xl md:text-7xl font-black text-gray-900 mb-6 leading-tight">
+            Every dog deserves a{' '}
+            <span className="text-amber-500">run</span>
+            {' '}to safety.
           </h1>
-          <p className="text-xl md:text-2xl text-gray-200 max-w-3xl mx-auto mb-10 leading-relaxed font-medium">
-            The fastest way for shelters to find rescues for their most urgent dogs.
+          <p className="text-xl text-gray-500 mb-10 max-w-2xl mx-auto leading-relaxed">
+            The fastest way for animal shelters to find specialized rescues for their most urgent dogs. Real-time matching, instant alerts, seamless communication.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/register" className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-lg font-bold rounded-xl shadow-lg text-white bg-[#f59e0b] hover:bg-[#d97706] transform transition hover:scale-105 active:scale-95">
-              Get Started
-            </Link>
-            <Link href="/dogs" className="inline-flex items-center justify-center px-8 py-4 border-2 border-white text-lg font-bold rounded-xl text-white hover:bg-white/10 transition-colors">
-              Browse Dogs
-            </Link>
+          <div className="flex gap-4 justify-center flex-wrap">
+            <Link href="/register" className="bg-amber-500 hover:bg-amber-600 text-white px-8 py-4 rounded-xl font-bold text-lg transition-colors shadow-lg shadow-amber-200/50">Get Started</Link>
+            <Link href="/dogs" className="border border-gray-200 hover:border-gray-300 text-gray-700 px-8 py-4 rounded-xl font-bold text-lg transition-colors bg-white/50 backdrop-blur-sm">Browse Dogs</Link>
           </div>
         </div>
-      </header>
+      </section>
 
       {/* Join the Network Section */}
       <section id="join" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
