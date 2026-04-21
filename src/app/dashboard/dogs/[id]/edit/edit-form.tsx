@@ -100,18 +100,19 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
       photo_url = publicUrl;
     }
 
-    const { error } = await supabase
-      .from('dogs')
-      .update({
+    const response = await fetch('/api/dogs/update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        dog_id: dog.id,
         ...form,
-        age_years: form.age_years ? parseFloat(form.age_years) : null,
-        weight_lbs: form.weight_lbs ? parseFloat(form.weight_lbs) : null,
         photo_url,
-      })
-      .eq('id', dog.id);
+      }),
+    });
 
-    if (error) {
-      alert(error.message);
+    if (!response.ok) {
+      const data = await response.json();
+      alert(data.error || 'Failed to update dog');
     } else {
       router.push(`/dashboard/dogs/${dog.id}`);
       router.refresh();
