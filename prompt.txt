@@ -1,26 +1,46 @@
-File: src/app/dashboard/dogs/[id]/edit/edit-form.tsx (or wherever the form submit handler is)
+Project: DOGSRUN — Next.js 15, Supabase, Tailwind CSS, TypeScript
 
-BUG: Saving edits does not persist — the update silently fails.
+## TASK 1: Negative value validation on dog intake form
+File: src/app/dashboard/dogs/new/page.tsx
 
-The issue is the Supabase update is using the anon key client, but RLS on the dogs table 
-requires the shelter to own the dog. The client-side session may not be passing through correctly.
+In the handleSubmit function, add validation before the Supabase insert:
+- If form.age_years is not empty and parseFloat(form.age_years) < 0, alert "Age cannot be negative" and return
+- If form.weight_lbs is not empty and parseFloat(form.weight_lbs) < 0, alert "Weight cannot be negative" and return
+Also change type="number" inputs for age and weight to have min="0" and step="0.1" for age, min="0" step="1" for weight.
 
-Fix the edit form submit by changing it to POST to a new API route instead of calling 
-Supabase directly from the client.
+## TASK 2: Edit page styling
+File: src/app/dashboard/dogs/[id]/edit/page.tsx
 
-Create src/app/api/dogs/update/route.ts:
-- Accepts POST with the full dog update payload including dog_id
-- Uses Supabase service role key (SUPABASE_SERVICE_ROLE_KEY) to bypass RLS
-- Validates that dog_id is present
-- Does supabase.from('dogs').update({...fields}).eq('id', dog_id)
-- Returns { success: true } or error
+Add the standard DOGSRUN page layout:
+- Dark subnav: bg-[#111] border-t border-white/5 py-2 px-8 with links: "Dashboard" → /dashboard (gray), "Dog Profile" → /dashboard/dogs/${id} (gray), "Edit Dog" (active, amber #f59e0b)
+- Include SignOutButton component (import from ../../sign-out-button) on the right side of subnav
+- Amber hero band: bg-[#fffbeb] border-b border-gray-200 py-12 px-8 with h1 "Edit {dog.name}" in text-4xl md:text-5xl font-[900] tracking-tight text-[#111] and subtitle "Update this dog's information." in text-[#6b7280]
+- Wrap the existing form in max-w-3xl mx-auto py-8 px-8
+- The page should have min-h-screen bg-white as the outer wrapper
 
-In the edit form, replace the direct Supabase update call with:
-fetch('/api/dogs/update', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ dog_id, ...formFields })
+## TASK 3: Photo compression on upload
+Files: 
+- src/app/dashboard/dogs/new/page.tsx
+- src/app/dashboard/dogs/[id]/edit/edit-form.tsx
+
+Install the browser-image-compression package. In both files, before the Supabase storage upload, compress the photo using:
+
+```javascript
+import imageCompression from 'browser-image-compression'
+
+const compressedPhoto = await imageCompression(photo, {
+  maxSizeMB: 0.3,
+  maxWidthOrHeight: 1200,
+  useWebWorker: true,
 })
+```
 
-Include all fields: name, breed, mix, age_years, weight_lbs, sex, color, description,
-parvo, tripod, blind, other_issues, other_issues_notes
+Then upload compressedPhoto instead of photo to Supabase storage. Everything else stays the same.
+
+Also add the package to package.json:
+Run: npm install browser-image-compression
+
+## NOTES:
+- Do not change any existing styling or functionality outside the areas mentioned
+- Match existing Tailwind CSS patterns and color scheme throughout
+- Keep all existing form fields, validation, and submit logic intact

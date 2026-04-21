@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import SignOutButton from '../../sign-out-button'
+import imageCompression from 'browser-image-compression'
 
 interface DogForm {
   name: string;
@@ -42,7 +43,7 @@ export default function NewDogPage() {
     other_issues_notes: '',
   })
 
-  const field = (key: keyof DogForm, label: string, type = 'text', placeholder = '', min?: string) => (
+  const field = (key: keyof DogForm, label: string, type = 'text', placeholder = '', min?: string, step?: string) => (
     <div>
       <label className="block text-sm font-semibold text-gray-700 mb-2">{label}</label>
       <input
@@ -51,6 +52,7 @@ export default function NewDogPage() {
         value={form[key] as string}
         onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
         min={min}
+        step={step}
         className="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] text-[#111] placeholder-[#9ca3af] transition-all text-sm"
       />
     </div>
@@ -59,11 +61,11 @@ export default function NewDogPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (form.age_years && parseFloat(form.age_years) < 0) {
+    if (form.age_years !== '' && parseFloat(form.age_years) < 0) {
       alert('Age cannot be negative')
       return
     }
-    if (form.weight_lbs && parseFloat(form.weight_lbs) < 0) {
+    if (form.weight_lbs !== '' && parseFloat(form.weight_lbs) < 0) {
       alert('Weight cannot be negative')
       return
     }
@@ -91,9 +93,15 @@ export default function NewDogPage() {
       const folderId = crypto.randomUUID()
       const fileName = `${folderId}/${photo.name}`
       
+      const compressedPhoto = await imageCompression(photo, {
+        maxSizeMB: 0.3,
+        maxWidthOrHeight: 1200,
+        useWebWorker: true,
+      })
+
       const { error: uploadError } = await supabase.storage
         .from('dog-photos')
-        .upload(fileName, photo)
+        .upload(fileName, compressedPhoto)
 
       if (uploadError) {
         alert('Error uploading photo: ' + uploadError.message)
@@ -163,8 +171,8 @@ export default function NewDogPage() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {field('age_years', 'Age (years)', 'number', '2')}
-            {field('weight_lbs', 'Weight (lbs)', 'number', '45')}
+            {field('age_years', 'Age (years)', 'number', '2', '0', '0.1')}
+            {field('weight_lbs', 'Weight (lbs)', 'number', '45', '0', '1')}
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

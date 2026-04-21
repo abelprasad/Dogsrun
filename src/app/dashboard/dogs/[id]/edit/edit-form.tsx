@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { createClient } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import imageCompression from 'browser-image-compression';
 
 interface Dog {
   id: string;
@@ -83,9 +84,15 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
       const folderId = crypto.randomUUID();
       const fileName = `${folderId}/${photo.name}`;
       
+      const compressedPhoto = await imageCompression(photo, {
+        maxSizeMB: 0.3,
+        maxWidthOrHeight: 1200,
+        useWebWorker: true,
+      });
+
       const { error: uploadError } = await supabase.storage
         .from('dog-photos')
-        .upload(fileName, photo);
+        .upload(fileName, compressedPhoto);
 
       if (uploadError) {
         alert('Error uploading photo: ' + uploadError.message);

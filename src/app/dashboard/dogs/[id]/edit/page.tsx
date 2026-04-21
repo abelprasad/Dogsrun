@@ -67,7 +67,8 @@ export default async function EditDogPage({ params }: { params: Promise<{ id: st
       <div className="bg-[#111] border-t border-white/5 py-2 px-8">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex gap-6">
-            <Link href={`/dashboard/dogs/${id}`} className="text-xs font-bold text-[#9ca3af] hover:text-white uppercase tracking-widest transition-colors">Back to Profile</Link>
+            <Link href="/dashboard" className="text-xs font-bold text-[#9ca3af] hover:text-white uppercase tracking-widest transition-colors">Dashboard</Link>
+            <Link href={`/dashboard/dogs/${id}`} className="text-xs font-bold text-[#9ca3af] hover:text-white uppercase tracking-widest transition-colors">Dog Profile</Link>
             <span className="text-xs font-bold text-[#f59e0b] uppercase tracking-widest">Edit Dog</span>
           </div>
           <SignOutButton />
@@ -80,7 +81,7 @@ export default async function EditDogPage({ params }: { params: Promise<{ id: st
           <h1 className="text-4xl md:text-5xl font-[900] tracking-tight text-[#111] mb-2">
             Edit {dogData.name}
           </h1>
-          <p className="text-[#6b7280]">Update the information for this dog.</p>
+          <p className="text-[#6b7280]">Update this dog's information.</p>
         </div>
       </header>
 
