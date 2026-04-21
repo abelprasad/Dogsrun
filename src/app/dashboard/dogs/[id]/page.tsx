@@ -1,8 +1,10 @@
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+'use client'
+
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase'
 import Link from 'next/link'
 import Image from 'next/image'
-import { notFound, redirect } from 'next/navigation'
+import { notFound, useRouter } from 'next/navigation'
 import StatusBadge, { DogStatus } from '@/components/status-badge'
 import StatusUpdater from './status-updater'
 import SignOutButton from '../../sign-out-button'
@@ -29,6 +31,11 @@ interface Dog {
   status: string;
   shelter_id: string;
   organizations?: Organization;
+  parvo: boolean;
+  tripod: boolean;
+  blind: boolean;
+  other_issues: boolean;
+  other_issues_notes: string;
 }
 
 interface Alert {
@@ -40,65 +47,95 @@ interface Alert {
   organizations?: Organization;
 }
 
-export default async function DogProfilePage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
-  const cookieStore = await cookies()
+export default function DogProfilePage({ params }: { params: Promise<{ id: string }> }) {
+  const router = useRouter()
+  const [dog, setDog] = useState<Dog | null>(null)
+  const [alerts, setAlerts] = useState<Alert[]>([])
+  const [userOrg, setUserOrg] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [shareText, setShareText] = useState('Share Profile')
+  const [id, setId] = useState<string | null>(null)
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            )
-          } catch {
-          }
-        },
-      },
+  useEffect(() => {
+    params.then(p => setId(p.id))
+  }, [params])
+
+  useEffect(() => {
+    if (!id) return
+
+    async function fetchData() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        router.push('/auth/login')
+        return
+      }
+
+      const { data: org } = await supabase
+        .from('organizations')
+        .select('*')
+        .eq('email', user.email)
+        .single()
+      
+      setUserOrg(org)
+
+      const { data: dogData } = await supabase
+        .from('dogs')
+        .select('*, organizations(*)')
+        .eq('id', id)
+        .single()
+
+      if (!dogData) {
+        setLoading(false)
+        return
+      }
+
+      setDog(dogData as unknown as Dog)
+
+      const { data: alertsData } = await supabase
+        .from('alerts')
+        .select('*, organizations(name, email, city, state)')
+        .eq('dog_id', id)
+        .order('sent_at', { ascending: false })
+
+      setAlerts((alertsData || []) as unknown as Alert[])
+      setLoading(false)
     }
-  )
 
-  const { data: { user } } = await supabase.auth.getUser()
+    fetchData()
+  }, [id, router])
 
-  if (!user) {
-    redirect('/auth/login')
-  }
-
-  const { data: userOrg } = await supabase
-    .from('organizations')
-    .select('*')
-    .eq('email', user.email)
-    .single()
-
-  const { data: dogData } = await supabase
-    .from('dogs')
-    .select('*, organizations(*)')
-    .eq('id', id)
-    .single()
-
-  if (!dogData) {
-    notFound()
-  }
-
-  const dog = dogData as unknown as Dog;
-
-  const { data: alertsData } = await supabase
-    .from('alerts')
-    .select('*, organizations!alerts_rescue_id_fkey(name, email, city, state)')
-    .eq('dog_id', id)
-    .order('sent_at', { ascending: false })
-
-  const alerts = (alertsData || []) as unknown as Alert[];
+  if (loading) return <div className="min-h-screen bg-white flex items-center justify-center font-bold text-[#f59e0b] uppercase tracking-widest animate-pulse">Loading Profile...</div>
+  if (!dog) return notFound()
 
   const isShelter = userOrg?.type === 'shelter'
-  const isDogShelter = isShelter && userOrg.id === dog.shelter_id
+  const isDogShelter = isShelter && userOrg?.id === dog.shelter_id
   const backLink = userOrg?.type === 'rescue' ? '/dashboard/rescue' : '/dashboard'
+
+  const handleShare = async () => {
+    const url = `${window.location.origin}/dogs/${dog.id}`
+    await navigator.clipboard.writeText(url)
+    setShareText('Copied!')
+    setTimeout(() => setShareText('Share Profile'), 2000)
+  }
+
+  const handleMarkUrgent = async () => {
+    const supabase = createClient()
+    const { error } = await supabase
+      .from('dogs')
+      .update({ status: 'urgent' })
+      .eq('id', dog.id)
+    
+    if (error) {
+      alert(error.message)
+    } else {
+      router.refresh()
+      window.location.reload()
+    }
+  }
+
+  const hasSpecialNeeds = dog.parvo || dog.tripod || dog.blind || dog.other_issues
 
   return (
     <div className="min-h-screen bg-white">
@@ -164,9 +201,26 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
                   </div>
                   <div>
                     <h3 className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-widest mb-2">Description / Notes</h3>
-                    <p className="text-sm text-[#6b7280] leading-relaxed italic">
+                    <p className="text-sm text-[#6b7280] leading-relaxed italic mb-6">
                       &quot;{dog.description || "No additional notes provided for this dog."}&quot;
                     </p>
+
+                    {hasSpecialNeeds && (
+                      <div className="pt-6 border-t border-gray-50">
+                        <h3 className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-widest mb-3">Special Needs</h3>
+                        <div className="flex flex-wrap gap-2">
+                          {dog.parvo && <span className="px-2.5 py-1 bg-red-50 text-red-700 text-[10px] font-black uppercase tracking-wider rounded border border-red-100">Parvo</span>}
+                          {dog.tripod && <span className="px-2.5 py-1 bg-blue-50 text-blue-700 text-[10px] font-black uppercase tracking-wider rounded border border-blue-100">Tripod / Amputee</span>}
+                          {dog.blind && <span className="px-2.5 py-1 bg-purple-50 text-purple-700 text-[10px] font-black uppercase tracking-wider rounded border border-purple-100">Blind / Vision Impaired</span>}
+                          {dog.other_issues && <span className="px-2.5 py-1 bg-gray-50 text-gray-700 text-[10px] font-black uppercase tracking-wider rounded border border-gray-200">Other Issues</span>}
+                        </div>
+                        {dog.other_issues && dog.other_issues_notes && (
+                          <p className="text-xs text-[#6b7280] mt-3 leading-relaxed italic">
+                            Note: {dog.other_issues_notes}
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -231,9 +285,9 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
               <div className="bg-[#111] p-6 rounded-xl border border-white/5 text-white">
                 <h3 className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-widest mb-4">Management</h3>
                 <div className="space-y-3">
-                  <button className="w-full py-2 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-semibold transition-colors">Edit Details</button>
-                  <button className="w-full py-2 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-semibold transition-colors">Share Profile</button>
-                  <button className="w-full py-2 bg-red-900/30 hover:bg-red-900/50 text-red-200 rounded-lg text-xs font-semibold transition-colors border border-red-900/20">Mark as Urgent</button>
+                  <Link href={`/dashboard/dogs/${dog.id}/edit`} className="w-full py-2 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center">Edit Details</Link>
+                  <button onClick={handleShare} className="w-full py-2 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-semibold transition-colors">{shareText}</button>
+                  <button onClick={handleMarkUrgent} className="w-full py-2 bg-red-900/30 hover:bg-red-900/50 text-red-200 rounded-lg text-xs font-semibold transition-colors border border-red-900/20">Mark as Urgent</button>
                 </div>
               </div>
             )}

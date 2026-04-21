@@ -42,7 +42,7 @@ export default function NewDogPage() {
     other_issues_notes: '',
   })
 
-  const field = (key: keyof DogForm, label: string, type = 'text', placeholder = '') => (
+  const field = (key: keyof DogForm, label: string, type = 'text', placeholder = '', min?: string) => (
     <div>
       <label className="block text-sm font-semibold text-gray-700 mb-2">{label}</label>
       <input
@@ -50,6 +50,7 @@ export default function NewDogPage() {
         placeholder={placeholder}
         value={form[key] as string}
         onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
+        min={min}
         className="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] text-[#111] placeholder-[#9ca3af] transition-all text-sm"
       />
     </div>
@@ -57,6 +58,16 @@ export default function NewDogPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (form.age_years && parseFloat(form.age_years) < 0) {
+      alert('Age cannot be negative')
+      return
+    }
+    if (form.weight_lbs && parseFloat(form.weight_lbs) < 0) {
+      alert('Weight cannot be negative')
+      return
+    }
+
     setLoading(true)
 
     const supabase = createClient()
