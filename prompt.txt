@@ -1,59 +1,99 @@
 Project: DOGSRUN — Next.js 15, Supabase, Tailwind CSS, TypeScript
 
-## TASK: Fix bugs on dog profile page
-File: src/app/dashboard/dogs/[id]/page.tsx
-Related files to create: src/app/dashboard/dogs/[id]/status-updater.tsx (may already exist)
+## TASK: Fix remaining dog profile bugs + create edit page
 
 ---
 
-### BUG 1: Management buttons do nothing
-The Edit Details, Share Profile, and Mark as Urgent buttons in the Management sidebar have no onClick handlers.
+### FIX 1: "Mark as Urgent" button — extract to client component
 
-Fix them as follows:
-- "Edit Details" → navigate to `/dashboard/dogs/${dog.id}/edit` using Next.js router (use a Link component instead of button)
-- "Share Profile" → copy `${window.location.origin}/dogs/${dog.id}` to clipboard, then show a brief "Copied!" confirmation in place of the button text for 2 seconds
-- "Mark as Urgent" → call a Supabase update to set `status = 'urgent'` on the dog, then refresh the page. Add 'urgent' as a valid status option.
+The dog profile page (src/app/dashboard/dogs/[id]/page.tsx) is a server component but the management buttons need client-side interactivity. 
 
----
+Create a new client component at src/app/dashboard/dogs/[id]/management-actions.tsx
 
-### BUG 2: Rescue Alerts section showing "0 alerts sent" even when alerts exist
-The alerts query uses:
-.select('*, organizations!alerts_rescue_id_fkey(name, email, city, state)')
-This join may be failing silently. Change it to a simpler select without the foreign key hint:
-.select('*, organizations(name, email, city, state)')
-If that also fails, do two separate queries: first fetch alerts for the dog, then fetch org names by rescue_id.
+Props: dogId (string), currentStatus (string)
 
-Also the section is only shown when `isDogShelter === true`. Make sure this condition is correctly evaluating — log userOrg.id and dog.shelter_id to verify they match.
+Buttons:
+- "Edit Details" → use Next.js Link component to /dashboard/dogs/${dogId}/edit
+- "Share Profile" → onClick copies ${window.location.origin}/dogs/${dogId} to clipboard, shows "Copied!" text in place of button label for 2 seconds, then reverts
+- "Mark as Urgent" → onClick calls fetch('/api/dogs/set-urgent', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dog_id: dogId }) }), then calls router.refresh() on success
 
----
+Style to match existing management sidebar:
+- Container: bg-[#111] p-6 rounded-xl border border-white/5 text-white
+- Edit Details + Share Profile: w-full py-2 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-semibold transition-colors
+- Mark as Urgent: w-full py-2 bg-red-900/30 hover:bg-red-900/50 text-red-200 rounded-lg text-xs font-semibold transition-colors border border-red-900/20
 
-### BUG 3: Special needs flags not shown on dog profile
-The Dog interface and dogData query do not include the special needs fields. 
-
-Add to the Dog interface:
-parvo: boolean;
-tripod: boolean;
-blind: boolean;
-other_issues: boolean;
-other_issues_notes: string;
-
-Add a "Special Needs" section in the dog info card (below Description / Notes). Only show this section if at least one flag is true. Display as colored badges:
-- Parvo → red badge
-- Tripod / Amputee → blue badge  
-- Blind / Vision Impaired → purple badge
-- Other Issues → gray badge + show other_issues_notes text below if present
+Replace the existing hardcoded buttons in page.tsx with this new <ManagementActions dogId={dog.id} currentStatus={dog.status} /> component.
 
 ---
 
-### BUG 4: Negative age/weight validation
-In src/app/dashboard/dogs/new/page.tsx, add validation in the handleSubmit function before the Supabase insert:
-- If age_years is less than 0, show alert "Age cannot be negative" and return early
-- If weight_lbs is less than 0, show alert "Weight cannot be negative" and return early
-Also add min="0" attribute to both number inputs.
+### FIX 2: Create API route for Mark as Urgent
+
+Create src/app/api/dogs/set-urgent/route.ts
+
+- Accepts POST { dog_id }
+- Uses Supabase service role key (process.env.SUPABASE_SERVICE_ROLE_KEY)
+- Updates dogs table: SET status = 'urgent' WHERE id = dog_id
+- Returns NextResponse.json({ success: true })
+- Returns 400 if dog_id missing, 500 if update fails
+
+---
+
+### FIX 3: Rescue Alerts showing "0 alerts sent"
+
+In src/app/dashboard/dogs/[id]/page.tsx, the alerts query is running with the anon key but RLS now requires authenticated email context.
+
+Replace the alerts fetch with a service role client:
+
+```typescript
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
+
+const { data: alertsData } = await supabaseAdmin
+  .from('alerts')
+  .select('*, organizations(name, email, city, state)')
+  .eq('dog_id', id)
+  .order('sent_at', { ascending: false })
+```
+
+---
+
+### FIX 4: Create dog edit page
+
+Create src/app/dashboard/dogs/[id]/edit/page.tsx
+
+Requirements:
+1. Server component that fetches existing dog data by ID using service role client
+2. Redirect to /auth/login if not authenticated
+3. Redirect to /dashboard if logged-in user's org is not the shelter that owns this dog (compare userOrg.id === dog.shelter_id)
+4. Pass dog data as props to a client component EditDogForm
+
+Create src/app/dashboard/dogs/[id]/edit/edit-form.tsx as a client component:
+- Pre-populate all fields with existing dog data:
+  name, breed, mix, age_years, weight_lbs, sex, color, description
+  parvo, tripod, blind, other_issues, other_issues_notes
+- Show existing photo_url if present (display as img tag), allow uploading a new photo to replace it
+- On submit, do a Supabase UPDATE on the dogs table for this dog ID
+- If new photo uploaded, upload to dog-photos bucket first, get public URL, include in update
+- On success, router.push(`/dashboard/dogs/${dogId}`)
+- Add min="0" to age and weight number inputs
+- Show "Other Issues" text input only when other_issues checkbox is checked
+
+Page layout:
+- Same dark subnav, amber hero, white body as new dog page
+- Hero title: "Edit [dog name]"
+- Back link in subnav to /dashboard/dogs/${id}
+- Same form card layout as src/app/dashboard/dogs/new/page.tsx
+- Submit button: "Save Changes" (amber, full width)
+- Cancel link below submit: goes back to /dashboard/dogs/${id}
 
 ---
 
 ### NOTES:
-- Do not change any existing styling or layout outside the areas mentioned
-- Match existing Tailwind CSS patterns and dark nav / amber hero color scheme
-- The Share Profile copy-to-clipboard should work without any external libraries
+- Do not change any existing styling outside the areas mentioned
+- Match existing Tailwind CSS patterns and color scheme throughout
+- Use the same supabase createClient pattern from @/lib/supabase for client components
+- Use service role key only in server components and API routes, never in client components

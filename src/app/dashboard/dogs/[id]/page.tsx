@@ -1,12 +1,12 @@
-'use client'
-
-import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase'
+import { createServerClient } from '@supabase/ssr'
+import { createClient } from '@supabase/supabase-js'
+import { cookies } from 'next/headers'
 import Link from 'next/link'
 import Image from 'next/image'
-import { notFound, useRouter } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import StatusBadge, { DogStatus } from '@/components/status-badge'
 import StatusUpdater from './status-updater'
+import ManagementActions from './management-actions'
 import SignOutButton from '../../sign-out-button'
 
 interface Organization {
@@ -47,93 +47,70 @@ interface Alert {
   organizations?: Organization;
 }
 
-export default function DogProfilePage({ params }: { params: Promise<{ id: string }> }) {
-  const router = useRouter()
-  const [dog, setDog] = useState<Dog | null>(null)
-  const [alerts, setAlerts] = useState<Alert[]>([])
-  const [userOrg, setUserOrg] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-  const [shareText, setShareText] = useState('Share Profile')
-  const [id, setId] = useState<string | null>(null)
+export default async function DogProfilePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const cookieStore = await cookies()
 
-  useEffect(() => {
-    params.then(p => setId(p.id))
-  }, [params])
-
-  useEffect(() => {
-    if (!id) return
-
-    async function fetchData() {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-
-      if (!user) {
-        router.push('/auth/login')
-        return
-      }
-
-      const { data: org } = await supabase
-        .from('organizations')
-        .select('*')
-        .eq('email', user.email)
-        .single()
-      
-      setUserOrg(org)
-
-      const { data: dogData } = await supabase
-        .from('dogs')
-        .select('*, organizations(*)')
-        .eq('id', id)
-        .single()
-
-      if (!dogData) {
-        setLoading(false)
-        return
-      }
-
-      setDog(dogData as unknown as Dog)
-
-      const { data: alertsData } = await supabase
-        .from('alerts')
-        .select('*, organizations(name, email, city, state)')
-        .eq('dog_id', id)
-        .order('sent_at', { ascending: false })
-
-      setAlerts((alertsData || []) as unknown as Alert[])
-      setLoading(false)
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll()
+        },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            )
+          } catch {
+          }
+        },
+      },
     }
+  )
 
-    fetchData()
-  }, [id, router])
+  const { data: { user } } = await supabase.auth.getUser()
 
-  if (loading) return <div className="min-h-screen bg-white flex items-center justify-center font-bold text-[#f59e0b] uppercase tracking-widest animate-pulse">Loading Profile...</div>
-  if (!dog) return notFound()
+  if (!user) {
+    redirect('/auth/login')
+  }
+
+  const { data: userOrg } = await supabase
+    .from('organizations')
+    .select('*')
+    .eq('email', user.email)
+    .single()
+
+  const { data: dogData } = await supabase
+    .from('dogs')
+    .select('*, organizations(*)')
+    .eq('id', id)
+    .single()
+
+  if (!dogData) {
+    notFound()
+  }
+
+  const dog = dogData as unknown as Dog;
+
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
+  const { data: alertsData } = await supabaseAdmin
+    .from('alerts')
+    .select('*, organizations(name, email, city, state)')
+    .eq('dog_id', id)
+    .order('sent_at', { ascending: false })
+
+  const alerts = (alertsData || []) as unknown as Alert[];
 
   const isShelter = userOrg?.type === 'shelter'
   const isDogShelter = isShelter && userOrg?.id === dog.shelter_id
   const backLink = userOrg?.type === 'rescue' ? '/dashboard/rescue' : '/dashboard'
-
-  const handleShare = async () => {
-    const url = `${window.location.origin}/dogs/${dog.id}`
-    await navigator.clipboard.writeText(url)
-    setShareText('Copied!')
-    setTimeout(() => setShareText('Share Profile'), 2000)
-  }
-
-  const handleMarkUrgent = async () => {
-    const supabase = createClient()
-    const { error } = await supabase
-      .from('dogs')
-      .update({ status: 'urgent' })
-      .eq('id', dog.id)
-    
-    if (error) {
-      alert(error.message)
-    } else {
-      router.refresh()
-      window.location.reload()
-    }
-  }
 
   const hasSpecialNeeds = dog.parvo || dog.tripod || dog.blind || dog.other_issues
 
@@ -282,14 +259,7 @@ export default function DogProfilePage({ params }: { params: Promise<{ id: strin
             </div>
 
             {isDogShelter && (
-              <div className="bg-[#111] p-6 rounded-xl border border-white/5 text-white">
-                <h3 className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-widest mb-4">Management</h3>
-                <div className="space-y-3">
-                  <Link href={`/dashboard/dogs/${dog.id}/edit`} className="w-full py-2 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center">Edit Details</Link>
-                  <button onClick={handleShare} className="w-full py-2 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-semibold transition-colors">{shareText}</button>
-                  <button onClick={handleMarkUrgent} className="w-full py-2 bg-red-900/30 hover:bg-red-900/50 text-red-200 rounded-lg text-xs font-semibold transition-colors border border-red-900/20">Mark as Urgent</button>
-                </div>
-              </div>
+              <ManagementActions dogId={dog.id} currentStatus={dog.status || 'available'} />
             )}
           </div>
         </div>
