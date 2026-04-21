@@ -77,13 +77,18 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
     redirect('/auth/login')
   }
 
-  const { data: userOrg } = await supabase
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
+  const { data: userOrg } = await supabaseAdmin
     .from('organizations')
     .select('*')
     .eq('email', user.email)
     .single()
 
-  const { data: dogData } = await supabase
+  const { data: dogData } = await supabaseAdmin
     .from('dogs')
     .select('*, organizations(*)')
     .eq('id', id)
@@ -94,11 +99,6 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
   }
 
   const dog = dogData as unknown as Dog;
-
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
 
   const { data: alertsData } = await supabaseAdmin
     .from('alerts')
