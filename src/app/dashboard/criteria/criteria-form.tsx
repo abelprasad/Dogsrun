@@ -14,6 +14,10 @@ interface RescueCriteria {
   accepts_mixes?: boolean;
   states_served?: string[];
   is_active?: boolean;
+  accepts_parvo?: boolean;
+  accepts_tripod?: boolean;
+  accepts_blind?: boolean;
+  accepts_other?: boolean;
 }
 
 interface CriteriaFormProps {
@@ -33,6 +37,10 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
     accepts_mixes: initialCriteria?.accepts_mixes ?? true,
     states_served: initialCriteria?.states_served?.join(', ') || '',
     is_active: initialCriteria?.is_active ?? true,
+    accepts_parvo: initialCriteria?.accepts_parvo ?? false,
+    accepts_tripod: initialCriteria?.accepts_tripod ?? false,
+    accepts_blind: initialCriteria?.accepts_blind ?? false,
+    accepts_other: initialCriteria?.accepts_other ?? false,
   });
 
   async function handleSubmit(e: React.FormEvent) {
@@ -49,6 +57,10 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
       accepts_mixes: form.accepts_mixes,
       states_served: form.states_served.split(',').map((s: string) => s.trim()).filter(Boolean),
       is_active: form.is_active,
+      accepts_parvo: form.accepts_parvo,
+      accepts_tripod: form.accepts_tripod,
+      accepts_blind: form.accepts_blind,
+      accepts_other: form.accepts_other,
     };
 
     const { error } = await supabase
@@ -127,6 +139,27 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
             <div>
               <h3 className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-widest mb-2">Sex Preference</h3>
               <p className="text-lg font-bold text-[#111] capitalize">{initialCriteria.sex_preference || 'Any'}</p>
+            </div>
+          </div>
+
+          <div className="pt-8 border-t border-gray-50">
+            <h3 className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-widest mb-4">Special Needs We Accept</h3>
+            <div className="flex flex-wrap gap-4">
+              {initialCriteria.accepts_parvo && (
+                <span className="px-3 py-1 bg-red-50 text-red-700 text-xs font-bold rounded border border-red-100">Parvo</span>
+              )}
+              {initialCriteria.accepts_tripod && (
+                <span className="px-3 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded border border-blue-100">Tripod / Amputee</span>
+              )}
+              {initialCriteria.accepts_blind && (
+                <span className="px-3 py-1 bg-purple-50 text-purple-700 text-xs font-bold rounded border border-purple-100">Blind / Vision Impaired</span>
+              )}
+              {initialCriteria.accepts_other && (
+                <span className="px-3 py-1 bg-gray-50 text-gray-700 text-xs font-bold rounded border border-gray-100">Other Issues</span>
+              )}
+              {!initialCriteria.accepts_parvo && !initialCriteria.accepts_tripod && !initialCriteria.accepts_blind && !initialCriteria.accepts_other && (
+                <span className="text-[#6b7280] text-sm italic">None specified</span>
+              )}
             </div>
           </div>
         </div>
@@ -215,6 +248,48 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
           />
           <span className="text-sm font-semibold text-gray-700 group-hover:text-[#111] transition-colors">Criteria is Active</span>
         </label>
+      </div>
+
+      <div className="space-y-4 pt-8 border-t border-gray-50">
+        <h3 className="text-sm font-bold text-[#111]">Special Needs We Accept</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <label className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors group">
+            <input
+              type="checkbox"
+              checked={form.accepts_parvo}
+              onChange={e => setForm({ ...form, accepts_parvo: e.target.checked })}
+              className="w-4 h-4 rounded border-gray-300 text-[#f59e0b] focus:ring-[#f59e0b]"
+            />
+            <span className="text-sm font-semibold text-gray-700 group-hover:text-[#111]">We accept dogs with Parvo</span>
+          </label>
+          <label className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors group">
+            <input
+              type="checkbox"
+              checked={form.accepts_tripod}
+              onChange={e => setForm({ ...form, accepts_tripod: e.target.checked })}
+              className="w-4 h-4 rounded border-gray-300 text-[#f59e0b] focus:ring-[#f59e0b]"
+            />
+            <span className="text-sm font-semibold text-gray-700 group-hover:text-[#111]">We accept Tripod / Amputee dogs</span>
+          </label>
+          <label className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors group">
+            <input
+              type="checkbox"
+              checked={form.accepts_blind}
+              onChange={e => setForm({ ...form, accepts_blind: e.target.checked })}
+              className="w-4 h-4 rounded border-gray-300 text-[#f59e0b] focus:ring-[#f59e0b]"
+            />
+            <span className="text-sm font-semibold text-gray-700 group-hover:text-[#111]">We accept Blind / Vision Impaired dogs</span>
+          </label>
+          <label className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors group">
+            <input
+              type="checkbox"
+              checked={form.accepts_other}
+              onChange={e => setForm({ ...form, accepts_other: e.target.checked })}
+              className="w-4 h-4 rounded border-gray-300 text-[#f59e0b] focus:ring-[#f59e0b]"
+            />
+            <span className="text-sm font-semibold text-gray-700 group-hover:text-[#111]">We accept dogs with Other Issues</span>
+          </label>
+        </div>
       </div>
 
       <div className="flex gap-4 pt-4 border-t border-gray-50">

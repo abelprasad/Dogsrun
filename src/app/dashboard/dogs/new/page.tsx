@@ -15,6 +15,11 @@ interface DogForm {
   sex: string;
   color: string;
   description: string;
+  parvo: boolean;
+  tripod: boolean;
+  blind: boolean;
+  other_issues: boolean;
+  other_issues_notes: string;
 }
 
 export default function NewDogPage() {
@@ -30,6 +35,11 @@ export default function NewDogPage() {
     sex: 'unknown',
     color: '',
     description: '',
+    parvo: false,
+    tripod: false,
+    blind: false,
+    other_issues: false,
+    other_issues_notes: '',
   })
 
   const field = (key: keyof DogForm, label: string, type = 'text', placeholder = '') => (
@@ -182,6 +192,59 @@ export default function NewDogPage() {
               rows={4}
               className="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] text-[#111] placeholder-[#9ca3af] transition-all text-sm"
             />
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-lg font-bold text-[#111]">Special Needs</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <label className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                <input
+                  type="checkbox"
+                  checked={form.parvo}
+                  onChange={e => setForm(f => ({ ...f, parvo: e.target.checked }))}
+                  className="w-4 h-4 rounded border-gray-300 text-[#f59e0b] focus:ring-[#f59e0b]"
+                />
+                <span className="text-sm font-semibold text-[#111]">Parvo</span>
+              </label>
+              <label className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                <input
+                  type="checkbox"
+                  checked={form.tripod}
+                  onChange={e => setForm(f => ({ ...f, tripod: e.target.checked }))}
+                  className="w-4 h-4 rounded border-gray-300 text-[#f59e0b] focus:ring-[#f59e0b]"
+                />
+                <span className="text-sm font-semibold text-[#111]">Tripod / Amputee</span>
+              </label>
+              <label className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                <input
+                  type="checkbox"
+                  checked={form.blind}
+                  onChange={e => setForm(f => ({ ...f, blind: e.target.checked }))}
+                  className="w-4 h-4 rounded border-gray-300 text-[#f59e0b] focus:ring-[#f59e0b]"
+                />
+                <span className="text-sm font-semibold text-[#111]">Blind / Vision Impaired</span>
+              </label>
+              <label className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                <input
+                  type="checkbox"
+                  checked={form.other_issues}
+                  onChange={e => setForm(f => ({ ...f, other_issues: e.target.checked, other_issues_notes: e.target.checked ? f.other_issues_notes : '' }))}
+                  className="w-4 h-4 rounded border-gray-300 text-[#f59e0b] focus:ring-[#f59e0b]"
+                />
+                <span className="text-sm font-semibold text-[#111]">Other Issues</span>
+              </label>
+            </div>
+            {form.other_issues && (
+              <div className="mt-2">
+                <input
+                  type="text"
+                  placeholder="Describe the issue(s)..."
+                  value={form.other_issues_notes}
+                  onChange={e => setForm(f => ({ ...f, other_issues_notes: e.target.value }))}
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] text-[#111] placeholder-[#9ca3af] transition-all text-sm"
+                />
+              </div>
+            )}
           </div>
 
           <div className="space-y-4">

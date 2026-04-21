@@ -24,6 +24,10 @@ interface RescueCriteria {
   sex_preference: string | null;
   accepts_mixes: boolean | null;
   organizations: RescueOrg | null;
+  accepts_parvo: boolean | null;
+  accepts_tripod: boolean | null;
+  accepts_blind: boolean | null;
+  accepts_other: boolean | null;
 }
 
 interface Match {
@@ -68,7 +72,14 @@ export async function POST(req: NextRequest) {
     // Skip if this is the shelter that added the dog
     if (org.id === dog.shelter_id) continue
 
-    // Match logic
+    // Special Needs Match logic
+    // If a dog has a special need, the rescue MUST accept it to match.
+    if (dog.parvo && !criteria.accepts_parvo) continue
+    if (dog.tripod && !criteria.accepts_tripod) continue
+    if (dog.blind && !criteria.accepts_blind) continue
+    if (dog.other_issues && !criteria.accepts_other) continue
+
+    // Basic Criteria Match logic
     const breedMatch = !criteria.breeds || criteria.breeds.length === 0 ||
       criteria.breeds.some((b: string) =>
         dog.breed?.toLowerCase().includes(b.toLowerCase())
@@ -101,6 +112,20 @@ export async function POST(req: NextRequest) {
   const results = await Promise.allSettled(
     matches.map(async ({ criteria, org }) => {
       const shelter = dog.organizations as unknown as { name: string; city: string; state: string }
+
+      const specialNeeds = []
+      if (dog.parvo) specialNeeds.push('Parvo')
+      if (dog.tripod) specialNeeds.push('Tripod / Amputee')
+      if (dog.blind) specialNeeds.push('Blind / Vision Impaired')
+      if (dog.other_issues) {
+        specialNeeds.push(`Other — "${dog.other_issues_notes}"`)
+      }
+      const specialNeedsRow = specialNeeds.length > 0 ? `
+        <tr>
+          <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #6b7280; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Special Needs</td>
+          <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #dc2626; font-size: 16px; font-weight: 700;">${specialNeeds.join(', ')}</td>
+        </tr>
+      ` : ''
 
       // Log the alert in the database first to get the ID for links
       const { data: alertData, error: alertError } = await supabase.from('alerts').insert({
@@ -145,6 +170,7 @@ export async function POST(req: NextRequest) {
                     <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #6b7280; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Breed</td>
                     <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #111827; font-size: 16px;">${dog.breed ?? '—'}${dog.mix ? ' mix' : ''}</td>
                   </tr>
+                  ${specialNeedsRow}
                   <tr>
                     <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #6b7280; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Age</td>
                     <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #111827; font-size: 16px;">${dog.age_years ? `${dog.age_years} years` : '—'}</td>
@@ -165,12 +191,8 @@ export async function POST(req: NextRequest) {
 
                 <div style="text-align: center; margin-bottom: 32px;">
                   <a href="https://dogsrun.net/api/respond?alert_id=${alertData.id}&action=interested" 
-                     style="background-color: #f59e0b; color: #ffffff; padding: 16px 32px; border-radius: 12px; text-decoration: none; display: inline-block; font-weight: 700; font-size: 16px; margin-right: 8px;">
+                     style="background-color: #f59e0b; color: #ffffff; padding: 16px 32px; border-radius: 12px; text-decoration: none; display: inline-block; font-weight: 700; font-size: 16px;">
                     Interested
-                  </a>
-                  <a href="https://dogsrun.net/api/respond?alert_id=${alertData.id}&action=pass" 
-                     style="background-color: #f3f4f6; color: #4b5563; padding: 16px 32px; border-radius: 12px; text-decoration: none; display: inline-block; font-weight: 700; font-size: 16px;">
-                    Pass
                   </a>
                 </div>
                 
