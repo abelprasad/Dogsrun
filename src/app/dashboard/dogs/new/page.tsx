@@ -7,6 +7,8 @@ import Link from 'next/link'
 import SignOutButton from '../../sign-out-button'
 import imageCompression from 'browser-image-compression'
 import BreedSelect from '@/components/breed-select'
+import ColorPicker from '@/components/color-picker'
+import StateSelect from '@/components/state-select'
 
 interface DogForm {
   name: string;
@@ -15,7 +17,8 @@ interface DogForm {
   age_years: string;
   weight_lbs: string;
   sex: string;
-  color: string;
+  color: string[];
+  state: string;
   description: string;
   parvo: boolean;
   tripod: boolean;
@@ -35,7 +38,8 @@ export default function NewDogPage() {
     age_years: '',
     weight_lbs: '',
     sex: 'unknown',
-    color: '',
+    color: [],
+    state: '',
     description: '',
     parvo: false,
     tripod: false,
@@ -93,34 +97,40 @@ export default function NewDogPage() {
     if (photo) {
       const folderId = crypto.randomUUID()
       const fileName = `${folderId}/${photo.name}`
-      
       const compressedPhoto = await imageCompression(photo, {
         maxSizeMB: 0.3,
         maxWidthOrHeight: 1200,
         useWebWorker: true,
       })
-
       const { error: uploadError } = await supabase.storage
         .from('dog-photos')
         .upload(fileName, compressedPhoto)
-
       if (uploadError) {
         alert('Error uploading photo: ' + uploadError.message)
         setLoading(false)
         return
       }
-
       const { data: { publicUrl } } = supabase.storage
         .from('dog-photos')
         .getPublicUrl(fileName)
-      
       photo_url = publicUrl
     }
 
     const { data, error } = await supabase.from('dogs').insert({
-      ...form,
+      name: form.name,
+      breed: form.breed,
+      mix: form.mix,
       age_years: form.age_years ? parseFloat(form.age_years) : null,
       weight_lbs: form.weight_lbs ? parseFloat(form.weight_lbs) : null,
+      sex: form.sex,
+      color: form.color.length > 0 ? form.color : null,
+      state: form.state || null,
+      description: form.description,
+      parvo: form.parvo,
+      tripod: form.tripod,
+      blind: form.blind,
+      other_issues: form.other_issues,
+      other_issues_notes: form.other_issues_notes,
       shelter_id: org.id,
       status: 'available',
       photo_url,
@@ -173,12 +183,12 @@ export default function NewDogPage() {
               />
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {field('age_years', 'Age (years)', 'number', '2', '0', '0.1')}
             {field('weight_lbs', 'Weight (lbs)', 'number', '45', '0', '1')}
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Sex</label>
@@ -192,9 +202,21 @@ export default function NewDogPage() {
                 <option value="unknown">Unknown</option>
               </select>
             </div>
-            {field('color', 'Color/Markings', 'text', 'Black and white')}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">State</label>
+              <StateSelect
+                value={form.state}
+                onChange={val => setForm(f => ({ ...f, state: val }))}
+              />
+            </div>
           </div>
-          
+
+          <ColorPicker
+            selected={form.color}
+            onChange={colors => setForm(f => ({ ...f, color: colors }))}
+            label="Color(s)"
+          />
+
           <div className="flex items-center gap-3 p-4 bg-[#fffbeb] rounded-lg border border-gray-100">
             <input
               type="checkbox"
@@ -205,7 +227,7 @@ export default function NewDogPage() {
             />
             <label htmlFor="mix" className="text-sm font-semibold text-[#111] cursor-pointer">This is a mixed breed dog</label>
           </div>
-          
+
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">Description & Medical Notes</label>
             <textarea
@@ -273,7 +295,7 @@ export default function NewDogPage() {
               </div>
             </div>
           </div>
-          
+
           <button
             type="submit"
             disabled={loading}

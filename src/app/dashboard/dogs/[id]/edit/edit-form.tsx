@@ -5,7 +5,9 @@ import { createClient } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import imageCompression from 'browser-image-compression';
-import BreedSelect from '@/components/breed-select'
+import BreedSelect from '@/components/breed-select';
+import ColorPicker from '@/components/color-picker';
+import StateSelect from '@/components/state-select';
 
 interface Dog {
   id: string;
@@ -15,7 +17,8 @@ interface Dog {
   age_years: number | null;
   weight_lbs: number | null;
   sex: string;
-  color: string;
+  color: string[] | null;
+  state: string | null;
   description: string;
   photo_url: string | null;
   status: string;
@@ -41,7 +44,8 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
     age_years: dog.age_years?.toString() || '',
     weight_lbs: dog.weight_lbs?.toString() || '',
     sex: dog.sex || 'unknown',
-    color: dog.color || '',
+    color: dog.color || [] as string[],
+    state: dog.state || '',
     description: dog.description || '',
     parvo: dog.parvo || false,
     tripod: dog.tripod || false,
@@ -57,7 +61,7 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
         type={type}
         placeholder={placeholder}
         value={form[key] as string | number}
-        onChange={e => setForm(f => ({ ...f, [key]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value }))}
+        onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
         min={min}
         className="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] text-[#111] placeholder-[#9ca3af] transition-all text-sm"
       />
@@ -84,36 +88,33 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
     if (photo) {
       const folderId = crypto.randomUUID();
       const fileName = `${folderId}/${photo.name}`;
-      
       const compressedPhoto = await imageCompression(photo, {
         maxSizeMB: 0.3,
         maxWidthOrHeight: 1200,
         useWebWorker: true,
       });
-
       const { error: uploadError } = await supabase.storage
         .from('dog-photos')
         .upload(fileName, compressedPhoto);
-
       if (uploadError) {
         alert('Error uploading photo: ' + uploadError.message);
         setLoading(false);
         return;
       }
-
       const { data: { publicUrl } } = supabase.storage
         .from('dog-photos')
         .getPublicUrl(fileName);
-      
       photo_url = publicUrl;
     }
 
     const response = await fetch('/api/dogs/update', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         dog_id: dog.id,
         ...form,
+        color: form.color.length > 0 ? form.color : null,
+        state: form.state || null,
         photo_url,
       }),
     });
@@ -133,20 +134,20 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {field('name', 'Dog Name', 'text', 'Buddy')}
         <div>
-  <label className="block text-sm font-semibold text-gray-700 mb-2">Primary Breed</label>
-  <BreedSelect
-    value={form.breed}
-    onChange={val => setForm(f => ({ ...f, breed: val }))}
-    placeholder="Search or type breed..."
-  />
-</div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">Primary Breed</label>
+          <BreedSelect
+            value={form.breed}
+            onChange={val => setForm(f => ({ ...f, breed: val }))}
+            placeholder="Search or type breed..."
+          />
+        </div>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {field('age_years', 'Age (years)', 'number', '2', '0')}
         {field('weight_lbs', 'Weight (lbs)', 'number', '45', '0')}
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">Sex</label>
@@ -160,9 +161,21 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
             <option value="unknown">Unknown</option>
           </select>
         </div>
-        {field('color', 'Color/Markings', 'text', 'Black and white')}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">State</label>
+          <StateSelect
+            value={form.state}
+            onChange={val => setForm(f => ({ ...f, state: val }))}
+          />
+        </div>
       </div>
-      
+
+      <ColorPicker
+        selected={form.color}
+        onChange={colors => setForm(f => ({ ...f, color: colors }))}
+        label="Color(s)"
+      />
+
       <div className="flex items-center gap-3 p-4 bg-[#fffbeb] rounded-lg border border-gray-100">
         <input
           type="checkbox"
@@ -173,7 +186,7 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
         />
         <label htmlFor="mix" className="text-sm font-semibold text-[#111] cursor-pointer">This is a mixed breed dog</label>
       </div>
-      
+
       <div>
         <label className="block text-sm font-semibold text-gray-700 mb-2">Description & Medical Notes</label>
         <textarea
@@ -188,53 +201,35 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
       <div className="space-y-4">
         <h3 className="text-lg font-bold text-[#111]">Special Needs</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <label className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-            <input
-              type="checkbox"
-              checked={form.parvo}
-              onChange={e => setForm(f => ({ ...f, parvo: e.target.checked }))}
-              className="w-4 h-4 rounded border-gray-300 text-[#f59e0b] focus:ring-[#f59e0b]"
-            />
-            <span className="text-sm font-semibold text-[#111]">Parvo</span>
-          </label>
-          <label className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-            <input
-              type="checkbox"
-              checked={form.tripod}
-              onChange={e => setForm(f => ({ ...f, tripod: e.target.checked }))}
-              className="w-4 h-4 rounded border-gray-300 text-[#f59e0b] focus:ring-[#f59e0b]"
-            />
-            <span className="text-sm font-semibold text-[#111]">Tripod / Amputee</span>
-          </label>
-          <label className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-            <input
-              type="checkbox"
-              checked={form.blind}
-              onChange={e => setForm(f => ({ ...f, blind: e.target.checked }))}
-              className="w-4 h-4 rounded border-gray-300 text-[#f59e0b] focus:ring-[#f59e0b]"
-            />
-            <span className="text-sm font-semibold text-[#111]">Blind / Vision Impaired</span>
-          </label>
-          <label className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-            <input
-              type="checkbox"
-              checked={form.other_issues}
-              onChange={e => setForm(f => ({ ...f, other_issues: e.target.checked, other_issues_notes: e.target.checked ? f.other_issues_notes : '' }))}
-              className="w-4 h-4 rounded border-gray-300 text-[#f59e0b] focus:ring-[#f59e0b]"
-            />
-            <span className="text-sm font-semibold text-[#111]">Other Issues</span>
-          </label>
+          {[
+            { key: 'parvo', label: 'Parvo' },
+            { key: 'tripod', label: 'Tripod / Amputee' },
+            { key: 'blind', label: 'Blind / Vision Impaired' },
+            { key: 'other_issues', label: 'Other Issues' },
+          ].map(({ key, label }) => (
+            <label key={key} className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+              <input
+                type="checkbox"
+                checked={form[key as keyof typeof form] as boolean}
+                onChange={e => setForm(f => ({
+                  ...f,
+                  [key]: e.target.checked,
+                  ...(key === 'other_issues' && !e.target.checked ? { other_issues_notes: '' } : {}),
+                }))}
+                className="w-4 h-4 rounded border-gray-300 text-[#f59e0b] focus:ring-[#f59e0b]"
+              />
+              <span className="text-sm font-semibold text-[#111]">{label}</span>
+            </label>
+          ))}
         </div>
         {form.other_issues && (
-          <div className="mt-2">
-            <input
-              type="text"
-              placeholder="Describe the issue(s)..."
-              value={form.other_issues_notes}
-              onChange={e => setForm(f => ({ ...f, other_issues_notes: e.target.value }))}
-              className="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] text-[#111] placeholder-[#9ca3af] transition-all text-sm"
-            />
-          </div>
+          <input
+            type="text"
+            placeholder="Describe the issue(s)..."
+            value={form.other_issues_notes}
+            onChange={e => setForm(f => ({ ...f, other_issues_notes: e.target.value }))}
+            className="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] text-[#111] placeholder-[#9ca3af] transition-all text-sm"
+          />
         )}
       </div>
 
@@ -264,7 +259,7 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
           </div>
         </div>
       </div>
-      
+
       <div className="space-y-4">
         <button
           type="submit"
@@ -273,7 +268,7 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
         >
           {loading ? 'Saving Changes...' : 'Save Changes'}
         </button>
-        <Link 
+        <Link
           href={`/dashboard/dogs/${dog.id}`}
           className="block text-center text-sm font-semibold text-[#6b7280] hover:text-[#111] transition-colors"
         >

@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase';
+import StateSelect from '@/components/state-select';
 
 function RegisterForm() {
   const searchParams = useSearchParams();
@@ -15,6 +16,7 @@ function RegisterForm() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [email, setEmail] = useState('');
+  const [state, setState] = useState('');
 
   useEffect(() => {}, [typeParam]);
 
@@ -28,12 +30,16 @@ function RegisterForm() {
     const password = formData.get('password') as string;
     const orgName = formData.get('orgName') as string;
     const city = formData.get('city') as string;
-    const state = formData.get('state') as string;
     setEmail(emailVal);
+
+    if (!state) {
+      setError('Please select a state.');
+      setLoading(false);
+      return;
+    }
 
     const supabase = createClient();
 
-    // 1. Sign up the user via Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: emailVal,
       password,
@@ -49,7 +55,6 @@ function RegisterForm() {
     }
 
     if (authData.user) {
-      // 2. Create org via API route (uses service role key — secure)
       const res = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -71,7 +76,6 @@ function RegisterForm() {
         return;
       }
 
-      // 3. Send confirmation email via magic link
       await supabase.auth.signInWithOtp({
         email: emailVal,
         options: {
@@ -95,9 +99,7 @@ function RegisterForm() {
         </div>
         <h2 className="text-2xl font-bold text-[#111] mb-2">Check your email</h2>
         <p className="text-[#6b7280] mb-8">We&apos;ve sent a login link to <strong>{email}</strong>. Click it to access your dashboard.</p>
-        <Link href="/auth/login" className="text-[#f59e0b] font-bold hover:underline">
-          Back to login
-        </Link>
+        <Link href="/auth/login" className="text-[#f59e0b] font-bold hover:underline">Back to login</Link>
       </div>
     );
   }
@@ -122,9 +124,7 @@ function RegisterForm() {
 
         <form onSubmit={handleSubmit} className="p-8 space-y-6">
           {error && (
-            <div className="p-4 bg-red-50 text-red-700 text-sm rounded-lg border border-red-100">
-              {error}
-            </div>
+            <div className="p-4 bg-red-50 text-red-700 text-sm rounded-lg border border-red-100">{error}</div>
           )}
 
           <div>
@@ -145,20 +145,13 @@ function RegisterForm() {
                 name="city"
                 type="text"
                 required
-                placeholder="Austin"
+                placeholder="Philadelphia"
                 className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] outline-none transition-all text-[#111] placeholder-[#9ca3af] text-sm"
               />
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">State</label>
-              <input
-                name="state"
-                type="text"
-                required
-                placeholder="TX"
-                maxLength={2}
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] outline-none transition-all text-[#111] placeholder-[#9ca3af] text-sm uppercase"
-              />
+              <StateSelect value={state} onChange={setState} placeholder="Select state..." />
             </div>
           </div>
 
@@ -196,9 +189,7 @@ function RegisterForm() {
 
       <p className="text-center mt-8 text-[#6b7280] text-sm">
         Already have an account?{' '}
-        <Link href="/auth/login" className="text-[#f59e0b] font-bold hover:underline">
-          Login
-        </Link>
+        <Link href="/auth/login" className="text-[#f59e0b] font-bold hover:underline">Login</Link>
       </p>
     </div>
   );
@@ -207,7 +198,6 @@ function RegisterForm() {
 function RegisterPageContent() {
   const searchParams = useSearchParams();
   const typeParam = searchParams.get('type');
-  
   return (
     <main className="py-8 px-8 flex items-center justify-center">
       <Suspense fallback={<div className="text-[#6b7280] font-medium">Loading...</div>}>
@@ -222,13 +212,10 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-white">
       <header className="bg-[#fffbeb] border-b border-gray-200 py-12 px-8">
         <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl font-[900] tracking-tight text-[#111] mb-4">
-            Join the network
-          </h1>
+          <h1 className="text-4xl md:text-5xl font-[900] tracking-tight text-[#111] mb-4">Join the network</h1>
           <p className="text-[#6b7280]">Help us save more dogs, faster.</p>
         </div>
       </header>
-
       <Suspense fallback={<div className="text-[#6b7280] font-medium text-center py-20">Loading...</div>}>
         <RegisterPageContent />
       </Suspense>
