@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from 'next/server'
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const code = searchParams.get('code')
-  const next = searchParams.get('next') ?? '/dashboard'
+  const next = searchParams.get('next') ?? '/dashboard/welcome'
 
   if (code) {
     const cookieStore = await cookies()
@@ -23,19 +23,7 @@ export async function GET(request: NextRequest) {
         },
       }
     )
-    const { data: { user } } = await supabase.auth.exchangeCodeForSession(code)
-
-    if (user) {
-      const { data: org } = await supabase
-        .from('organizations')
-        .select('type')
-        .eq('email', user.email)
-        .maybeSingle()
-
-      if (org?.type === 'rescue') {
-        return NextResponse.redirect(new URL('/dashboard/rescue', request.url))
-      }
-    }
+    await supabase.auth.exchangeCodeForSession(code)
   }
 
   return NextResponse.redirect(new URL(next, request.url))
