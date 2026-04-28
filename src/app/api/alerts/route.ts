@@ -73,44 +73,36 @@ export async function POST(req: NextRequest) {
     if (org.id === dog.shelter_id) continue
     if (org.approval_status !== 'approved') continue
 
-    // Special needs — dog's needs must be accepted by rescue
     if (dog.parvo && !criteria.accepts_parvo) continue
     if (dog.tripod && !criteria.accepts_tripod) continue
     if (dog.blind && !criteria.accepts_blind) continue
     if (dog.other_issues && !criteria.accepts_other) continue
 
-    // Breed match
     const breedMatch = !criteria.breeds || criteria.breeds.length === 0 ||
       criteria.breeds.some((b: string) =>
         dog.breed?.toLowerCase().includes(b.toLowerCase())
       )
 
-    // Color match — any overlap between dog colors and rescue preferred colors
     const colorMatch = !criteria.colors || criteria.colors.length === 0 ||
       !dog.color || dog.color.length === 0 ||
       dog.color.some((c: string) =>
         criteria.colors!.some(cc => cc.toLowerCase() === c.toLowerCase())
       )
 
-    // Age match
     const ageMatch = !criteria.max_age_years ||
       !dog.age_years ||
       dog.age_years <= criteria.max_age_years
 
-    // Weight match
     const weightMatch = !criteria.max_weight_lbs ||
       !dog.weight_lbs ||
       dog.weight_lbs <= criteria.max_weight_lbs
 
-    // Sex match
     const sexMatch = !criteria.sex_preference ||
       criteria.sex_preference === 'any' ||
       criteria.sex_preference === dog.sex
 
-    // Mix match
     const mixMatch = dog.mix ? criteria.accepts_mixes !== false : true
 
-    // State match — if rescue has states_served, dog must be from one of them
     const stateMatch = !criteria.states_served || criteria.states_served.length === 0 ||
       !dog.state ||
       criteria.states_served.some((s: string) =>
@@ -161,7 +153,7 @@ export async function POST(req: NextRequest) {
       if (alertError || !alertData) throw alertError
 
       await resend.emails.send({
-        from: 'DOGSRUN Alerts <alerts@dogsrun.net>',
+        from: 'DOGSRUN Alerts <alerts@dogsrun.org>',
         to: org.email,
         subject: `New dog match: ${dog.name ?? 'Unnamed'} (${dog.breed ?? 'Unknown breed'})`,
         html: `
@@ -210,18 +202,18 @@ export async function POST(req: NextRequest) {
                   </tr>
                 </table>
                 <div style="text-align: center; margin-bottom: 32px;">
-                  <a href="https://dogsrun.net/api/respond?alert_id=${alertData.id}&action=interested"
+                  <a href="https://dogsrun.org/api/respond?alert_id=${alertData.id}&action=interested"
                      style="background-color: #f59e0b; color: #ffffff; padding: 16px 32px; border-radius: 12px; text-decoration: none; display: inline-block; font-weight: 700; font-size: 16px;">
                     Interested
                   </a>
                 </div>
                 <div style="text-align: center;">
-                  <a href="https://dogsrun.net/dashboard/rescue" style="color: #f59e0b; text-decoration: underline; font-size: 14px; font-weight: 600;">View all matches on your dashboard</a>
+                  <a href="https://dogsrun.org/dashboard/rescue" style="color: #f59e0b; text-decoration: underline; font-size: 14px; font-weight: 600;">View all matches on your dashboard</a>
                 </div>
               </div>
               <div style="background-color: #f9fafb; padding: 24px 40px; border-top: 1px solid #e5e7eb; text-align: center;">
                 <p style="color: #9ca3af; font-size: 12px; line-height: 18px; margin: 0;">
-                  You received this alert because your rescue organization has active matching criteria on DOGSRUN. To update your criteria, <a href="https://dogsrun.net/dashboard/rescue" style="color: #f59e0b; text-decoration: underline;">log in to your rescue portal</a>.
+                  You received this alert because your rescue organization has active matching criteria on DOGSRUN. To update your criteria, <a href="https://dogsrun.org/dashboard/rescue" style="color: #f59e0b; text-decoration: underline;">log in to your rescue portal</a>.
                 </p>
               </div>
             </div>

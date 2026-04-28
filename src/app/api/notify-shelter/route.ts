@@ -17,14 +17,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'alert_id required' }, { status: 400 })
     }
 
-    // Fetch alert with dog and rescue org
     const { data: alert, error: alertError } = await supabase
       .from('alerts')
-      .select(`
-        *,
-        dogs (*),
-        organizations!alerts_rescue_id_fkey (*)
-      `)
+      .select(`*, dogs (*), organizations!alerts_rescue_id_fkey (*)`)
       .eq('id', alert_id)
       .single()
 
@@ -35,7 +30,6 @@ export async function POST(req: NextRequest) {
     const dog = alert.dogs
     const rescue = alert.organizations
 
-    // Fetch shelter org
     const { data: shelter, error: shelterError } = await supabase
       .from('organizations')
       .select('*')
@@ -46,9 +40,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Shelter not found' }, { status: 404 })
     }
 
-    // Send email to shelter
     await resend.emails.send({
-      from: 'DOGSRUN <alerts@dogsrun.net>',
+      from: 'DOGSRUN <alerts@dogsrun.org>',
       to: shelter.email,
       subject: `${rescue.name} is interested in ${dog.name}`,
       html: `
@@ -60,7 +53,7 @@ export async function POST(req: NextRequest) {
             <p style="margin: 5px 0 0 0;"><strong>Email:</strong> <a href="mailto:${rescue.email}">${rescue.email}</a></p>
           </div>
           <p>You can view the dog's profile and alert history here:</p>
-          <a href="https://dogsrun.net/dashboard/dogs/${dog.id}" style="display: inline-block; background: #f59e0b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">View Dog Profile</a>
+          <a href="https://dogsrun.org/dashboard/dogs/${dog.id}" style="display: inline-block; background: #f59e0b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">View Dog Profile</a>
           <p style="color: #666; font-size: 12px; margin-top: 30px;">This is an automated notification from DOGSRUN.</p>
         </div>
       `

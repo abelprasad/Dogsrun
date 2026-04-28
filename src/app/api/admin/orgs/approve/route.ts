@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
             <span style="color:#fff;font-size:24px;font-weight:800;letter-spacing:-0.025em;">DOGSRUN</span>
           </div>
           <div style="padding:32px 40px;">
-            <h1 style="color:#111827;font-size:22px;font-weight:700;margin-bottom:16px;">You&apos;re approved! 🎉</h1>
+            <h1 style="color:#111827;font-size:22px;font-weight:700;margin-bottom:16px;">You're approved! 🎉</h1>
             <p style="color:#4b5563;font-size:16px;line-height:24px;margin-bottom:24px;">
               Hi <strong>${org.name}</strong>, your 501(c)(3) verification has been reviewed and your rescue organization is now approved on DOGSRUN.
             </p>
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
               You can now access your rescue portal and start receiving dog match alerts.
             </p>
             <div style="text-align:center;margin-bottom:32px;">
-              <a href="https://dogsrun.net/dashboard/rescue"
+              <a href="https://dogsrun.org/dashboard/rescue"
                  style="background-color:#f59e0b;color:#fff;padding:16px 32px;border-radius:12px;text-decoration:none;display:inline-block;font-weight:700;font-size:16px;">
                 Go to Rescue Portal
               </a>
@@ -114,7 +114,7 @@ export async function POST(req: NextRequest) {
     `
 
   await resend.emails.send({
-    from: 'DOGSRUN <alerts@dogsrun.net>',
+    from: 'DOGSRUN <alerts@dogsrun.org>',
     to: org.email,
     subject,
     html,
