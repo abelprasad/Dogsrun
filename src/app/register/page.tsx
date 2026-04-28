@@ -16,17 +16,7 @@ function RegisterForm() {
   const [success, setSuccess] = useState(false);
   const [email, setEmail] = useState('');
 
-  // We use a key on the component to handle typeParam changes, 
-  // but if the user manually clicks the tab, we still want to update state.
-  // The effect below is technically redundant if we use a key, but 
-  // since we want to avoid the lint error, we'll rely on the key for initial 
-  // sync and the buttons for manual sync.
-  
-  useEffect(() => {
-    // This effect is now only for logging or other non-state-sync purposes 
-    // if needed, but to satisfy the lint rule we'll just remove the state sync 
-    // and rely on the 'key' prop in the parent.
-  }, [typeParam]);
+  useEffect(() => {}, [typeParam]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -43,7 +33,7 @@ function RegisterForm() {
 
     const supabase = createClient();
 
-    // 1. Sign up the user
+    // 1. Sign up the user via Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: emailVal,
       password,
@@ -59,28 +49,37 @@ function RegisterForm() {
     }
 
     if (authData.user) {
-      // 2. Create the organization profile
-      const { error: profileError } = await supabase.from('organizations').insert({
-        id: authData.user.id,
-        name: orgName,
-        email: emailVal,
-        city: city,
-        state: state,
-        type: type,
+      // 2. Create org via API route (uses service role key — secure)
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: authData.user.id,
+          name: orgName,
+          email: emailVal,
+          city,
+          state,
+          type,
+        }),
       });
 
-      if (profileError) {
-        setError(profileError.message);
-      } else {
-        // 3. Send magic link
-        await supabase.auth.signInWithOtp({
-          email: emailVal,
-          options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
-          },
-        });
-        setSuccess(true);
+      const result = await res.json();
+
+      if (!res.ok) {
+        setError(result.error ?? 'Failed to create organization');
+        setLoading(false);
+        return;
       }
+
+      // 3. Send confirmation email via magic link
+      await supabase.auth.signInWithOtp({
+        email: emailVal,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      setSuccess(true);
     }
 
     setLoading(false);
@@ -221,7 +220,6 @@ function RegisterPageContent() {
 export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero band */}
       <header className="bg-[#fffbeb] border-b border-gray-200 py-12 px-8">
         <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-[900] tracking-tight text-[#111] mb-4">
