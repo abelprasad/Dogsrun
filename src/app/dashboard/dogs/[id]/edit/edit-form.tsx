@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import imageCompression from 'browser-image-compression';
+import BreedSelect from '@/components/breed-select'
 
 interface Dog {
   id: string;
@@ -131,7 +132,14 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
     <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-100 p-8 space-y-8 shadow-none">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {field('name', 'Dog Name', 'text', 'Buddy')}
-        {field('breed', 'Primary Breed', 'text', 'Labrador')}
+        <div>
+  <label className="block text-sm font-semibold text-gray-700 mb-2">Primary Breed</label>
+  <BreedSelect
+    value={form.breed}
+    onChange={val => setForm(f => ({ ...f, breed: val }))}
+    placeholder="Search or type breed..."
+  />
+</div>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

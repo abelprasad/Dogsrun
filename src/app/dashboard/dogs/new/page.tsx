@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import SignOutButton from '../../sign-out-button'
 import imageCompression from 'browser-image-compression'
+import BreedSelect from '@/components/breed-select'
 
 interface DogForm {
   name: string;
@@ -142,7 +143,6 @@ export default function NewDogPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Dashboard Sub-nav */}
       <div className="bg-[#111] border-t border-white/5 py-2 px-8">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex gap-6">
@@ -153,12 +153,9 @@ export default function NewDogPage() {
         </div>
       </div>
 
-      {/* Hero band */}
       <header className="bg-[#fffbeb] border-b border-gray-200 py-12 px-8">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-[900] tracking-tight text-[#111] mb-2">
-            Add a dog
-          </h1>
+          <h1 className="text-4xl md:text-5xl font-[900] tracking-tight text-[#111] mb-2">Add a dog</h1>
           <p className="text-[#6b7280]">Help this dog find the perfect rescue match.</p>
         </div>
       </header>
@@ -167,7 +164,14 @@ export default function NewDogPage() {
         <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-100 p-8 space-y-8 shadow-none">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {field('name', 'Dog Name', 'text', 'Buddy')}
-            {field('breed', 'Primary Breed', 'text', 'Labrador')}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Primary Breed</label>
+              <BreedSelect
+                value={form.breed}
+                onChange={val => setForm(f => ({ ...f, breed: val }))}
+                placeholder="Search or type breed..."
+              />
+            </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -216,53 +220,35 @@ export default function NewDogPage() {
           <div className="space-y-4">
             <h3 className="text-lg font-bold text-[#111]">Special Needs</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <label className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                <input
-                  type="checkbox"
-                  checked={form.parvo}
-                  onChange={e => setForm(f => ({ ...f, parvo: e.target.checked }))}
-                  className="w-4 h-4 rounded border-gray-300 text-[#f59e0b] focus:ring-[#f59e0b]"
-                />
-                <span className="text-sm font-semibold text-[#111]">Parvo</span>
-              </label>
-              <label className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                <input
-                  type="checkbox"
-                  checked={form.tripod}
-                  onChange={e => setForm(f => ({ ...f, tripod: e.target.checked }))}
-                  className="w-4 h-4 rounded border-gray-300 text-[#f59e0b] focus:ring-[#f59e0b]"
-                />
-                <span className="text-sm font-semibold text-[#111]">Tripod / Amputee</span>
-              </label>
-              <label className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                <input
-                  type="checkbox"
-                  checked={form.blind}
-                  onChange={e => setForm(f => ({ ...f, blind: e.target.checked }))}
-                  className="w-4 h-4 rounded border-gray-300 text-[#f59e0b] focus:ring-[#f59e0b]"
-                />
-                <span className="text-sm font-semibold text-[#111]">Blind / Vision Impaired</span>
-              </label>
-              <label className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                <input
-                  type="checkbox"
-                  checked={form.other_issues}
-                  onChange={e => setForm(f => ({ ...f, other_issues: e.target.checked, other_issues_notes: e.target.checked ? f.other_issues_notes : '' }))}
-                  className="w-4 h-4 rounded border-gray-300 text-[#f59e0b] focus:ring-[#f59e0b]"
-                />
-                <span className="text-sm font-semibold text-[#111]">Other Issues</span>
-              </label>
+              {[
+                { key: 'parvo', label: 'Parvo' },
+                { key: 'tripod', label: 'Tripod / Amputee' },
+                { key: 'blind', label: 'Blind / Vision Impaired' },
+                { key: 'other_issues', label: 'Other Issues' },
+              ].map(({ key, label }) => (
+                <label key={key} className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={form[key as keyof DogForm] as boolean}
+                    onChange={e => setForm(f => ({
+                      ...f,
+                      [key]: e.target.checked,
+                      ...(key === 'other_issues' && !e.target.checked ? { other_issues_notes: '' } : {}),
+                    }))}
+                    className="w-4 h-4 rounded border-gray-300 text-[#f59e0b] focus:ring-[#f59e0b]"
+                  />
+                  <span className="text-sm font-semibold text-[#111]">{label}</span>
+                </label>
+              ))}
             </div>
             {form.other_issues && (
-              <div className="mt-2">
-                <input
-                  type="text"
-                  placeholder="Describe the issue(s)..."
-                  value={form.other_issues_notes}
-                  onChange={e => setForm(f => ({ ...f, other_issues_notes: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] text-[#111] placeholder-[#9ca3af] transition-all text-sm"
-                />
-              </div>
+              <input
+                type="text"
+                placeholder="Describe the issue(s)..."
+                value={form.other_issues_notes}
+                onChange={e => setForm(f => ({ ...f, other_issues_notes: e.target.value }))}
+                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] text-[#111] placeholder-[#9ca3af] transition-all text-sm"
+              />
             )}
           </div>
 
