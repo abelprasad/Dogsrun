@@ -196,17 +196,27 @@ export default function AdminOrgTable({ orgs, alertsByOrg }: Props) {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <button
-                        onClick={() => toggleActive(org.id, org.is_active)}
-                        disabled={loading === org.id + '-active'}
-                        className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-50 ${
-                          org.is_active
-                            ? 'bg-red-50 text-red-600 hover:bg-red-100'
-                            : 'bg-green-50 text-green-700 hover:bg-green-100'
-                        }`}
-                      >
-                        {loading === org.id + '-active' ? '...' : org.is_active ? 'Deactivate' : 'Activate'}
-                      </button>
+                      <div className="flex items-center gap-2">
+                        {org.tax_doc_url && (
+                          <button
+                            onClick={() => viewDocument(org.tax_doc_url!)}
+                            className="px-3 py-1 rounded-lg text-xs font-bold bg-gray-50 border border-gray-200 text-[#6b7280] hover:text-[#111] hover:border-gray-300 transition-colors"
+                          >
+                            Doc
+                          </button>
+                        )}
+                        <button
+                          onClick={() => toggleActive(org.id, org.is_active)}
+                          disabled={loading === org.id + '-active'}
+                          className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-50 ${
+                            org.is_active
+                              ? 'bg-red-50 text-red-600 hover:bg-red-100'
+                              : 'bg-green-50 text-green-700 hover:bg-green-100'
+                          }`}
+                        >
+                          {loading === org.id + '-active' ? '...' : org.is_active ? 'Deactivate' : 'Activate'}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 )
