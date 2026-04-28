@@ -13,6 +13,7 @@ interface RescueOrg {
   id: string;
   name: string;
   email: string;
+  approval_status: string;
 }
 
 interface RescueCriteria {
@@ -56,7 +57,7 @@ export async function POST(req: NextRequest) {
 
   const { data: criteriaList } = await supabase
     .from('rescue_criteria')
-    .select('*, organizations(id, name, email)')
+    .select('*, organizations(id, name, email, approval_status)')
     .eq('is_active', true)
 
   if (!criteriaList || (criteriaList as unknown as RescueCriteria[]).length === 0) {
@@ -70,6 +71,7 @@ export async function POST(req: NextRequest) {
     if (!org) continue
 
     if (org.id === dog.shelter_id) continue
+    if (org.approval_status !== 'approved') continue
 
     // Special needs — dog's needs must be accepted by rescue
     if (dog.parvo && !criteria.accepts_parvo) continue

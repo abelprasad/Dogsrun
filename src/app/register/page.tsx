@@ -17,8 +17,29 @@ function RegisterForm() {
   const [success, setSuccess] = useState(false);
   const [email, setEmail] = useState('');
   const [state, setState] = useState('');
+  const [taxDoc, setTaxDoc] = useState<File | null>(null);
+  const [taxDocError, setTaxDocError] = useState<string | null>(null);
 
   useEffect(() => {}, [typeParam]);
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setTaxDocError(null);
+    const file = e.target.files?.[0] ?? null;
+    if (!file) { setTaxDoc(null); return; }
+    if (file.type !== 'application/pdf') {
+      setTaxDocError('Please upload a PDF file.');
+      setTaxDoc(null);
+      e.target.value = '';
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setTaxDocError('File must be under 10MB.');
+      setTaxDoc(null);
+      e.target.value = '';
+      return;
+    }
+    setTaxDoc(file);
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -34,6 +55,12 @@ function RegisterForm() {
 
     if (!state) {
       setError('Please select a state.');
+      setLoading(false);
+      return;
+    }
+
+    if (type === 'rescue' && !taxDoc) {
+      setError('Please upload your 501(c)(3) determination letter.');
       setLoading(false);
       return;
     }
@@ -55,17 +82,20 @@ function RegisterForm() {
     }
 
     if (authData.user) {
+      const apiFormData = new FormData();
+      apiFormData.append('user_id', authData.user.id);
+      apiFormData.append('name', orgName);
+      apiFormData.append('email', emailVal);
+      apiFormData.append('city', city);
+      apiFormData.append('state', state);
+      apiFormData.append('type', type);
+      if (type === 'rescue' && taxDoc) {
+        apiFormData.append('tax_doc', taxDoc);
+      }
+
       const res = await fetch('/api/register', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: authData.user.id,
-          name: orgName,
-          email: emailVal,
-          city,
-          state,
-          type,
-        }),
+        body: apiFormData,
       });
 
       const result = await res.json();
@@ -98,7 +128,15 @@ function RegisterForm() {
           </svg>
         </div>
         <h2 className="text-2xl font-bold text-[#111] mb-2">Check your email</h2>
-        <p className="text-[#6b7280] mb-8">We&apos;ve sent a login link to <strong>{email}</strong>. Click it to access your dashboard.</p>
+        {type === 'rescue' ? (
+          <p className="text-[#6b7280] mb-4">
+            We&apos;ve sent a login link to <strong>{email}</strong>. Once you confirm your email, your application will be reviewed by our team. We&apos;ll notify you when you&apos;re approved.
+          </p>
+        ) : (
+          <p className="text-[#6b7280] mb-8">
+            We&apos;ve sent a login link to <strong>{email}</strong>. Click it to access your dashboard.
+          </p>
+        )}
         <Link href="/auth/login" className="text-[#f59e0b] font-bold hover:underline">Back to login</Link>
       </div>
     );
@@ -109,12 +147,14 @@ function RegisterForm() {
       <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
         <div className="flex p-2 gap-2 bg-gray-50/50">
           <button
+            type="button"
             onClick={() => setType('shelter')}
             className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${type === 'shelter' ? 'bg-[#f59e0b] text-[#451a03]' : 'text-[#9ca3af] hover:text-[#6b7280]'}`}
           >
             Shelter
           </button>
           <button
+            type="button"
             onClick={() => setType('rescue')}
             className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${type === 'rescue' ? 'bg-[#f59e0b] text-[#451a03]' : 'text-[#9ca3af] hover:text-[#6b7280]'}`}
           >
@@ -176,6 +216,36 @@ function RegisterForm() {
               className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] outline-none transition-all text-[#111] placeholder-[#9ca3af] text-sm"
             />
           </div>
+
+          {type === 'rescue' && (
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">
+                501(c)(3) Determination Letter <span className="text-red-500">*</span>
+              </label>
+              <p className="text-xs text-[#9ca3af] mb-2">PDF only · Max 10MB</p>
+              <label className={`flex items-center gap-3 w-full px-4 py-3 rounded-lg border-2 border-dashed cursor-pointer transition-colors ${
+                taxDoc
+                  ? 'border-[#f59e0b] bg-[#fffbeb]'
+                  : 'border-gray-200 hover:border-[#f59e0b] bg-gray-50'
+              }`}>
+                <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 flex-shrink-0 ${taxDoc ? 'text-[#f59e0b]' : 'text-[#9ca3af]'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span className={`text-sm flex-1 truncate ${taxDoc ? 'text-[#111] font-semibold' : 'text-[#9ca3af]'}`}>
+                  {taxDoc ? taxDoc.name : 'Click to upload PDF'}
+                </span>
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+              </label>
+              {taxDocError && (
+                <p className="text-red-600 text-xs mt-1">{taxDocError}</p>
+              )}
+            </div>
+          )}
 
           <button
             type="submit"
