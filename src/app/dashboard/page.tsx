@@ -49,6 +49,15 @@ export default async function DashboardPage() {
     redirect('/dashboard/rescue')
   }
 
+  // Check if user is admin
+  const { data: admin } = await supabase
+    .from('admins')
+    .select('id')
+    .eq('email', user.email)
+    .maybeSingle()
+
+  const isAdmin = !!admin
+
   const { data: dogs } = await supabase
     .from('dogs')
     .select('*')
@@ -63,6 +72,9 @@ export default async function DashboardPage() {
           <div className="flex gap-6">
             <Link href="/dashboard" className="text-xs font-bold text-[#f59e0b] uppercase tracking-widest">Dashboard</Link>
             <Link href="/dashboard/dogs/new" className="text-xs font-bold text-[#9ca3af] hover:text-white uppercase tracking-widest transition-colors">Add Dog</Link>
+            {isAdmin && (
+              <Link href="/dashboard/admin" className="text-xs font-bold text-[#f59e0b]/60 hover:text-[#f59e0b] uppercase tracking-widest transition-colors">Admin</Link>
+            )}
           </div>
           <div className="flex items-center gap-4">
             <span className="text-xs font-bold text-[#9ca3af] uppercase tracking-widest">{org.name}</span>

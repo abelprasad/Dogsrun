@@ -81,7 +81,7 @@ export default async function EditDogPage({ params }: { params: Promise<{ id: st
           <h1 className="text-4xl md:text-5xl font-[900] tracking-tight text-[#111] mb-2">
             Edit {dogData.name}
           </h1>
-          <p className="text-[#6b7280]">Update this dog's information.</p>
+          <p className="text-[#6b7280]">Update this dog&apos;s information.</p>
         </div>
       </header>
 
