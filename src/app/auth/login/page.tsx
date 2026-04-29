@@ -134,6 +134,14 @@ export default function LoginPage() {
               </button>
             </form>
 
+            {mode === 'password' && (
+              <div className="mt-4 text-center">
+                <Link href="/auth/reset-password" className="text-xs text-[#9ca3af] hover:text-[#f59e0b] transition-colors font-semibold">
+                  Forgot password?
+                </Link>
+              </div>
+            )}
+
             <div className="mt-6 text-center">
               <button
                 onClick={() => { setMode(mode === 'password' ? 'magic' : 'password'); setError(null) }}
