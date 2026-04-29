@@ -1,6 +1,5 @@
-import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
-import { cookies } from 'next/headers'
+import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import SignOutButton from '../../../sign-out-button'
@@ -10,21 +9,7 @@ import StatusBadge from '@/components/status-badge'
 
 export default async function EditDogPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const cookieStore = await cookies()
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() { return cookieStore.getAll() },
-        setAll(cookiesToSet) {
-          try { cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options)) } catch {}
-        },
-      },
-    }
-  )
-
+  const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
@@ -56,7 +41,6 @@ export default async function EditDogPage({ params }: { params: Promise<{ id: st
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Sub-nav */}
       <div className="bg-[#111] border-t border-white/5 py-2 px-8">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex gap-6">
@@ -71,7 +55,6 @@ export default async function EditDogPage({ params }: { params: Promise<{ id: st
         </div>
       </div>
 
-      {/* Header */}
       <header className="bg-[#fffbeb] border-b border-gray-200 py-8 px-8">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div>
@@ -84,21 +67,11 @@ export default async function EditDogPage({ params }: { params: Promise<{ id: st
 
       <main className="max-w-7xl mx-auto py-8 px-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-          {/* Left — edit form */}
           <div className="lg:col-span-2">
             <EditDogForm dog={dog} />
           </div>
-
-          {/* Right — status + alerts */}
           <div className="space-y-6">
-
-            {/* Euthanasia countdown */}
-            {dog.euthanasia_date && (
-              <EuthanasiaCountdown euthanasiaDate={dog.euthanasia_date} />
-            )}
-
-            {/* Rescue alerts */}
+            {dog.euthanasia_date && <EuthanasiaCountdown euthanasiaDate={dog.euthanasia_date} />}
             <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
               <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
                 <h3 className="text-sm font-[900] text-[#111] uppercase tracking-widest">Rescue Alerts</h3>
@@ -126,13 +99,10 @@ export default async function EditDogPage({ params }: { params: Promise<{ id: st
                     </div>
                   ))
                 ) : (
-                  <div className="px-5 py-8 text-center text-sm text-[#9ca3af] italic">
-                    No alerts sent yet.
-                  </div>
+                  <div className="px-5 py-8 text-center text-sm text-[#9ca3af] italic">No alerts sent yet.</div>
                 )}
               </div>
             </div>
-
           </div>
         </div>
       </main>

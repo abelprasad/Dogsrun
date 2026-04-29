@@ -1,5 +1,5 @@
-import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
+import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -8,53 +8,31 @@ import StatusBadge, { DogStatus } from '@/components/status-badge'
 import SignOutButton from '../../sign-out-button'
 import EuthanasiaCountdown from '@/components/euthanasia-countdown'
 
-interface Organization {
-  id: string;
-  name: string;
-  email: string;
-  city: string;
-  state: string;
-}
-
 interface Dog {
-  id: string;
-  name: string;
-  breed: string;
-  mix: boolean;
-  age_years: number;
-  weight_lbs: number;
-  sex: string;
-  color: string;
-  description: string;
-  photo_url: string;
-  status: string;
-  shelter_id: string;
-  organizations?: Organization;
-  parvo: boolean;
-  tripod: boolean;
-  blind: boolean;
-  other_issues: boolean;
-  other_issues_notes: string;
-  euthanasia_date: string | null;
+  id: string
+  name: string
+  breed: string
+  mix: boolean
+  age_years: number
+  weight_lbs: number
+  sex: string
+  color: string
+  description: string
+  photo_url: string
+  status: string
+  shelter_id: string
+  euthanasia_date: string | null
+  parvo: boolean
+  tripod: boolean
+  blind: boolean
+  other_issues: boolean
+  other_issues_notes: string
+  organizations?: { id: string; name: string; email: string; city: string; state: string }
 }
 
 export default async function DogProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const cookieStore = await cookies()
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() { return cookieStore.getAll() },
-        setAll(cookiesToSet) {
-          try { cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options)) } catch {}
-        },
-      },
-    }
-  )
-
+  const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
@@ -70,7 +48,6 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
     .single()
 
   if (!dogData) notFound()
-
   const dog = dogData as unknown as Dog
 
   const { data: userOrg } = await supabaseAdmin
@@ -120,22 +97,17 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
                 </div>
                 <div className="p-8 space-y-8">
                   <div className="grid grid-cols-2 gap-y-6 gap-x-8">
-                    <div>
-                      <p className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-widest mb-1">Age</p>
-                      <p className="text-lg font-bold text-[#111]">{dog.age_years ? `${dog.age_years}y` : '—'}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-widest mb-1">Sex</p>
-                      <p className="text-lg font-bold text-[#111] capitalize">{dog.sex || '—'}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-widest mb-1">Weight</p>
-                      <p className="text-lg font-bold text-[#111]">{dog.weight_lbs ? `${dog.weight_lbs} lbs` : '—'}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-widest mb-1">Color</p>
-                      <p className="text-lg font-bold text-[#111] capitalize">{dog.color || '—'}</p>
-                    </div>
+                    {[
+                      { label: 'Age', value: dog.age_years ? `${dog.age_years}y` : '—' },
+                      { label: 'Sex', value: dog.sex || '—', capitalize: true },
+                      { label: 'Weight', value: dog.weight_lbs ? `${dog.weight_lbs} lbs` : '—' },
+                      { label: 'Color', value: dog.color || '—', capitalize: true },
+                    ].map(({ label, value, capitalize }) => (
+                      <div key={label}>
+                        <p className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-widest mb-1">{label}</p>
+                        <p className={`text-lg font-bold text-[#111] ${capitalize ? 'capitalize' : ''}`}>{value}</p>
+                      </div>
+                    ))}
                   </div>
                   <div>
                     <h3 className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-widest mb-2">Description / Notes</h3>
@@ -163,9 +135,7 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
           </div>
 
           <div className="space-y-6">
-            {dog.euthanasia_date && (
-              <EuthanasiaCountdown euthanasiaDate={dog.euthanasia_date} />
-            )}
+            {dog.euthanasia_date && <EuthanasiaCountdown euthanasiaDate={dog.euthanasia_date} />}
             <div className="bg-[#fffbeb] p-6 rounded-xl border border-gray-100">
               <h3 className="text-[10px] font-bold text-[#451a03] uppercase tracking-widest mb-4">Location</h3>
               <p className="font-bold text-[#111] mb-1">{dog.organizations?.name}</p>
