@@ -73,15 +73,15 @@ export async function POST(req: NextRequest) {
           <div style="padding:32px 40px;">
             <h1 style="color:#111827;font-size:22px;font-weight:700;margin-bottom:16px;">You're approved! 🎉</h1>
             <p style="color:#4b5563;font-size:16px;line-height:24px;margin-bottom:24px;">
-              Hi <strong>${org.name}</strong>, your 501(c)(3) verification has been reviewed and your rescue organization is now approved on DOGSRUN.
+              Hi <strong>${org.name}</strong>, your 501(c)(3) verification has been reviewed and your organization is now approved on DOGSRUN.
             </p>
             <p style="color:#4b5563;font-size:16px;line-height:24px;margin-bottom:32px;">
-              You can now access your rescue portal and start receiving dog match alerts.
+              You can now access your portal and start using DOGSRUN.
             </p>
             <div style="text-align:center;margin-bottom:32px;">
-              <a href="https://dogsrun.org/dashboard/rescue"
+              <a href="https://dogsrun.org/dashboard"
                  style="background-color:#f59e0b;color:#fff;padding:16px 32px;border-radius:12px;text-decoration:none;display:inline-block;font-weight:700;font-size:16px;">
-                Go to Rescue Portal
+                Go to Your Dashboard
               </a>
             </div>
           </div>

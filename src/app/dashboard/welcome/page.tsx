@@ -29,7 +29,7 @@ export default async function WelcomePage() {
   const { data: org } = await supabase
     .from('organizations')
     .select('*')
-    .eq('email', user.email)
+    .eq('id', user.id)
     .single()
 
   if (!org) redirect('/register')

@@ -60,7 +60,7 @@ export default async function RescuePortalPage() {
   const { data: org } = await supabase
     .from('organizations')
     .select('*')
-    .eq('email', user.email)
+    .eq('id', user.id)
     .single()
 
   if (!org || org.type !== 'rescue') redirect('/dashboard')
@@ -167,7 +167,7 @@ export default async function RescuePortalPage() {
                       <div>
                         <div className="flex items-center gap-3 mb-1">
                           <h2 className="text-xl font-bold text-[#111]">{alert.dogs?.name || 'Unnamed Dog'}</h2>
-                          <StatusBadge status={(alert.dogs?.status as DogStatus) || 'available'} />
+                          <StatusBadge status={(alert.dogs?.status as DogStatus) || 'available'} euthanasiaDate={alert.dogs?.euthanasia_date} />
                         </div>
                         <p className="text-sm text-[#6b7280] mb-2">
                           {alert.dogs?.breed || 'Unknown breed'} • {alert.dogs?.age_years ? `${alert.dogs?.age_years}y` : '—'} • {alert.dogs?.sex || '—'}
@@ -184,7 +184,7 @@ export default async function RescuePortalPage() {
                 </div>
                 <div className="bg-gray-50/50 px-8 py-3 border-t border-gray-100 flex items-center justify-between">
                   <span className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-widest">Received {new Date(alert.sent_at).toLocaleDateString()}</span>
-                  <Link href={`/dashboard/dogs/${alert.dog_id}`} className="text-xs font-bold text-[#f59e0b] hover:underline">View Full Profile →</Link>
+                  <Link href={`/dogs/${alert.dog_id}`} className="text-xs font-bold text-[#f59e0b] hover:underline">View Full Profile →</Link>
                 </div>
               </div>
             ))

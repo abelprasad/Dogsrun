@@ -20,16 +20,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid org type' }, { status: 400 })
   }
 
-  if (type === 'rescue') {
-    if (!taxDoc) {
-      return NextResponse.json({ error: '501(c)(3) determination letter is required for rescue organizations' }, { status: 400 })
-    }
-    if (taxDoc.type !== 'application/pdf') {
-      return NextResponse.json({ error: 'Tax document must be a PDF file' }, { status: 400 })
-    }
-    if (taxDoc.size > 10 * 1024 * 1024) {
-      return NextResponse.json({ error: 'PDF must be under 10MB' }, { status: 400 })
-    }
+  if (!taxDoc) {
+    return NextResponse.json({ error: '501(c)(3) determination letter is required' }, { status: 400 })
+  }
+  if (taxDoc.type !== 'application/pdf') {
+    return NextResponse.json({ error: 'Tax document must be a PDF file' }, { status: 400 })
+  }
+  if (taxDoc.size > 10 * 1024 * 1024) {
+    return NextResponse.json({ error: 'PDF must be under 10MB' }, { status: 400 })
   }
 
   const serviceClient = createClient(
@@ -48,10 +46,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Organization already exists for this user' }, { status: 409 })
   }
 
-  // Upload tax doc for rescues
+  // Upload tax doc for all orgs
   let tax_doc_url: string | null = null
 
-  if (type === 'rescue' && taxDoc) {
+  if (taxDoc) {
     const fileBuffer = await taxDoc.arrayBuffer()
     const filePath = `${user_id}/501c3.pdf`
 
@@ -77,7 +75,7 @@ export async function POST(req: NextRequest) {
     city,
     state,
     type,
-    approval_status: type === 'shelter' ? 'approved' : 'pending',
+    approval_status: 'pending',
     tax_doc_url,
   })
 

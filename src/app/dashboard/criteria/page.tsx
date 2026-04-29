@@ -37,7 +37,7 @@ export default async function CriteriaPage() {
   const { data: org } = await supabase
     .from('organizations')
     .select('*')
-    .eq('email', user.email)
+    .eq('id', user.id)
     .single()
 
   if (!org || org.type !== 'rescue') {
@@ -81,7 +81,7 @@ export default async function CriteriaPage() {
         
         {!criteria && (
           <p className="mt-8 text-center text-xs text-[#9ca3af] uppercase tracking-widest font-bold">
-            Need help? Contact <Link href="mailto:support@dogsrun.net" className="text-[#f59e0b] hover:underline transition-colors">support@dogsrun.net</Link>
+            Need help? Contact <Link href="mailto:admin@dogsrun.org" className="text-[#f59e0b] hover:underline transition-colors">admin@dogsrun.org</Link>
           </p>
         )}
       </main>

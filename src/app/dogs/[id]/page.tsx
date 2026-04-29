@@ -32,7 +32,7 @@ export default async function PublicDogProfilePage({ params }: { params: Promise
             </p>
           </div>
           <div className="flex items-center gap-4">
-            <StatusBadge status={dog.status} />
+            <StatusBadge status={dog.status} euthanasiaDate={dog.euthanasia_date} />
           </div>
         </div>
       </header>

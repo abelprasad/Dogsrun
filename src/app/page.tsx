@@ -9,9 +9,10 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div>
-              <h1 className="text-5xl md:text-7xl font-[900] tracking-tight text-[#111] leading-tight mb-8">
+              <h1 className="text-5xl md:text-7xl font-[900] tracking-tight text-[#111] leading-tight mb-4">
                 Every dog deserves a <mark style={{background: "#f59e0b", color: "#111", padding: "0 4px", borderRadius: "3px", fontStyle: "normal"}}>run</mark> to safety.
               </h1>
+              <p className="text-xs font-black text-[#f59e0b] uppercase tracking-[0.2em] mb-6">Loyalty Repaid</p>
               <p className="text-base md:text-lg text-[#6b7280] leading-relaxed mb-8">
                 The fastest way for animal shelters to find specialized rescues for their most urgent dogs. Real-time matching, instant alerts, and seamless communication to save more lives.
               </p>

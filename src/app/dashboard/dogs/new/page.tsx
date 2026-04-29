@@ -146,7 +146,7 @@ export default function NewDogPage() {
           body: JSON.stringify({ dog_id: data.id }),
         })
       }
-      router.push('/dashboard')
+      router.push('/dashboard/dogs')
     }
     setLoading(false)
   }
@@ -157,6 +157,7 @@ export default function NewDogPage() {
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex gap-6">
             <Link href="/dashboard" className="text-xs font-bold text-[#9ca3af] hover:text-white uppercase tracking-widest transition-colors">Dashboard</Link>
+            <Link href="/dashboard/dogs" className="text-xs font-bold text-[#9ca3af] hover:text-white uppercase tracking-widest transition-colors">My Dogs</Link>
             <Link href="/dashboard/dogs/new" className="text-xs font-bold text-[#f59e0b] uppercase tracking-widest">Add Dog</Link>
           </div>
           <SignOutButton />

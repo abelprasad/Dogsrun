@@ -23,7 +23,7 @@ export default function RespondedPage() {
             Thanks for your response. We&apos;ve notified the shelter and they&apos;ll be in touch soon.
           </p>
           <Link 
-            href="/auth/login" 
+            href="/dashboard/rescue" 
             className="inline-block w-full bg-[#111] text-white py-3 rounded-lg font-semibold hover:bg-black transition-colors"
           >
             Go to Rescue Portal

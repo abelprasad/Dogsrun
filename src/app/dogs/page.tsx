@@ -21,7 +21,7 @@ export default async function PublicDogsPage() {
   const { data: dogs } = await supabase
     .from('dogs')
     .select('*, organizations(name, city, state)')
-    .eq('status', 'available')
+    .in('status', ['available', 'urgent'])
     .order('created_at', { ascending: false })
 
   return (
@@ -61,7 +61,7 @@ export default async function PublicDogsPage() {
                   </div>
                 )}
                 <div className="absolute top-4 right-4">
-                  <StatusBadge status={dog.status} />
+                  <StatusBadge status={dog.status} euthanasiaDate={dog.euthanasia_date} />
                 </div>
               </div>
               

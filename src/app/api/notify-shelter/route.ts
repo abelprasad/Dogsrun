@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
             <p style="margin: 5px 0 0 0;"><strong>Email:</strong> <a href="mailto:${rescue.email}">${rescue.email}</a></p>
           </div>
           <p>You can view the dog's profile and alert history here:</p>
-          <a href="https://dogsrun.org/dashboard/dogs/${dog.id}" style="display: inline-block; background: #f59e0b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">View Dog Profile</a>
+          <a href="https://dogsrun.org/dashboard" style="display: inline-block; background: #f59e0b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">Go to Dashboard</a>
           <p style="color: #666; font-size: 12px; margin-top: 30px;">This is an automated notification from DOGSRUN.</p>
         </div>
       `

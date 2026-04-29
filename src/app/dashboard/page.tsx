@@ -49,6 +49,55 @@ export default async function DashboardPage() {
     redirect('/dashboard/rescue')
   }
 
+  // Approval wall for shelters
+  if (org.approval_status !== 'approved') {
+    const isRejected = org.approval_status === 'rejected'
+    return (
+      <div className="min-h-screen bg-white">
+        <div className="bg-[#111] border-t border-white/5 py-2 px-8">
+          <div className="max-w-7xl mx-auto flex justify-between items-center">
+            <span className="text-xs font-bold text-[#9ca3af] uppercase tracking-widest">{org.name}</span>
+            <SignOutButton />
+          </div>
+        </div>
+        <header className="bg-[#fffbeb] border-b border-gray-200 py-12 px-8">
+          <div className="max-w-7xl mx-auto">
+            <h1 className="text-4xl md:text-5xl font-[900] tracking-tight text-[#111] mb-2">{org.name}</h1>
+            <p className="text-[#6b7280]">Shelter Portal</p>
+          </div>
+        </header>
+        <main className="max-w-7xl mx-auto py-16 px-8 flex justify-center">
+          <div className="max-w-md w-full text-center">
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 ${isRejected ? 'bg-red-50' : 'bg-[#fffbeb]'}`}>
+              {isRejected ? (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[#f59e0b]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              )}
+            </div>
+            <h2 className="text-2xl font-bold text-[#111] mb-3">
+              {isRejected ? 'Application Not Approved' : 'Application Under Review'}
+            </h2>
+            <p className="text-[#6b7280] mb-6">
+              {isRejected
+                ? "We weren't able to verify your 501(c)(3) status. Please contact us to resubmit your documentation."
+                : 'Your 501(c)(3) documentation is being reviewed by our team. You\'ll receive an email once you\'re approved.'}
+            </p>
+            {isRejected && (
+              <a href="mailto:admin@dogsrun.org" className="inline-block bg-[#111] text-white font-semibold rounded-lg px-5 py-2.5 hover:bg-black transition-colors">
+                Contact Us
+              </a>
+            )}
+          </div>
+        </main>
+      </div>
+    )
+  }
+
   // Check if user is admin
   const { data: admin } = await supabase
     .from('admins')
@@ -71,6 +120,7 @@ export default async function DashboardPage() {
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex gap-6">
             <Link href="/dashboard" className="text-xs font-bold text-[#f59e0b] uppercase tracking-widest">Dashboard</Link>
+            <Link href="/dashboard/dogs" className="text-xs font-bold text-[#9ca3af] hover:text-white uppercase tracking-widest transition-colors">My Dogs</Link>
             <Link href="/dashboard/dogs/new" className="text-xs font-bold text-[#9ca3af] hover:text-white uppercase tracking-widest transition-colors">Add Dog</Link>
             {isAdmin && (
               <Link href="/dashboard/admin" className="text-xs font-bold text-[#f59e0b]/60 hover:text-[#f59e0b] uppercase tracking-widest transition-colors">Admin</Link>
@@ -85,54 +135,60 @@ export default async function DashboardPage() {
 
       {/* Hero band */}
       <header className="bg-[#fffbeb] border-b border-gray-200 py-12 px-8">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
-            <h1 className="text-4xl md:text-5xl font-[900] tracking-tight text-[#111] mb-2">
-              {org.name}
-            </h1>
-            <p className="text-[#6b7280]">Manage your dogs and track rescue interest.</p>
-          </div>
-          <Link href="/dashboard/dogs/new" className="inline-block bg-[#f59e0b] text-[#451a03] font-semibold rounded-lg px-5 py-2.5 hover:bg-[#d97706] transition-colors">
-            + Add a dog
-          </Link>
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-4xl md:text-5xl font-[900] tracking-tight text-[#111] mb-2">
+            {org.name}
+          </h1>
+          <p className="text-[#6b7280]">Manage your dogs and track rescue interest.</p>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto py-8 px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {/* Stats row */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+          <div className="bg-[#fffbeb] rounded-xl border border-gray-100 p-5">
+            <p className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-widest mb-1">Total Dogs</p>
+            <p className="text-3xl font-[900] text-[#111]">{dogs?.length || 0}</p>
+          </div>
+          <div className="bg-[#fffbeb] rounded-xl border border-gray-100 p-5">
+            <p className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-widest mb-1">Available</p>
+            <p className="text-3xl font-[900] text-[#111]">{dogs?.filter(d => d.status === 'available' || !d.status).length || 0}</p>
+          </div>
+          <div className="bg-red-50 rounded-xl border border-red-100 p-5">
+            <p className="text-[10px] font-bold text-red-400 uppercase tracking-widest mb-1">Urgent</p>
+            <p className="text-3xl font-[900] text-red-600">{dogs?.filter(d => d.status === 'urgent').length || 0}</p>
+          </div>
+          <div className="bg-[#dcfce7] rounded-xl border border-green-100 p-5">
+            <p className="text-[10px] font-bold text-green-600 uppercase tracking-widest mb-1">Placed / Adopted</p>
+            <p className="text-3xl font-[900] text-green-700">{dogs?.filter(d => d.status === 'placed' || d.status === 'adopted').length || 0}</p>
+          </div>
+        </div>
+
+        {/* My Dogs section */}
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-lg font-[900] text-[#111] uppercase tracking-widest">Recent Dogs</h2>
+          <Link href="/dashboard/dogs" className="text-sm font-bold text-[#f59e0b] hover:underline">Manage all dogs →</Link>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {dogs && dogs.length > 0 ? (
-            dogs.map((dog) => (
+            dogs.slice(0, 6).map((dog) => (
               <div key={dog.id} className="bg-white border border-gray-100 rounded-xl overflow-hidden flex flex-col shadow-sm">
-                <div className="w-full h-36 bg-gray-100 overflow-hidden relative">
+                <div className="w-full h-32 bg-gray-100 overflow-hidden relative">
                   {dog.photo_url ? (
                     <Image src={dog.photo_url} alt={dog.name} fill className="object-cover" unoptimized />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-300">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
+                    <div className="w-full h-full flex items-center justify-center text-2xl font-[900] text-[#f59e0b]">
+                      {dog.name?.[0]}
                     </div>
                   )}
                 </div>
-                <div className="p-6 flex flex-col flex-1 justify-between">
-                  <div>
-                    <div className="flex justify-between items-start mb-4">
-                      <h2 className="text-xl font-bold text-[#111]">{dog.name}</h2>
-                      <StatusBadge status={dog.status || 'available'} />
-                    </div>
-                    <p className="text-sm text-[#6b7280] mb-4">{dog.breed || 'Unknown breed'}</p>
-                    <div className="flex gap-4 text-xs font-semibold text-[#9ca3af] mb-6">
-                      <span>{dog.age_years ? `${dog.age_years}y` : '—'}</span>
-                      <span>{dog.sex || '—'}</span>
-                      <span>{dog.weight_lbs ? `${dog.weight_lbs} lbs` : '—'}</span>
-                    </div>
+                <div className="p-4 flex flex-col flex-1">
+                  <div className="flex justify-between items-start mb-1">
+                    <h2 className="text-base font-[900] text-[#111]">{dog.name}</h2>
+                    <StatusBadge status={dog.status || 'available'} />
                   </div>
-                  <Link 
-                    href={`/dashboard/dogs/${dog.id}`} 
-                    className="block w-full text-center border border-[#d1d5db] text-[#374151] bg-transparent font-semibold rounded-lg px-4 py-2 hover:bg-gray-50 transition-colors text-sm"
-                  >
-                    Manage Dog
-                  </Link>
+                  <p className="text-xs text-[#6b7280]">{dog.breed || 'Unknown breed'}{dog.age_years ? ` · ${dog.age_years}y` : ''}</p>
                 </div>
               </div>
             ))

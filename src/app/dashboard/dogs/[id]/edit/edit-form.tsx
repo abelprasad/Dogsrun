@@ -27,6 +27,7 @@ interface Dog {
   blind: boolean;
   other_issues: boolean;
   other_issues_notes: string;
+  euthanasia_date: string | null;
 }
 
 interface EditDogFormProps {
@@ -52,6 +53,7 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
     blind: dog.blind || false,
     other_issues: dog.other_issues || false,
     other_issues_notes: dog.other_issues_notes || '',
+    euthanasia_date: dog.euthanasia_date ? dog.euthanasia_date.split('T')[0] : '',
   });
 
   const field = (key: keyof typeof form, label: string, type = 'text', placeholder = '', min?: string) => (
@@ -115,6 +117,7 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
         ...form,
         color: form.color.length > 0 ? form.color : null,
         state: form.state || null,
+        euthanasia_date: form.euthanasia_date || null,
         photo_url,
       }),
     });
@@ -123,7 +126,7 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
       const data = await response.json();
       alert(data.error || 'Failed to update dog');
     } else {
-      router.push(`/dashboard/dogs/${dog.id}`);
+      router.push('/dashboard/dogs');
       router.refresh();
     }
     setLoading(false);
@@ -198,6 +201,28 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
         />
       </div>
 
+      <div className="space-y-3 p-5 bg-amber-50 border border-amber-200 rounded-xl">
+        <div>
+          <label className="block text-sm font-bold text-amber-800 mb-1">⚠ Euthanasia Date</label>
+          <p className="text-xs text-amber-700 mb-3">If this dog is at risk of euthanasia, set the date. A countdown will appear on their profile and in your dog list.</p>
+          <input
+            type="date"
+            value={form.euthanasia_date}
+            onChange={e => setForm(f => ({ ...f, euthanasia_date: e.target.value }))}
+            className="w-full border border-amber-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 text-[#111] transition-all text-sm bg-white"
+          />
+        </div>
+        {form.euthanasia_date && (
+          <button
+            type="button"
+            onClick={() => setForm(f => ({ ...f, euthanasia_date: '' }))}
+            className="text-xs font-semibold text-amber-700 hover:text-red-600 transition-colors"
+          >
+            Clear date
+          </button>
+        )}
+      </div>
+
       <div className="space-y-4">
         <h3 className="text-lg font-bold text-[#111]">Special Needs</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -269,7 +294,7 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
           {loading ? 'Saving Changes...' : 'Save Changes'}
         </button>
         <Link
-          href={`/dashboard/dogs/${dog.id}`}
+          href="/dashboard/dogs"
           className="block text-center text-sm font-semibold text-[#6b7280] hover:text-[#111] transition-colors"
         >
           Cancel

@@ -59,7 +59,7 @@ function RegisterForm() {
       return;
     }
 
-    if (type === 'rescue' && !taxDoc) {
+    if (!taxDoc) {
       setError('Please upload your 501(c)(3) determination letter.');
       setLoading(false);
       return;
@@ -82,16 +82,16 @@ function RegisterForm() {
     }
 
     if (authData.user) {
-      const apiFormData = new FormData();
-      apiFormData.append('user_id', authData.user.id);
-      apiFormData.append('name', orgName);
-      apiFormData.append('email', emailVal);
-      apiFormData.append('city', city);
-      apiFormData.append('state', state);
-      apiFormData.append('type', type);
-      if (type === 'rescue' && taxDoc) {
-        apiFormData.append('tax_doc', taxDoc);
-      }
+        const apiFormData = new FormData();
+        apiFormData.append('user_id', authData.user.id);
+        apiFormData.append('name', orgName);
+        apiFormData.append('email', emailVal);
+        apiFormData.append('city', city);
+        apiFormData.append('state', state);
+        apiFormData.append('type', type);
+        if (taxDoc) {
+          apiFormData.append('tax_doc', taxDoc);
+        }
 
       const res = await fetch('/api/register', {
         method: 'POST',
@@ -129,13 +129,13 @@ function RegisterForm() {
         </div>
         <h2 className="text-2xl font-bold text-[#111] mb-2">Check your email</h2>
         {type === 'rescue' ? (
-          <p className="text-[#6b7280] mb-4">
-            We&apos;ve sent a login link to <strong>{email}</strong>. Once you confirm your email, your application will be reviewed by our team. We&apos;ll notify you when you&apos;re approved.
-          </p>
+        <p className="text-[#6b7280] mb-4">
+        We&apos;ve sent a login link to <strong>{email}</strong>. Once you confirm your email, your application will be reviewed by our team. We&apos;ll notify you when you&apos;re approved.
+        </p>
         ) : (
-          <p className="text-[#6b7280] mb-8">
-            We&apos;ve sent a login link to <strong>{email}</strong>. Click it to access your dashboard.
-          </p>
+        <p className="text-[#6b7280] mb-4">
+        We&apos;ve sent a login link to <strong>{email}</strong>. Once you confirm your email, your application will be reviewed by our team. We&apos;ll notify you when you&apos;re approved.
+        </p>
         )}
         <Link href="/auth/login" className="text-[#f59e0b] font-bold hover:underline">Back to login</Link>
       </div>
@@ -217,8 +217,7 @@ function RegisterForm() {
             />
           </div>
 
-          {type === 'rescue' && (
-            <div>
+          <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">
                 501(c)(3) Determination Letter <span className="text-red-500">*</span>
               </label>
@@ -245,7 +244,6 @@ function RegisterForm() {
                 <p className="text-red-600 text-xs mt-1">{taxDocError}</p>
               )}
             </div>
-          )}
 
           <button
             type="submit"

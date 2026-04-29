@@ -68,7 +68,10 @@ export default function RootLayout({
                   height={36}
                   unoptimized
                 />
-                <span className="font-semibold tracking-wider text-white text-sm uppercase">DOGSRUN</span>
+                <div>
+                  <span className="font-semibold tracking-wider text-white text-sm uppercase block">DOGSRUN</span>
+                  <span className="text-[10px] font-bold text-[#f59e0b] uppercase tracking-widest">Loyalty Repaid</span>
+                </div>
               </div>
               <div className="flex items-center gap-8">
                 <Link href="/dogs" className="text-sm font-medium text-[#9ca3af] hover:text-white transition-colors">Browse Dogs</Link>
