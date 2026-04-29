@@ -3,6 +3,7 @@ import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import SignOutButton from '../sign-out-button'
 import AdminOrgTable from './org-table'
+import AdminDogsTable from './dogs-table'
 
 export default async function AdminPage() {
   const supabase = await createSupabaseServerClient()
@@ -10,11 +11,7 @@ export default async function AdminPage() {
   if (!user) redirect('/auth/login')
 
   const { data: admin } = await supabase
-    .from('admins')
-    .select('id')
-    .eq('email', user.email)
-    .maybeSingle()
-
+    .from('admins').select('id').eq('email', user.email).maybeSingle()
   if (!admin) redirect('/dashboard')
 
   const serviceClient = createClient(
@@ -22,10 +19,14 @@ export default async function AdminPage() {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
-  const [{ data: orgs }, { data: dogs }, { data: alerts }] = await Promise.all([
+  const [{ data: orgs }, { data: dogs }, { data: alerts }, { data: recentAlerts }] = await Promise.all([
     serviceClient.from('organizations').select('*').order('created_at', { ascending: false }),
     serviceClient.from('dogs').select('*, organizations(name)').order('created_at', { ascending: false }),
     serviceClient.from('alerts').select('rescue_id, status'),
+    serviceClient.from('alerts')
+      .select('*, dogs(name, breed), organizations!alerts_rescue_id_fkey(name)')
+      .order('sent_at', { ascending: false })
+      .limit(20),
   ])
 
   const totalOrgs = orgs?.length ?? 0
@@ -34,6 +35,9 @@ export default async function AdminPage() {
   const totalDogs = dogs?.length ?? 0
   const totalAlerts = alerts?.length ?? 0
   const totalInterested = alerts?.filter(a => a.status === 'responded').length ?? 0
+  const responseRate = totalAlerts > 0 ? Math.round((totalInterested / totalAlerts) * 100) : 0
+  const atRiskDogs = dogs?.filter(d => d.euthanasia_date && new Date(d.euthanasia_date) > new Date()).length ?? 0
+  const pendingOrgs = orgs?.filter(o => o.approval_status === 'pending').length ?? 0
 
   const alertsByOrg: Record<string, { sent: number; responded: number }> = {}
   for (const alert of alerts ?? []) {
@@ -43,12 +47,15 @@ export default async function AdminPage() {
   }
 
   const stats = [
-    { label: 'Total Orgs', value: totalOrgs },
-    { label: 'Shelters', value: totalShelters },
-    { label: 'Rescues', value: totalRescues },
-    { label: 'Dogs Listed', value: totalDogs },
-    { label: 'Alerts Sent', value: totalAlerts },
-    { label: 'Interested', value: totalInterested },
+    { label: 'Total Orgs', value: totalOrgs, color: '' },
+    { label: 'Shelters', value: totalShelters, color: '' },
+    { label: 'Rescues', value: totalRescues, color: '' },
+    { label: 'Dogs Listed', value: totalDogs, color: '' },
+    { label: 'Response Rate', value: `${responseRate}%`, color: '' },
+    { label: 'Alerts Sent', value: totalAlerts, color: '' },
+    { label: 'Interested', value: totalInterested, color: 'text-green-600' },
+    { label: 'At Risk', value: atRiskDogs, color: atRiskDogs > 0 ? 'text-red-600' : '' },
+    { label: 'Pending', value: pendingOrgs, color: pendingOrgs > 0 ? 'text-amber-600' : '' },
   ]
 
   return (
@@ -71,58 +78,73 @@ export default async function AdminPage() {
       </header>
 
       <main className="max-w-7xl mx-auto py-8 px-8 space-y-12">
+
+        {/* Stats */}
         <section>
           <h2 className="text-xl font-bold text-[#111] mb-6">Overview</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {stats.map(({ label, value }) => (
-              <div key={label} className="bg-[#fffbeb] rounded-xl border border-gray-200 p-5 text-center">
-                <div className="text-3xl font-[900] text-[#111] mb-1">{value}</div>
-                <div className="text-xs font-semibold text-[#6b7280] uppercase tracking-widest">{label}</div>
+          <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-4">
+            {stats.map(({ label, value, color }) => (
+              <div key={label} className="bg-[#fffbeb] rounded-xl border border-gray-200 p-4 text-center">
+                <div className={`text-2xl font-[900] mb-1 ${color || 'text-[#111]'}`}>{value}</div>
+                <div className="text-[10px] font-semibold text-[#6b7280] uppercase tracking-widest leading-tight">{label}</div>
               </div>
             ))}
           </div>
         </section>
 
+        {/* Organizations */}
         <section>
           <h2 className="text-xl font-bold text-[#111] mb-6">Organizations</h2>
           <AdminOrgTable orgs={orgs ?? []} alertsByOrg={alertsByOrg} />
         </section>
 
+        {/* Dogs */}
         <section>
           <h2 className="text-xl font-bold text-[#111] mb-6">All Dogs</h2>
-          <div className="overflow-x-auto rounded-xl border border-gray-200">
+          <AdminDogsTable dogs={dogs ?? []} />
+        </section>
+
+        {/* Recent Activity */}
+        <section>
+          <h2 className="text-xl font-bold text-[#111] mb-6">Recent Activity</h2>
+          <div className="rounded-xl border border-gray-200 overflow-hidden">
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  {['Name', 'Breed', 'Shelter', 'Status', 'Added'].map(h => (
+                  {['Dog', 'Rescue', 'Status', 'Date'].map(h => (
                     <th key={h} className="text-left px-4 py-3 font-semibold text-[#6b7280] uppercase tracking-wider text-xs">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {dogs && dogs.length > 0 ? dogs.map((dog, i) => (
-                  <tr key={dog.id} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}>
-                    <td className="px-4 py-3 font-semibold text-[#111]">{dog.name ?? '—'}</td>
-                    <td className="px-4 py-3 text-[#6b7280]">{dog.breed ?? '—'}{dog.mix ? ' mix' : ''}</td>
-                    <td className="px-4 py-3 text-[#6b7280]">{(dog.organizations as { name: string } | null)?.name ?? '—'}</td>
+                {recentAlerts && recentAlerts.length > 0 ? recentAlerts.map((alert: any, i: number) => (
+                  <tr key={alert.id} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}>
+                    <td className="px-4 py-3 font-semibold text-[#111]">
+                      {alert.dogs?.name ?? '—'}
+                      <span className="text-[#9ca3af] font-normal"> · {alert.dogs?.breed ?? ''}</span>
+                    </td>
+                    <td className="px-4 py-3 text-[#6b7280]">{alert.organizations?.name ?? '—'}</td>
                     <td className="px-4 py-3">
                       <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold ${
-                        dog.status === 'available' ? 'bg-green-100 text-green-700' :
-                        dog.status === 'adopted' ? 'bg-blue-100 text-blue-700' :
-                        'bg-gray-100 text-gray-600'
+                        alert.status === 'responded' ? 'bg-green-100 text-green-700' :
+                        alert.status === 'declined' ? 'bg-gray-100 text-gray-500' :
+                        'bg-amber-100 text-amber-700'
                       }`}>
-                        {dog.status ?? 'available'}
+                        {alert.status === 'responded' ? 'Interested' : alert.status === 'declined' ? 'Passed' : 'Sent'}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-[#9ca3af]">{dog.created_at ? new Date(dog.created_at).toLocaleDateString() : '—'}</td>
+                    <td className="px-4 py-3 text-[#9ca3af]">
+                      {alert.sent_at ? new Date(alert.sent_at).toLocaleDateString() : '—'}
+                    </td>
                   </tr>
                 )) : (
-                  <tr><td colSpan={5} className="px-4 py-8 text-center text-[#9ca3af]">No dogs found</td></tr>
+                  <tr><td colSpan={4} className="px-4 py-8 text-center text-[#9ca3af]">No activity yet</td></tr>
                 )}
               </tbody>
             </table>
           </div>
         </section>
+
       </main>
     </div>
   )

@@ -26,7 +26,7 @@ export default function AdminOrgTable({ orgs, alertsByOrg }: Props) {
   const [filter, setFilter] = useState<'all' | 'shelter' | 'rescue'>('all')
 
   const filtered = orgList.filter(o => filter === 'all' || o.type === filter)
-  const pendingRescues = orgList.filter(o => o.type === 'rescue' && o.approval_status === 'pending')
+  const pendingOrgs = orgList.filter(o => o.approval_status === 'pending')
 
   async function toggleActive(orgId: string, currentState: boolean) {
     setLoading(orgId + '-active')
@@ -71,19 +71,24 @@ export default function AdminOrgTable({ orgs, alertsByOrg }: Props) {
     <div className="space-y-10">
 
       {/* Pending Approvals */}
-      {pendingRescues.length > 0 && (
+      {pendingOrgs.length > 0 && (
         <div>
           <div className="flex items-center gap-3 mb-4">
             <h3 className="text-base font-bold text-[#111]">Pending Approvals</h3>
             <span className="inline-block px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700">
-              {pendingRescues.length} pending
+              {pendingOrgs.length} pending
             </span>
           </div>
           <div className="space-y-3">
-            {pendingRescues.map(org => (
+            {pendingOrgs.map(org => (
               <div key={org.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-xl border border-amber-200 bg-[#fffbeb]">
                 <div>
-                  <p className="font-bold text-[#111]">{org.name}</p>
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <p className="font-bold text-[#111]">{org.name}</p>
+                    <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                      org.type === 'shelter' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
+                    }`}>{org.type}</span>
+                  </div>
                   <p className="text-sm text-[#6b7280]">{org.email} · {org.city}, {org.state}</p>
                   <p className="text-xs text-[#9ca3af] mt-0.5">Applied {new Date(org.created_at).toLocaleDateString()}</p>
                 </div>

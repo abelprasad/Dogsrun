@@ -24,11 +24,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'DOGSRUN — Every dog deserves a run to safety.',
     description: 'Real-time matching between shelters and rescue organizations. Instant alerts, seamless communication.',
-    url: 'https://dogsrun.net',
+    url: 'https://dogsrun.org',
     siteName: 'DOGSRUN',
     images: [
       {
-        url: 'https://dogsrun.net/dogsrun_og-image.png',
+        url: 'https://dogsrun.org/dogsrun_og-image.png',
         width: 1200,
         height: 630,
       }

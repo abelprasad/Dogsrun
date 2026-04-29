@@ -67,7 +67,7 @@ export default function FAQPage() {
     },
     {
       question: "Who do I contact for help?",
-      answer: "Reach out via our contact page at dogsrun.net/contact or email us at admin@dogsrun.org. We're a small nonprofit team and will get back to you as soon as possible."
+      answer: "Reach out via our contact page at dogsrun.org/contact or email us at admin@dogsrun.org. We're a small nonprofit team and will get back to you as soon as possible."
     }
   ];
 
