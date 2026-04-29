@@ -38,17 +38,6 @@ export default function DogRowActions({ dogId, currentStatus }: { dogId: string;
     setStatusLoading(false);
   }
 
-  async function handleShare() {
-    const url = `${window.location.origin}/dogs/${dogId}`;
-    try {
-      await navigator.clipboard.writeText(url);
-      setShareLabel('Copied!');
-      setTimeout(() => setShareLabel('Share'), 2000);
-    } catch {
-      setShareLabel('Share');
-    }
-  }
-
   const isDirty = pendingStatus !== status;
 
   return (
