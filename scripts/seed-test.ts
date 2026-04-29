@@ -163,8 +163,9 @@ async function testAlertInDB() {
   if (error) fail(`Failed to query alerts: ${error.message}`)
   if (!alerts || alerts.length === 0) fail('No alert row found after matching')
 
-  ok(`${alerts.length} alert row(s) in DB · status: ${alerts[0].status}`)
-  return alerts[0].id
+  const firstAlert = alerts![0]
+  ok(`${alerts!.length} alert row(s) in DB · status: ${firstAlert.status}`)
+  return firstAlert.id
 }
 
 async function testAlertResponse(alertId: string) {
