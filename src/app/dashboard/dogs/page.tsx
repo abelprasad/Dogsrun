@@ -28,7 +28,7 @@ export default async function MyDogsPage({ searchParams }: { searchParams: Promi
 
   const { data: dogs, count } = await supabase
     .from('dogs')
-    .select('*', { count: 'exact' })
+    .select('*, alerts(status)', { count: 'exact' })
     .eq('shelter_id', org.id)
     .order('created_at', { ascending: false })
     .range(from, to)
@@ -88,6 +88,12 @@ export default async function MyDogsPage({ searchParams }: { searchParams: Promi
                   <p className="text-sm text-[#6b7280]">
                     {dog.breed || 'Unknown breed'}{dog.mix ? ' mix' : ''}{dog.age_years ? ` · ${dog.age_years}y` : ''}{dog.sex ? ` · ${dog.sex}` : ''}{dog.weight_lbs ? ` · ${dog.weight_lbs} lbs` : ''}
                   </p>
+                  {(() => {
+                    const interested = (dog.alerts || []).filter((a: {status: string}) => a.status === 'responded').length
+                    return interested > 0 ? (
+                      <p className="text-xs font-bold text-green-600 mt-0.5">{interested} rescue{interested !== 1 ? 's' : ''} interested</p>
+                    ) : null
+                  })()}
                 </div>
                 <DogRowActions dogId={dog.id} currentStatus={dog.status || 'available'} />
               </div>

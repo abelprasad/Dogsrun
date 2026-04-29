@@ -31,6 +31,7 @@ export default function NewDogPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [photo, setPhoto] = useState<File | null>(null)
+  const [showSpecialNeeds, setShowSpecialNeeds] = useState(false)
   const [form, setForm] = useState<DogForm>({
     name: '',
     breed: '',
@@ -241,37 +242,53 @@ export default function NewDogPage() {
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-lg font-bold text-[#111]">Special Needs</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {[
-                { key: 'parvo', label: 'Parvo' },
-                { key: 'tripod', label: 'Tripod / Amputee' },
-                { key: 'blind', label: 'Blind / Vision Impaired' },
-                { key: 'other_issues', label: 'Other Issues' },
-              ].map(({ key, label }) => (
-                <label key={key} className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+            <button
+              type="button"
+              onClick={() => setShowSpecialNeeds(!showSpecialNeeds)}
+              className="flex items-center gap-2 text-sm font-semibold text-[#6b7280] hover:text-[#111] transition-colors"
+            >
+              <span className={`w-4 h-4 border-2 rounded flex items-center justify-center transition-colors ${
+                showSpecialNeeds ? 'border-[#f59e0b] bg-[#f59e0b]' : 'border-gray-300'
+              }`}>
+                {showSpecialNeeds && <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 12 12"><path d="M10 3L5 8.5 2 5.5" stroke="white" strokeWidth="2" strokeLinecap="round" fill="none"/></svg>}
+              </span>
+              This dog has special needs
+            </button>
+
+            {showSpecialNeeds && (
+              <div className="space-y-4 pl-6 border-l-2 border-amber-200">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {[
+                    { key: 'parvo', label: 'Parvo' },
+                    { key: 'tripod', label: 'Tripod / Amputee' },
+                    { key: 'blind', label: 'Blind / Vision Impaired' },
+                    { key: 'other_issues', label: 'Other Issues' },
+                  ].map(({ key, label }) => (
+                    <label key={key} className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={form[key as keyof DogForm] as boolean}
+                        onChange={e => setForm(f => ({
+                          ...f,
+                          [key]: e.target.checked,
+                          ...(key === 'other_issues' && !e.target.checked ? { other_issues_notes: '' } : {}),
+                        }))}
+                        className="w-4 h-4 rounded border-gray-300 text-[#f59e0b] focus:ring-[#f59e0b]"
+                      />
+                      <span className="text-sm font-semibold text-[#111]">{label}</span>
+                    </label>
+                  ))}
+                </div>
+                {form.other_issues && (
                   <input
-                    type="checkbox"
-                    checked={form[key as keyof DogForm] as boolean}
-                    onChange={e => setForm(f => ({
-                      ...f,
-                      [key]: e.target.checked,
-                      ...(key === 'other_issues' && !e.target.checked ? { other_issues_notes: '' } : {}),
-                    }))}
-                    className="w-4 h-4 rounded border-gray-300 text-[#f59e0b] focus:ring-[#f59e0b]"
+                    type="text"
+                    placeholder="Describe the issue(s)..."
+                    value={form.other_issues_notes}
+                    onChange={e => setForm(f => ({ ...f, other_issues_notes: e.target.value }))}
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] text-[#111] placeholder-[#9ca3af] transition-all text-sm"
                   />
-                  <span className="text-sm font-semibold text-[#111]">{label}</span>
-                </label>
-              ))}
-            </div>
-            {form.other_issues && (
-              <input
-                type="text"
-                placeholder="Describe the issue(s)..."
-                value={form.other_issues_notes}
-                onChange={e => setForm(f => ({ ...f, other_issues_notes: e.target.value }))}
-                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] text-[#111] placeholder-[#9ca3af] transition-all text-sm"
-              />
+                )}
+              </div>
             )}
           </div>
 

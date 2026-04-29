@@ -28,11 +28,12 @@ export default function LoginPage() {
         setLoading(false)
         return
       }
-      // Look up org type and redirect
+      // Look up org type by user.id (canonical pattern)
+      const { data: { user: signedInUser } } = await supabase.auth.getUser()
       const { data: org } = await supabase
         .from('organizations')
         .select('type')
-        .eq('email', email)
+        .eq('id', signedInUser?.id)
         .maybeSingle()
       
       router.push(org?.type === 'rescue' ? '/dashboard/rescue' : '/dashboard')

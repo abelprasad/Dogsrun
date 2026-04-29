@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import BreedSelect from '@/components/breed-select';
 import ColorPicker from '@/components/color-picker';
+import StateMultiSelect from '@/components/state-multi-select';
 
 interface RescueCriteria {
   id?: string;
@@ -40,7 +41,7 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
     max_weight_lbs: initialCriteria?.max_weight_lbs || '',
     sex_preference: initialCriteria?.sex_preference || 'any',
     accepts_mixes: initialCriteria?.accepts_mixes ?? true,
-    states_served: initialCriteria?.states_served?.join(', ') || '',
+    states_served: initialCriteria?.states_served || [] as string[],
     is_active: initialCriteria?.is_active ?? true,
     accepts_parvo: initialCriteria?.accepts_parvo ?? false,
     accepts_tripod: initialCriteria?.accepts_tripod ?? false,
@@ -73,7 +74,7 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
       max_weight_lbs: form.max_weight_lbs ? parseInt(form.max_weight_lbs.toString()) : null,
       sex_preference: form.sex_preference,
       accepts_mixes: form.accepts_mixes,
-      states_served: form.states_served.split(',').map((s: string) => s.trim()).filter(Boolean),
+      states_served: form.states_served,
       is_active: form.is_active,
       accepts_parvo: form.accepts_parvo,
       accepts_tripod: form.accepts_tripod,
@@ -221,16 +222,11 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">States Served (comma separated)</label>
-          <input
-            type="text"
-            placeholder="TX, CA, NY"
-            value={form.states_served}
-            onChange={e => setForm({ ...form, states_served: e.target.value })}
-            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] outline-none transition-all text-[#111] placeholder-[#9ca3af] text-sm uppercase"
-          />
-        </div>
+        <StateMultiSelect
+          selected={form.states_served}
+          onChange={states => setForm({ ...form, states_served: states })}
+          label="States Served"
+        />
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">Sex Preference</label>
           <select

@@ -45,7 +45,7 @@ export default async function DashboardPage() {
 
   const { data: recentDogs } = await serviceClient
     .from('dogs')
-    .select('*')
+    .select('*, alerts(status)')
     .eq('shelter_id', org.id)
     .order('created_at', { ascending: false })
     .limit(6)
@@ -119,7 +119,13 @@ export default async function DashboardPage() {
                     <h2 className="text-base font-[900] text-[#111]">{dog.name}</h2>
                     <StatusBadge status={dog.status || 'available'} euthanasiaDate={dog.euthanasia_date} />
                   </div>
-                  <p className="text-xs text-[#6b7280]">{dog.breed || 'Unknown breed'}{dog.age_years ? ` · ${dog.age_years}y` : ''}</p>
+                  <p className="text-xs text-[#6b7280] mb-2">{dog.breed || 'Unknown breed'}{dog.age_years ? ` · ${dog.age_years}y` : ''}</p>
+                  {(() => {
+                    const interested = (dog.alerts || []).filter((a: {status: string}) => a.status === 'responded').length
+                    return interested > 0 ? (
+                      <p className="text-xs font-bold text-green-600">{interested} rescue{interested !== 1 ? 's' : ''} interested</p>
+                    ) : null
+                  })()}
                 </div>
               </div>
             ))
