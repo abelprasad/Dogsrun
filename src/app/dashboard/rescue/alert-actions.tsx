@@ -26,50 +26,22 @@ export default function AlertActions({ alertId, currentStatus }: { alertId: stri
 
   if (status === 'responded') {
     return (
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2 text-[#166534] font-bold text-sm bg-[#dcfce7] px-4 py-2 rounded-lg border border-[#166534]/10">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-          </svg>
-          Interested ✓
-        </div>
-      </div>
-    )
-  }
-
-  if (status === 'declined') {
-    return (
-      <div className="flex items-center gap-3">
-        <span className="text-[#6b7280] font-medium text-sm bg-[#f3f4f6] px-4 py-2 rounded-lg border border-gray-200">
-          Passed
-        </span>
-        <button
-          onClick={() => updateStatus('sent')}
-          disabled={loading}
-          className="text-xs font-semibold text-[#9ca3af] hover:text-[#f59e0b] transition-colors disabled:opacity-50"
-        >
-          {loading ? '...' : 'Undo'}
-        </button>
+      <div className="flex items-center gap-2 border border-green-200 bg-green-50 px-4 py-2.5 text-sm font-black text-green-700">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+        </svg>
+        Interested
       </div>
     )
   }
 
   return (
-    <div className="flex items-center gap-3">
-      <button
-        onClick={() => updateStatus('declined')}
-        disabled={loading}
-        className="px-5 py-2.5 border border-gray-300 text-[#374151] font-semibold rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 text-sm"
-      >
-        {loading ? '...' : 'Pass'}
-      </button>
-      <button
-        onClick={() => updateStatus('responded')}
-        disabled={loading}
-        className="px-5 py-2.5 bg-[#f59e0b] text-[#451a03] font-semibold rounded-lg hover:bg-[#d97706] transition-colors disabled:opacity-50 text-sm"
-      >
-        {loading ? 'Updating...' : 'Interested'}
-      </button>
-    </div>
+    <button
+      onClick={() => updateStatus('responded')}
+      disabled={loading}
+      className="bg-[#f4b942] px-6 py-2.5 text-sm font-black uppercase tracking-[0.16em] text-[#1a2e1a] transition hover:bg-[#ffd86a] disabled:opacity-50"
+    >
+      {loading ? '...' : 'Interested?'}
+    </button>
   )
 }

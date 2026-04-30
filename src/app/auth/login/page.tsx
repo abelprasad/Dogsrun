@@ -28,21 +28,17 @@ export default function LoginPage() {
         setLoading(false)
         return
       }
-      // Look up org type by user.id (canonical pattern)
       const { data: { user: signedInUser } } = await supabase.auth.getUser()
       const { data: org } = await supabase
         .from('organizations')
         .select('type')
         .eq('id', signedInUser?.id)
         .maybeSingle()
-      
       router.push(org?.type === 'rescue' ? '/dashboard/rescue' : '/dashboard')
     } else {
       const { error } = await supabase.auth.signInWithOtp({
         email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
       })
       if (error) {
         setError(error.message)
@@ -53,24 +49,24 @@ export default function LoginPage() {
     }
   }
 
+  const inputClass = "w-full px-4 py-3 border border-[#13241d]/20 bg-white focus:border-[#f4b942] focus:ring-1 focus:ring-[#f4b942] outline-none transition-all text-[#13241d] placeholder-[#9ca3af] text-sm"
+
   if (sent) {
     return (
-      <div className="min-h-screen bg-white">
-        <header className="bg-[#fffbeb] border-b border-gray-200 py-12 px-8">
-          <div className="max-w-7xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-[900] tracking-tight text-[#111] mb-4">
-              Check your email
-            </h1>
+      <div className="bg-[#f5f0e8] text-[#13241d]">
+        <header className="bg-[#13241d] px-5 py-16 sm:px-8 lg:px-12">
+          <div className="mx-auto max-w-7xl">
+            <h1 className="text-5xl font-black leading-[0.9] tracking-tight text-[#f4b942]">Check your email</h1>
           </div>
         </header>
-        <main className="py-8 px-8 flex items-center justify-center">
-          <div className="max-w-md w-full bg-white border border-gray-100 rounded-xl p-8 text-center">
-            <div className="w-16 h-16 bg-[#fffbeb] rounded-full flex items-center justify-center mx-auto mb-6 text-[#f59e0b]">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <main className="flex items-center justify-center px-5 py-16 sm:px-8">
+          <div className="max-w-md w-full border border-[#13241d]/10 bg-[#fff9ef] p-10 text-center">
+            <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-[#f4b942] text-[#13241d]">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
             </div>
-            <p className="text-[#6b7280] mb-2">We sent a magic link to <strong>{email}</strong></p>
+            <p className="text-[#5d6a64] mb-2">We sent a magic link to <strong className="text-[#13241d]">{email}</strong></p>
             <p className="text-sm text-[#9ca3af]">Click the link to sign in.</p>
           </div>
         </main>
@@ -79,49 +75,50 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Hero band */}
-      <header className="bg-[#fffbeb] border-b border-gray-200 py-12 px-8">
-        <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl font-[900] tracking-tight text-[#111] mb-4">
+    <div className="bg-[#f5f0e8] text-[#13241d]">
+      <header className="bg-[#13241d] px-5 py-16 sm:px-8 lg:px-12">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-6 inline-flex items-center gap-3 border-y border-[#f4b942]/30 py-3 text-[11px] font-bold uppercase tracking-[0.28em] text-[#f4b942]">
+            <span className="h-2 w-2 rounded-full bg-[#f4b942]" />
+            Member access
+          </div>
+          <h1 className="text-5xl font-black leading-[0.9] tracking-tight text-[#f4b942] sm:text-6xl">
             Welcome back
           </h1>
-          <p className="text-[#6b7280]">Sign in to your shelter or rescue account</p>
+          <p className="mt-4 text-lg text-[#c8d3ce]">Sign in to your shelter or rescue account</p>
         </div>
       </header>
 
-      <main className="py-8 px-8 flex items-center justify-center">
+      <main className="flex items-start justify-center px-5 py-12 sm:px-8">
         <div className="max-w-md w-full">
-          <div className="bg-white rounded-xl border border-gray-100 p-8">
+          <div className="border border-[#13241d]/10 bg-[#fff9ef] p-8">
             {error && (
-              <div className="p-4 bg-red-50 text-red-700 text-sm rounded-lg border border-red-100 mb-6">
-                {error}
-              </div>
+              <div className="mb-6 border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
             )}
 
             <form onSubmit={handleLogin} className="space-y-6">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Email address</label>
+                <label className="mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-[#5d6a64]">Email address</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@shelter.org"
                   required
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] outline-none transition-all text-[#111] placeholder-[#9ca3af] text-sm"
+                  className={inputClass}
                 />
               </div>
 
               {mode === 'password' && (
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                  <label className="mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-[#5d6a64]">Password</label>
                   <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
                     required
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] outline-none transition-all text-[#111] placeholder-[#9ca3af] text-sm"
+                    className={inputClass}
                   />
                 </div>
               )}
@@ -129,7 +126,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 bg-[#111] text-white font-semibold rounded-lg hover:bg-black transition-colors disabled:opacity-50"
+                className="w-full bg-[#f4b942] py-3 text-sm font-black uppercase tracking-[0.16em] text-[#1a2e1a] transition hover:bg-[#ffd86a] disabled:opacity-50"
               >
                 {loading ? 'Signing in...' : mode === 'password' ? 'Sign in' : 'Send magic link'}
               </button>
@@ -137,7 +134,7 @@ export default function LoginPage() {
 
             {mode === 'password' && (
               <div className="mt-4 text-center">
-                <Link href="/auth/reset-password" className="text-xs text-[#9ca3af] hover:text-[#f59e0b] transition-colors font-semibold">
+                <Link href="/auth/reset-password" className="text-xs font-bold uppercase tracking-wider text-[#9ca3af] transition hover:text-[#d95f4b]">
                   Forgot password?
                 </Link>
               </div>
@@ -146,18 +143,16 @@ export default function LoginPage() {
             <div className="mt-6 text-center">
               <button
                 onClick={() => { setMode(mode === 'password' ? 'magic' : 'password'); setError(null) }}
-                className="text-xs text-[#9ca3af] hover:text-[#f59e0b] transition-colors uppercase tracking-wider font-bold"
+                className="text-xs font-bold uppercase tracking-wider text-[#9ca3af] transition hover:text-[#13241d]"
               >
                 {mode === 'password' ? 'Use magic link instead' : 'Use password instead'}
               </button>
             </div>
           </div>
 
-          <p className="text-center mt-8 text-[#6b7280] text-sm">
+          <p className="mt-8 text-center text-sm text-[#5d6a64]">
             Don&apos;t have an account?{' '}
-            <Link href="/register" className="text-[#f59e0b] font-bold hover:underline">
-              Register
-            </Link>
+            <Link href="/register" className="font-black text-[#d95f4b] hover:underline">Register</Link>
           </p>
         </div>
       </main>

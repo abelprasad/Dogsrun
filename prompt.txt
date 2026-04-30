@@ -1,46 +1,75 @@
-Project: DOGSRUN — Next.js 15, Supabase, Tailwind CSS, TypeScript
+In C:\code\fillr\popup, make these changes to the resume section UI:
+popup.html — replace the entire <div class="resume-section" ...> block with:
+html<div class="resume-section" id="resumeSection">
+  <input type="file" id="resumeFileInput" accept=".pdf" style="display:none">
+  <div class="resume-drop-zone" id="resumeDropZone">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="flex-shrink:0"><path d="M3 2h7l3 3v9H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M10 2v3h3" stroke="currentColor" stroke-width="1.2"/></svg>
+    <span>Upload resume (PDF)</span>
+  </div>
+  <div class="resume-pill hidden" id="resumeStatus">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="flex-shrink:0"><path d="M3 2h7l3 3v9H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M10 2v3h3" stroke="currentColor" stroke-width="1.2"/></svg>
+    <span class="resume-filename" id="resumeFilename"></span>
+    <button class="resume-change-btn" id="resumeClearBtn">change</button>
+  </div>
+  <div class="resume-processing hidden" id="resumeProcessing">
+    <span>Extracting text...</span>
+  </div>
+</div>
+popup.css — remove all existing .resume-* styles and replace with:
+css.resume-section { margin: 8px 0 4px; }
 
-## TASK 1: Negative value validation on dog intake form
-File: src/app/dashboard/dogs/new/page.tsx
+.resume-drop-zone {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px dashed var(--border, #4a5568);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary, #9ca3af);
+  transition: border-color 0.15s, color 0.15s;
+}
+.resume-drop-zone:hover { border-color: var(--primary, #2563eb); color: var(--text, #f1f5f9); }
+.resume-drop-zone.drag-over { border-color: var(--primary, #2563eb); }
 
-In the handleSubmit function, add validation before the Supabase insert:
-- If form.age_years is not empty and parseFloat(form.age_years) < 0, alert "Age cannot be negative" and return
-- If form.weight_lbs is not empty and parseFloat(form.weight_lbs) < 0, alert "Weight cannot be negative" and return
-Also change type="number" inputs for age and weight to have min="0" and step="0.1" for age, min="0" step="1" for weight.
+.resume-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--surface, #1e2a3a);
+  border: 1px solid var(--border, #2d3748);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--text, #f1f5f9);
+}
 
-## TASK 2: Edit page styling
-File: src/app/dashboard/dogs/[id]/edit/page.tsx
+.resume-filename {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
 
-Add the standard DOGSRUN page layout:
-- Dark subnav: bg-[#111] border-t border-white/5 py-2 px-8 with links: "Dashboard" → /dashboard (gray), "Dog Profile" → /dashboard/dogs/${id} (gray), "Edit Dog" (active, amber #f59e0b)
-- Include SignOutButton component (import from ../../sign-out-button) on the right side of subnav
-- Amber hero band: bg-[#fffbeb] border-b border-gray-200 py-12 px-8 with h1 "Edit {dog.name}" in text-4xl md:text-5xl font-[900] tracking-tight text-[#111] and subtitle "Update this dog's information." in text-[#6b7280]
-- Wrap the existing form in max-w-3xl mx-auto py-8 px-8
-- The page should have min-h-screen bg-white as the outer wrapper
+.resume-change-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--text-secondary, #9ca3af);
+  padding: 0;
+  flex-shrink: 0;
+}
+.resume-change-btn:hover { color: var(--text, #f1f5f9); }
 
-## TASK 3: Photo compression on upload
-Files: 
-- src/app/dashboard/dogs/new/page.tsx
-- src/app/dashboard/dogs/[id]/edit/edit-form.tsx
+.resume-processing {
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--text-secondary, #9ca3af);
+}
 
-Install the browser-image-compression package. In both files, before the Supabase storage upload, compress the photo using:
-
-```javascript
-import imageCompression from 'browser-image-compression'
-
-const compressedPhoto = await imageCompression(photo, {
-  maxSizeMB: 0.3,
-  maxWidthOrHeight: 1200,
-  useWebWorker: true,
-})
-```
-
-Then upload compressedPhoto instead of photo to Supabase storage. Everything else stays the same.
-
-Also add the package to package.json:
-Run: npm install browser-image-compression
-
-## NOTES:
-- Do not change any existing styling or functionality outside the areas mentioned
-- Match existing Tailwind CSS patterns and color scheme throughout
-- Keep all existing form fields, validation, and submit logic intact
+.hidden { display: none !important; }
+popup.js — in showResumeUploadArea, replace document.getElementById('resumeUploadArea') with document.getElementById('resumeDropZone') everywhere. Also in handleResumeUpload, replace the line document.getElementById('resumeUploadArea').classList.add('hidden') with document.getElementById('resumeDropZone').classList.add('hidden'). Do the same in setupResumeUpload — replace resumeUploadArea references with resumeDropZone. The clearBtn click handler should call showResumeUploadArea() which shows the drop zone again, not the upload area div.
+Then reload the extension in Brave.

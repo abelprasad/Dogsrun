@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 const US_STATES = [
   'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
@@ -18,75 +18,88 @@ interface StateMultiSelectProps {
 
 export default function StateMultiSelect({ selected, onChange, label = 'States Served' }: StateMultiSelectProps) {
   const [open, setOpen] = useState(false)
+  const [query, setQuery] = useState('')
+  const ref = useRef<HTMLDivElement>(null)
+
+  const filtered = query.length > 0
+    ? US_STATES.filter(s => s.toLowerCase().startsWith(query.toLowerCase()))
+    : US_STATES
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false)
+        setQuery('')
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
 
   function toggle(state: string) {
     if (selected.includes(state)) {
       onChange(selected.filter(s => s !== state))
     } else {
       onChange([...selected, state])
+      setQuery('')
     }
   }
 
-  return (
-    <div>
-      {label && <label className="block text-sm font-semibold text-gray-700 mb-2">{label}</label>}
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-left text-sm text-[#111] bg-white focus:outline-none focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] transition-all flex items-center justify-between"
-      >
-        <span className={selected.length === 0 ? 'text-[#9ca3af]' : ''}>
-          {selected.length === 0
-            ? 'Select states...'
-            : selected.length <= 4
-            ? selected.join(', ')
-            : `${selected.slice(0, 4).join(', ')} +${selected.length - 4} more`}
-        </span>
-        <svg className={`h-4 w-4 text-[#9ca3af] transition-transform ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
+  function remove(state: string) {
+    onChange(selected.filter(s => s !== state))
+  }
 
-      {open && (
-        <div className="mt-1 border border-gray-200 rounded-lg bg-white shadow-lg max-h-56 overflow-y-auto z-50 relative">
-          <div className="p-2 border-b border-gray-100 flex gap-2">
+  return (
+    <div ref={ref} className="relative">
+      {label && (
+        <label className="mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-[#5d6a64]">{label}</label>
+      )}
+
+      {/* Selected tags */}
+      {selected.length > 0 && (
+        <div className="mb-2 flex flex-wrap gap-1">
+          {selected.map(state => (
+            <span key={state} className="flex items-center gap-1 border border-[#13241d]/15 bg-[#f5f0e8] px-2 py-1 text-xs font-black text-[#13241d]">
+              {state}
+              <button type="button" onClick={() => remove(state)} className="text-[#9ca3af] hover:text-red-500 leading-none">×</button>
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* Search input */}
+      <input
+        type="text"
+        value={query}
+        onChange={e => { setQuery(e.target.value); setOpen(true) }}
+        onFocus={() => setOpen(true)}
+        placeholder={selected.length === 0 ? 'Type a state (e.g. PA, NY)...' : 'Add another state...'}
+        className="w-full border border-[#13241d]/20 bg-white px-4 py-3 text-sm text-[#13241d] placeholder-[#9ca3af] transition-all focus:border-[#f4b942] focus:outline-none focus:ring-1 focus:ring-[#f4b942]"
+      />
+
+      {/* Dropdown */}
+      {open && filtered.length > 0 && (
+        <div className="absolute z-50 mt-1 w-full border border-[#13241d]/20 bg-white shadow-lg max-h-48 overflow-y-auto">
+          {filtered.map(state => (
             <button
+              key={state}
               type="button"
-              onClick={() => onChange([...US_STATES])}
-              className="text-xs font-bold text-[#f59e0b] hover:underline"
+              onMouseDown={() => toggle(state)}
+              className={`w-full px-4 py-2.5 text-left text-sm font-black transition-colors ${
+                selected.includes(state)
+                  ? 'bg-[#f4b942] text-[#13241d]'
+                  : 'text-[#13241d] hover:bg-[#f5f0e8]'
+              }`}
             >
-              All
+              {state}
+              {selected.includes(state) && <span className="ml-2 text-[#13241d]/50">✓</span>}
             </button>
-            <span className="text-[#9ca3af]">·</span>
-            <button
-              type="button"
-              onClick={() => onChange([])}
-              className="text-xs font-bold text-[#9ca3af] hover:text-[#111]"
-            >
-              Clear
-            </button>
-          </div>
-          <div className="grid grid-cols-4 gap-0.5 p-2">
-            {US_STATES.map(state => (
-              <button
-                key={state}
-                type="button"
-                onClick={() => toggle(state)}
-                className={`px-2 py-1.5 rounded text-xs font-bold transition-colors ${
-                  selected.includes(state)
-                    ? 'bg-[#f59e0b] text-[#451a03]'
-                    : 'text-[#6b7280] hover:bg-gray-100'
-                }`}
-              >
-                {state}
-              </button>
-            ))}
-          </div>
+          ))}
         </div>
       )}
 
       {selected.length === 0 && (
-        <p className="text-xs text-[#9ca3af] mt-1.5">Leave empty to receive alerts from all states</p>
+        <p className="mt-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-[#9ca3af]">Leave empty for all states</p>
       )}
     </div>
   )

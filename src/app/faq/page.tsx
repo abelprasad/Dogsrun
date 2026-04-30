@@ -12,23 +12,21 @@ function FAQItem({ question, answer }: FAQItemProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="border-b border-gray-100 last:border-0">
+    <div className="border-b border-[#13241d]/10 last:border-0">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between py-4 text-left focus:outline-none group"
+        className="group flex w-full items-center justify-between py-5 text-left focus:outline-none"
       >
-        <span className="font-semibold text-[#111] text-base group-hover:text-[#f59e0b] transition-colors">
+        <span className="font-black text-[#13241d] text-base group-hover:text-[#d95f4b] transition-colors">
           {question}
         </span>
-        <span className="text-[#9ca3af] text-xl ml-4">
-          {isOpen ? '▴' : '▾'}
+        <span className="ml-4 text-[#f4b942] text-lg font-black shrink-0">
+          {isOpen ? '−' : '+'}
         </span>
       </button>
       {isOpen && (
-        <div className="pb-4">
-          <p className="text-sm text-gray-500 leading-relaxed">
-            {answer}
-          </p>
+        <div className="pb-5">
+          <p className="text-sm leading-7 text-[#5d6a64]">{answer}</p>
         </div>
       )}
     </div>
@@ -72,33 +70,38 @@ export default function FAQPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Hero band */}
-      <header className="bg-[#fffbeb] border-b border-gray-200 py-12 px-8">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-[900] tracking-tight text-[#111] mb-4">
+    <div className="bg-[#f5f0e8] text-[#13241d]">
+      {/* Hero */}
+      <header className="bg-[#13241d] px-5 py-16 sm:px-8 lg:px-12">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-6 inline-flex items-center gap-3 border-y border-[#f4b942]/30 py-3 text-[11px] font-bold uppercase tracking-[0.28em] text-[#f4b942]">
+            <span className="h-2 w-2 rounded-full bg-[#f4b942]" />
+            Support
+          </div>
+          <h1 className="max-w-4xl text-5xl font-black leading-[0.9] tracking-tight text-[#f4b942] sm:text-6xl">
             Frequently asked questions
           </h1>
-          <p className="text-base text-[#6b7280] max-w-2xl leading-relaxed">
+          <p className="mt-6 max-w-2xl text-lg leading-8 text-[#c8d3ce]">
             Answers to common questions about joining DOGSRUN, managing shelter dog profiles, and receiving rescue notifications.
           </p>
         </div>
       </header>
 
       {/* Body */}
-      <main className="py-12 px-8 max-w-3xl mx-auto">
-        <div className="space-y-2">
+      <main className="mx-auto max-w-3xl px-5 py-12 sm:px-8 lg:px-12">
+        <div className="bg-[#fff9ef] border border-[#13241d]/10 p-8">
           {faqs.map((faq, index) => (
             <FAQItem key={index} question={faq.question} answer={faq.answer} />
           ))}
         </div>
 
-        {/* CTA box */}
-        <div className="bg-[#fffbeb] rounded-xl p-8 text-center mt-12 border border-gray-100">
-          <h3 className="text-xl font-bold text-[#111] mb-4">Still have questions? We&apos;re happy to help.</h3>
-          <Link 
-            href="/contact" 
-            className="inline-block bg-[#f59e0b] text-[#451a03] font-semibold px-6 py-2.5 rounded-lg hover:bg-[#d97706] transition-colors"
+        {/* CTA */}
+        <div className="mt-10 border-l-4 border-[#f59e0b] bg-[#13241d] p-8 text-center text-[#f8f1e8]">
+          <h3 className="text-xl font-black text-[#f4b942] mb-3">Still have questions?</h3>
+          <p className="text-sm text-[#c8d3ce] mb-6">We&apos;re happy to help.</p>
+          <Link
+            href="/contact"
+            className="inline-flex items-center justify-center bg-[#f4b942] px-6 py-3 text-sm font-bold uppercase tracking-[0.16em] text-[#1a2e1a] transition hover:bg-[#ffd86a]"
           >
             Contact us
           </Link>

@@ -87,33 +87,40 @@ function RegisterForm() {
     setLoading(false)
   }
 
+  const inputClass = "w-full px-4 py-3 border border-[#13241d]/20 bg-white focus:border-[#f4b942] focus:ring-1 focus:ring-[#f4b942] outline-none transition-all text-[#13241d] placeholder-[#9ca3af] text-sm"
+
   if (success) {
     return (
-      <div className="max-w-md w-full bg-white border border-gray-100 rounded-xl p-8 text-center">
-        <div className="w-16 h-16 bg-[#fffbeb] rounded-full flex items-center justify-center mx-auto mb-6 text-[#f59e0b]">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div className="max-w-md w-full border border-[#13241d]/10 bg-[#fff9ef] p-8 text-center">
+        <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-[#f4b942] text-[#13241d]">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h2 className="text-2xl font-bold text-[#111] mb-2">Check your email</h2>
-        <p className="text-[#6b7280] mb-4">
+        <h2 className="text-2xl font-black text-[#13241d] mb-2">Check your email</h2>
+        <p className="text-[#5d6a64] mb-6">
           We&apos;ve sent a login link to <strong>{email}</strong>. Once you confirm your email, your application will be reviewed by our team. We&apos;ll notify you when you&apos;re approved.
         </p>
-        <Link href="/auth/login" className="text-[#f59e0b] font-bold hover:underline">Back to login</Link>
+        <Link href="/auth/login" className="text-[#d95f4b] font-black hover:underline text-sm uppercase tracking-widest">Back to login</Link>
       </div>
     )
   }
 
   return (
     <div className="max-w-md w-full">
-      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-        <div className="flex p-2 gap-2 bg-gray-50/50">
+      <div className="border border-[#13241d]/10 bg-[#fff9ef] overflow-hidden">
+        {/* Type toggle */}
+        <div className="flex border-b border-[#13241d]/10">
           {(['shelter', 'rescue'] as const).map((t) => (
             <button
               key={t}
               type="button"
               onClick={() => setType(t)}
-              className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors capitalize ${type === t ? 'bg-[#f59e0b] text-[#451a03]' : 'text-[#9ca3af] hover:text-[#6b7280]'}`}
+              className={`flex-1 py-3 text-sm font-black uppercase tracking-[0.16em] transition-colors ${
+                type === t
+                  ? 'bg-[#f4b942] text-[#13241d]'
+                  : 'bg-[#fff9ef] text-[#7a877f] hover:text-[#13241d]'
+              }`}
             >
               {t}
             </button>
@@ -121,65 +128,66 @@ function RegisterForm() {
         </div>
 
         <form onSubmit={handleSubmit} className="p-8 space-y-6">
-          {error && <div className="p-4 bg-red-50 text-red-700 text-sm rounded-lg border border-red-100">{error}</div>}
+          {error && (
+            <div className="border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
+          )}
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Organization Name</label>
-            <input name="orgName" type="text" required placeholder={type === 'shelter' ? 'City Animal Shelter' : 'Golden Retriever Rescue'}
-              className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] outline-none transition-all text-[#111] placeholder-[#9ca3af] text-sm" />
+            <label className="mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-[#5d6a64]">Organization Name</label>
+            <input name="orgName" type="text" required placeholder={type === 'shelter' ? 'City Animal Shelter' : 'Golden Retriever Rescue'} className={inputClass} />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">City</label>
-              <input name="city" type="text" required placeholder="Philadelphia"
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] outline-none transition-all text-[#111] placeholder-[#9ca3af] text-sm" />
+              <label className="mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-[#5d6a64]">City</label>
+              <input name="city" type="text" required placeholder="Philadelphia" className={inputClass} />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">State</label>
+              <label className="mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-[#5d6a64]">State</label>
               <StateSelect value={state} onChange={setState} placeholder="Select state..." />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Work Email</label>
-            <input name="email" type="email" required placeholder="director@org.org"
-              className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] outline-none transition-all text-[#111] placeholder-[#9ca3af] text-sm" />
+            <label className="mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-[#5d6a64]">Work Email</label>
+            <input name="email" type="email" required placeholder="director@org.org" className={inputClass} />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
-            <input name="password" type="password" required minLength={6}
-              className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] outline-none transition-all text-[#111] placeholder-[#9ca3af] text-sm" />
+            <label className="mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-[#5d6a64]">Password</label>
+            <input name="password" type="password" required minLength={6} className={inputClass} />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">
+            <label className="mb-1 block text-xs font-bold uppercase tracking-[0.18em] text-[#5d6a64]">
               501(c)(3) Determination Letter <span className="text-red-500">*</span>
             </label>
             <p className="text-xs text-[#9ca3af] mb-2">PDF only · Max 10MB</p>
-            <label className={`flex items-center gap-3 w-full px-4 py-3 rounded-lg border-2 border-dashed cursor-pointer transition-colors ${taxDoc ? 'border-[#f59e0b] bg-[#fffbeb]' : 'border-gray-200 hover:border-[#f59e0b] bg-gray-50'}`}>
-              <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 flex-shrink-0 ${taxDoc ? 'text-[#f59e0b]' : 'text-[#9ca3af]'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <label className={`flex cursor-pointer items-center gap-3 border-2 border-dashed px-4 py-3 transition-colors ${taxDoc ? 'border-[#f4b942] bg-[#fffbeb]' : 'border-[#13241d]/20 hover:border-[#f4b942] bg-white'}`}>
+              <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 shrink-0 ${taxDoc ? 'text-[#f4b942]' : 'text-[#9ca3af]'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              <span className={`text-sm flex-1 truncate ${taxDoc ? 'text-[#111] font-semibold' : 'text-[#9ca3af]'}`}>
+              <span className={`flex-1 truncate text-sm ${taxDoc ? 'font-black text-[#13241d]' : 'text-[#9ca3af]'}`}>
                 {taxDoc ? taxDoc.name : 'Click to upload PDF'}
               </span>
               <input type="file" accept="application/pdf" onChange={handleFileChange} className="hidden" />
             </label>
-            {taxDocError && <p className="text-red-600 text-xs mt-1">{taxDocError}</p>}
+            {taxDocError && <p className="mt-1 text-xs text-red-600">{taxDocError}</p>}
           </div>
 
-          <button type="submit" disabled={loading}
-            className="w-full py-2.5 bg-[#111] text-white font-semibold rounded-lg hover:bg-black transition-colors disabled:opacity-50">
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-[#f4b942] py-3 text-sm font-black uppercase tracking-[0.16em] text-[#1a2e1a] transition hover:bg-[#ffd86a] disabled:opacity-50"
+          >
             {loading ? 'Creating account...' : `Register as ${type === 'shelter' ? 'Shelter' : 'Rescue'}`}
           </button>
         </form>
       </div>
 
-      <p className="text-center mt-8 text-[#6b7280] text-sm">
+      <p className="mt-8 text-center text-sm text-[#5d6a64]">
         Already have an account?{' '}
-        <Link href="/auth/login" className="text-[#f59e0b] font-bold hover:underline">Login</Link>
+        <Link href="/auth/login" className="font-black text-[#d95f4b] hover:underline">Login</Link>
       </p>
     </div>
   )
@@ -187,15 +195,21 @@ function RegisterForm() {
 
 export default function RegisterPage() {
   return (
-    <div className="min-h-screen bg-white">
-      <header className="bg-[#fffbeb] border-b border-gray-200 py-12 px-8">
-        <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl font-[900] tracking-tight text-[#111] mb-4">Join the network</h1>
-          <p className="text-[#6b7280]">Help us save more dogs, faster.</p>
+    <div className="bg-[#f5f0e8] text-[#13241d]">
+      <header className="bg-[#13241d] px-5 py-16 sm:px-8 lg:px-12">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-6 inline-flex items-center gap-3 border-y border-[#f4b942]/30 py-3 text-[11px] font-bold uppercase tracking-[0.28em] text-[#f4b942]">
+            <span className="h-2 w-2 rounded-full bg-[#f4b942]" />
+            Join the network
+          </div>
+          <h1 className="text-5xl font-black leading-[0.9] tracking-tight text-[#f4b942] sm:text-6xl">
+            Join the network
+          </h1>
+          <p className="mt-4 text-lg text-[#c8d3ce]">Help us save more dogs, faster.</p>
         </div>
       </header>
-      <main className="py-8 px-8 flex items-center justify-center">
-        <Suspense fallback={<div className="text-[#6b7280] font-medium">Loading...</div>}>
+      <main className="px-5 py-12 flex items-start justify-center sm:px-8 lg:px-12">
+        <Suspense fallback={<div className="text-[#5d6a64] font-medium">Loading...</div>}>
           <RegisterForm />
         </Suspense>
       </main>

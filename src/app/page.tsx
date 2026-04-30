@@ -1,113 +1,130 @@
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
+
+const dogPhotos = {
+  hero: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=1200&q=85",
+  rescue: "https://images.unsplash.com/photo-1561037404-61cd46aa615b?auto=format&fit=crop&w=1200&q=85",
+};
+
+const steps = [
+  ["Intake", "Shelters publish the essential context: behavior notes, timeline, size, medical flags, and transfer constraints."],
+  ["Match", "DOGSRUN compares each case against active rescue criteria and highlights the organizations most likely to say yes."],
+  ["Move", "Rescues receive a focused alert with one-click response links so urgent dogs can get out faster."],
+];
 
 export default function Home() {
   return (
-    <div>
-      {/* Band 2: Amber Hero */}
-      <section className="bg-[#fffbeb] border-b border-gray-200 py-12 px-8 min-h-[320px]">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div>
-              <h1 className="text-5xl md:text-7xl font-[900] tracking-tight text-[#111] leading-tight mb-4">
-                Every dog deserves a <mark style={{background: "#f59e0b", color: "#111", padding: "0 4px", borderRadius: "3px", fontStyle: "normal"}}>run</mark> to safety.
-              </h1>
-              <p className="text-xs font-black text-[#f59e0b] uppercase tracking-[0.2em] mb-6">Loyalty Repaid</p>
-              <p className="text-base md:text-lg text-[#6b7280] leading-relaxed mb-8">
-                The fastest way for animal shelters to find specialized rescues for their most urgent dogs. Real-time matching, instant alerts, and seamless communication to save more lives.
-              </p>
-              <div className="flex gap-4">
-                <Link href="/register" className="bg-[#111] text-white font-semibold rounded-lg px-5 py-2.5 hover:bg-black transition-colors">Get started</Link>
-                <Link href="/dogs" className="border border-[#d1d5db] text-[#374151] bg-transparent font-semibold rounded-lg px-5 py-2.5 hover:bg-gray-50 transition-colors">Browse dogs</Link>
-              </div>
+    <div className="bg-[#f5f0e8] text-[#17231f]">
+      {/* Hero */}
+      <section className="relative overflow-hidden bg-[#1a2e1a] px-5 py-20 text-[#fff4c1] sm:px-8 sm:py-24 lg:px-12 lg:py-28">
+        <Image
+          src={dogPhotos.hero}
+          alt="Golden retriever rescue dog looking upward"
+          fill
+          className="object-cover object-center"
+          sizes="100vw"
+          unoptimized
+          priority
+        />
+        <div className="absolute inset-0 bg-[#1a2e1a]/75" />
+        <div className="absolute inset-0 bg-black/25" />
+        <div className="absolute inset-x-0 bottom-0 h-px bg-[#f4b942]/30" />
+        <div className="relative mx-auto max-w-7xl">
+          <div className="max-w-5xl">
+            <div className="mb-8 inline-flex items-center gap-3 border-y border-[#f4b942]/30 py-3 text-[11px] font-bold uppercase tracking-[0.28em] text-[#f4b942]">
+              <span className="h-2 w-2 rounded-full bg-[#f4b942]" />
+              Live shelter-to-rescue matching
             </div>
-            
-            {/* Hero photo collage */}
-            <div className="grid grid-cols-2 grid-rows-2 gap-4 h-[400px]">
-              <div className="row-span-2 relative rounded-xl overflow-hidden border border-gray-200 shadow-sm">
-                <Image
-                  src="https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg?auto=compress&cs=tinysrgb&w=600"
-                  alt="Tall dog photo"
-                  fill
-                  className="object-cover"
-                  unoptimized
-                />
-              </div>
-              <div className="relative rounded-xl overflow-hidden border border-gray-200 shadow-sm">
-                <Image
-                  src="https://images.pexels.com/photos/2607544/pexels-photo-2607544.jpeg?auto=compress&cs=tinysrgb&w=600"
-                  alt="Top right dog photo"
-                  fill
-                  className="object-cover"
-                  unoptimized
-                />
-              </div>
-              <div className="relative rounded-xl overflow-hidden border border-gray-200 shadow-sm">
-                <Image
-                  src="https://images.pexels.com/photos/3628100/pexels-photo-3628100.jpeg?auto=compress&cs=tinysrgb&w=400"
-                  alt="Bottom right dog photo"
-                  fill
-                  className="object-cover"
-                  unoptimized
-                />
-              </div>
+            <h1 className="text-6xl font-black leading-[0.86] tracking-tight text-[#f4b942] sm:text-7xl lg:text-8xl">
+              Find the rescue before the clock wins.
+            </h1>
+            <p className="mt-8 max-w-3xl text-xl font-semibold leading-8 text-[#f8f1e8] sm:text-2xl sm:leading-9">
+              A fast, high-signal matching platform that helps shelters reach the right rescue partners before urgent dogs run out of time.
+            </p>
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+              <Link href="/register" className="inline-flex items-center justify-center bg-[#f4b942] px-6 py-3 text-sm font-bold uppercase tracking-[0.16em] text-[#1a2e1a] transition hover:bg-[#ffd86a]">
+                Start matching
+              </Link>
+              <Link href="/dogs" className="inline-flex items-center justify-center border border-[#f8f1e8]/40 px-6 py-3 text-sm font-bold uppercase tracking-[0.16em] text-[#f8f1e8] transition hover:border-[#f8f1e8] hover:bg-[#f8f1e8] hover:text-[#1a2e1a]">
+                View dogs
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* How it works section */}
-      <section className="bg-[#fafaf9] border-t border-b border-gray-200 py-16 px-8 mb-0">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-2xl font-black text-[#111] mb-2">How it works</h2>
-          <p className="text-sm text-gray-500 mb-12 uppercase tracking-widest font-bold">Three steps to save more lives.</p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div>
-              <div className="text-5xl font-black text-[#f59e0b] mb-3">1</div>
-              <h3 className="font-bold text-[#111] text-base mb-1">Shelter adds a dog</h3>
-              <p className="text-sm text-gray-500 leading-relaxed">Staff enter intake details and a photo. Takes under 2 minutes.</p>
-            </div>
-            <div>
-              <div className="text-5xl font-black text-[#f59e0b] mb-3">2</div>
-              <h3 className="font-bold text-[#111] text-base mb-1">System finds matches</h3>
-              <p className="text-sm text-gray-500 leading-relaxed">DOGSRUN checks every active rescue&apos;s criteria and finds the right fit instantly.</p>
-            </div>
-            <div>
-              <div className="text-5xl font-black text-[#f59e0b] mb-3">3</div>
-              <h3 className="font-bold text-[#111] text-base mb-1">Rescue gets alerted</h3>
-              <p className="text-sm text-gray-500 leading-relaxed">Matched rescues receive an instant email with one-click Interested or Pass links. No login needed.</p>
-            </div>
+      {/* How it works */}
+      <section className="bg-[#f5f0e8] px-5 py-16 text-[#17231f] sm:px-8 lg:px-12">
+        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.72fr_1.28fr]">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#d95f4b]">How it works</p>
+            <h2 className="mt-4 text-4xl font-black tracking-tight text-[#13241d] sm:text-5xl">
+              Built for the handoff moment.
+            </h2>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            {steps.map(([title, copy], index) => (
+              <div key={title} className="border border-[#13241d]/12 bg-[#fff9ef] p-7">
+                <div className="mb-10 flex h-12 w-12 items-center justify-center rounded-full bg-[#f4b942] text-sm font-black text-[#13241d]">
+                  0{index + 1}
+                </div>
+                <h3 className="text-xl font-black text-[#13241d]">{title}</h3>
+                <p className="mt-4 text-sm leading-7 text-[#5d6a64]">{copy}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Band 3: White content body */}
-      <section className="bg-white py-16 px-8 mt-0 border-t-0">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Shelter Card */}
-            <div className="bg-white border border-gray-100 rounded-xl p-8 shadow-sm">
-              <h2 className="text-xl font-bold text-[#111] mb-4">I run a shelter</h2>
-              <p className="text-sm text-[#6b7280] leading-relaxed mb-8">
-                List dogs that need rescue pulls. Get matched with the right rescue organizations instantly and track interest in real-time.
-              </p>
-              <Link href="/register?type=shelter" className="inline-block bg-[#f59e0b] text-[#451a03] font-semibold rounded-lg px-5 py-2.5 hover:bg-[#d97706] transition-colors">
-                Register as a shelter
-              </Link>
-            </div>
-
-            {/* Rescue Card */}
-            <div className="bg-white border border-gray-100 rounded-xl p-8 shadow-sm">
-              <h2 className="text-xl font-bold text-[#111] mb-4">I run a rescue</h2>
-              <p className="text-sm text-[#6b7280] leading-relaxed mb-8">
-                Set your rescue criteria once. Get alerted automatically when matching dogs are available at shelters near you.
-              </p>
-              <Link href="/register?type=rescue" className="inline-block border border-[#d1d5db] text-[#374151] bg-transparent font-semibold rounded-lg px-5 py-2.5 hover:bg-gray-50 transition-colors">
-                Register as a rescue
-              </Link>
-            </div>
+      {/* Shelter / Rescue CTAs */}
+      <section className="bg-[#1a2e1a] px-5 py-16 text-[#f8f1e8] sm:px-8 lg:px-12">
+        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-2">
+          <div className="border-l-4 border-[#f59e0b] bg-[#f5f0e8] p-8 lg:p-10">
+            <p className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.28em] text-[#d95f4b]">
+              <span className="text-lg leading-none text-[#f59e0b]">→</span>
+              For shelters
+            </p>
+            <h2 className="mt-5 max-w-2xl text-3xl font-black tracking-tight text-[#13241d] sm:text-4xl">Publish the case once. Reach the rescues that fit.</h2>
+            <p className="mt-5 max-w-xl text-sm leading-7 text-[#5d6a64]">
+              List urgent dogs, capture the details rescues need, and see who has responded without managing another spreadsheet.
+            </p>
+            <Link href="/register?type=shelter" className="mt-8 inline-flex bg-[#13241d] px-5 py-3 text-sm font-bold uppercase tracking-[0.16em] text-[#f8f1e8] transition hover:bg-[#f4b942] hover:text-[#13241d]">
+              Register shelter
+            </Link>
           </div>
+
+          <div className="border-l-4 border-[#f59e0b] bg-[#f5f0e8] p-8 lg:p-10">
+            <p className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.28em] text-[#d95f4b]">
+              <span className="text-lg leading-none text-[#f59e0b]">→</span>
+              For rescues
+            </p>
+            <h2 className="mt-5 max-w-2xl text-3xl font-black tracking-tight text-[#13241d] sm:text-4xl">Set your criteria. Get the dogs you can actually pull.</h2>
+            <p className="mt-5 max-w-xl text-sm leading-7 text-[#5d6a64]">
+              Define geography, breed focus, weight, age, and capacity once. Receive urgent alerts that respect your mission and your limits.
+            </p>
+            <Link href="/register?type=rescue" className="mt-8 inline-flex bg-[#13241d] px-5 py-3 text-sm font-bold uppercase tracking-[0.16em] text-[#f8f1e8] transition hover:bg-[#f4b942] hover:text-[#13241d]">
+              Register rescue
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Closing — dog photo + text */}
+      <section className="grid grid-cols-1 lg:grid-cols-2">
+        <div className="relative min-h-[400px] lg:min-h-[560px]">
+          <Image
+            src={dogPhotos.rescue}
+            alt="Expressive close-up portrait of a rescue dog"
+            fill
+            className="object-cover object-center"
+            sizes="(min-width: 1024px) 50vw, 100vw"
+            unoptimized
+          />
+        </div>
+        <div className="bg-[#2d1f0e] flex items-center justify-center px-10 py-16 lg:py-24">
+          <h2 className="max-w-lg text-5xl font-black leading-none tracking-tight text-[#f5f0e8] sm:text-6xl lg:text-7xl">
+            Every dog deserves a second run.
+          </h2>
         </div>
       </section>
     </div>
