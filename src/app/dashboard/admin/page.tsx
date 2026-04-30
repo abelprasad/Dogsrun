@@ -117,7 +117,7 @@ export default async function AdminPage() {
                 </tr>
               </thead>
               <tbody>
-                {recentAlerts && recentAlerts.length > 0 ? recentAlerts.map((alert: any, i: number) => (
+                {recentAlerts && recentAlerts.length > 0 ? recentAlerts.map((alert: { id: string; dogs: { name: string; breed: string } | null; organizations: { name: string } | null; status: string; sent_at: string | null }, i: number) => (
                   <tr key={alert.id} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}>
                     <td className="px-4 py-3 font-semibold text-[#111]">
                       {alert.dogs?.name ?? '—'}

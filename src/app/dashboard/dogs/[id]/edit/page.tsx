@@ -81,7 +81,7 @@ export default async function EditDogPage({ params }: { params: Promise<{ id: st
               </div>
               <div className="divide-y divide-gray-50">
                 {alerts && alerts.length > 0 ? (
-                  alerts.map((alert: any) => (
+                  alerts.map((alert: { id: string; status: string; sent_at: string | null; organizations: { name: string; city: string; state: string } | null }) => (
                     <div key={alert.id} className="px-5 py-4">
                       <div className="flex items-center justify-between mb-1">
                         <p className="font-bold text-[#111] text-sm">{alert.organizations?.name}</p>

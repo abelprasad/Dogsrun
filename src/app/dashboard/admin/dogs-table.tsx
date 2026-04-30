@@ -24,11 +24,16 @@ export default function AdminDogsTable({ dogs: initialDogs }: { dogs: Dog[] }) {
   const [dateValue, setDateValue] = useState('')
   const [filter, setFilter] = useState<'all' | 'at_risk' | 'urgent'>('all')
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
+  const [now, setNow] = useState(() => Date.now())
   const router = useRouter()
+
+  // Refresh "now" every minute so risk labels stay accurate without calling Date.now() during render
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useState(() => { const id = setInterval(() => setNow(Date.now()), 60_000); return () => clearInterval(id) })
 
   const filtered = dogs.filter(d => {
     if (filter === 'urgent') return d.status === 'urgent'
-    if (filter === 'at_risk') return !!d.euthanasia_date && new Date(d.euthanasia_date) > new Date()
+    if (filter === 'at_risk') return !!d.euthanasia_date && new Date(d.euthanasia_date).getTime() > now
     return true
   })
 
@@ -77,13 +82,13 @@ export default function AdminDogsTable({ dogs: initialDogs }: { dogs: Dog[] }) {
 
   function getRiskLabel(dog: Dog) {
     if (!dog.euthanasia_date) return null
-    const diff = new Date(dog.euthanasia_date).getTime() - Date.now()
+    const diff = new Date(dog.euthanasia_date).getTime() - now
     if (diff <= 0) return { label: 'Past Due', cls: 'bg-red-600 text-white' }
     if (diff <= 24 * 60 * 60 * 1000) return { label: 'Critical', cls: 'bg-red-100 text-red-700' }
     return { label: 'At Risk', cls: 'bg-amber-100 text-amber-700' }
   }
 
-  const atRiskCount = dogs.filter(d => d.euthanasia_date && new Date(d.euthanasia_date) > new Date()).length
+  const atRiskCount = dogs.filter(d => d.euthanasia_date && new Date(d.euthanasia_date).getTime() > now).length
   const urgentCount = dogs.filter(d => d.status === 'urgent').length
 
   return (

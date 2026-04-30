@@ -257,7 +257,7 @@ test.describe('Auth Guards', () => {
 test.describe('Responded Page', () => {
   test('loads with success message', async ({ page }) => {
     await page.goto(`${BASE}/responded`)
-    await expect(page.locator('text=Response Received')).toBeVisible()
-    await expect(page.locator('a[href="/dashboard/rescue"]')).toBeVisible()
+    await expect(page.locator('text=You\'re Interested')).toBeVisible()
+    await expect(page.locator('a[href="/auth/login"]').first()).toBeVisible()
   })
 })
