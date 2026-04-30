@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { NextRequest, NextResponse } from 'next/server'
+import { createSupabaseServerClient } from '@/lib/supabase-server'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -39,7 +40,20 @@ interface Match {
 }
 
 export async function POST(req: NextRequest) {
-  const { dog_id } = await req.json()
+  // Auth check — only logged-in shelter users can trigger alert matching
+  const supabaseAuth = await createSupabaseServerClient()
+  const { data: { user } } = await supabaseAuth.auth.getUser()
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  let dog_id: string
+  try {
+    const body = await req.json()
+    dog_id = body.dog_id
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
+  }
 
   if (!dog_id) {
     return NextResponse.json({ error: 'dog_id required' }, { status: 400 })

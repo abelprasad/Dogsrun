@@ -1,8 +1,16 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+import { createSupabaseServerClient } from '@/lib/supabase-server'
 
 export async function POST(req: NextRequest) {
   try {
+    // Auth check — must be a logged-in user
+    const supabaseAuth = await createSupabaseServerClient()
+    const { data: { user } } = await supabaseAuth.auth.getUser()
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body = await req.json()
     const { dog_id, ...updateFields } = body
 
@@ -15,8 +23,27 @@ export async function POST(req: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
-    // Filter out fields that shouldn't be updated directly via this payload if any
-    // or just pass them through as requested.
+    // Ownership check — dog must belong to user's org
+    const { data: org } = await supabase
+      .from('organizations')
+      .select('id')
+      .eq('email', user.email)
+      .single()
+
+    if (!org) {
+      return NextResponse.json({ error: 'Organization not found' }, { status: 403 })
+    }
+
+    const { data: dog } = await supabase
+      .from('dogs')
+      .select('shelter_id')
+      .eq('id', dog_id)
+      .single()
+
+    if (!dog || dog.shelter_id !== org.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     const { error } = await supabase
       .from('dogs')
       .update({
