@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import imageCompression from 'browser-image-compression';
+import Image from 'next/image';
 import BreedSelect from '@/components/breed-select';
 import ColorPicker from '@/components/color-picker';
 import StateSelect from '@/components/state-select';
@@ -262,7 +263,7 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
         <label className="block text-sm font-semibold text-gray-700">Dog Photo</label>
         {dog.photo_url && (
           <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-gray-100 mb-4">
-            <img src={dog.photo_url} alt={dog.name} className="object-cover w-full h-full" />
+            <Image src={dog.photo_url} alt={dog.name} fill className="object-cover" unoptimized />
           </div>
         )}
         <div className="relative group">

@@ -1,4 +1,3 @@
-import { createClient } from '@supabase/supabase-js'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import SignOutButton from '../sign-out-button'

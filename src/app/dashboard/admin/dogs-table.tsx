@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 
 const STATUSES = ['available', 'urgent', 'pending', 'rescue_requested', 'placed', 'adopted', 'deceased', 'transferred']
 
@@ -25,10 +24,8 @@ export default function AdminDogsTable({ dogs: initialDogs }: { dogs: Dog[] }) {
   const [filter, setFilter] = useState<'all' | 'at_risk' | 'urgent'>('all')
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
   const [now, setNow] = useState(() => Date.now())
-  const router = useRouter()
 
   // Refresh "now" every minute so risk labels stay accurate without calling Date.now() during render
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useState(() => { const id = setInterval(() => setNow(Date.now()), 60_000); return () => clearInterval(id) })
 
   const filtered = dogs.filter(d => {
