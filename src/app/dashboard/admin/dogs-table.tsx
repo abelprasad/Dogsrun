@@ -23,10 +23,13 @@ export default function AdminDogsTable({ dogs: initialDogs }: { dogs: Dog[] }) {
   const [dateValue, setDateValue] = useState('')
   const [filter, setFilter] = useState<'all' | 'at_risk' | 'urgent'>('all')
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
+<<<<<<< HEAD
   const [now, setNow] = useState(() => Date.now())
 
   // Refresh "now" every minute so risk labels stay accurate without calling Date.now() during render
   useState(() => { const id = setInterval(() => setNow(Date.now()), 60_000); return () => clearInterval(id) })
+=======
+>>>>>>> 0032f87 (fix: admin link on all shelter pages, my dogs + add dog restyled to dark green/cream)
 
   const filtered = dogs.filter(d => {
     if (filter === 'urgent') return d.status === 'urgent'
@@ -82,7 +85,7 @@ export default function AdminDogsTable({ dogs: initialDogs }: { dogs: Dog[] }) {
     const diff = new Date(dog.euthanasia_date).getTime() - now
     if (diff <= 0) return { label: 'Past Due', cls: 'bg-red-600 text-white' }
     if (diff <= 24 * 60 * 60 * 1000) return { label: 'Critical', cls: 'bg-red-100 text-red-700' }
-    return { label: 'At Risk', cls: 'bg-amber-100 text-amber-700' }
+    return { label: 'At Risk', cls: 'bg-[#f4b942]/20 text-[#13241d]' }
   }
 
   const atRiskCount = dogs.filter(d => d.euthanasia_date && new Date(d.euthanasia_date).getTime() > now).length
@@ -98,20 +101,22 @@ export default function AdminDogsTable({ dogs: initialDogs }: { dogs: Dog[] }) {
           { key: 'urgent', label: `Urgent (${urgentCount})` },
         ].map(({ key, label }) => (
           <button key={key} onClick={() => setFilter(key as typeof filter)}
-            className={`px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors ${
-              filter === key ? 'bg-[#111] text-white' : 'bg-gray-100 text-[#6b7280] hover:bg-gray-200'
+            className={`px-4 py-1.5 text-xs font-bold uppercase tracking-[0.24em] transition-colors ${
+              filter === key
+                ? 'bg-[#13241d] text-[#f4b942]'
+                : 'bg-[#f5f0e8] text-[#5d6a64] hover:bg-[#13241d]/10'
             }`}>
             {label}
           </button>
         ))}
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-gray-200">
+      <div className="overflow-x-auto bg-[#fff9ef] outline outline-1 outline-[#13241d]/10">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-gray-50 border-b border-gray-200">
+            <tr className="bg-[#13241d]">
               {['Dog', 'Shelter', 'Status', 'Euthanasia Date', 'Added', 'Actions'].map(h => (
-                <th key={h} className="text-left px-4 py-3 font-semibold text-[#6b7280] uppercase tracking-wider text-xs">{h}</th>
+                <th key={h} className="text-left px-4 py-3 font-bold text-[#f4b942]/70 uppercase tracking-[0.24em] text-xs whitespace-nowrap">{h}</th>
               ))}
             </tr>
           </thead>
@@ -120,27 +125,27 @@ export default function AdminDogsTable({ dogs: initialDogs }: { dogs: Dog[] }) {
               const risk = getRiskLabel(dog)
               const isDeleting = confirmDelete === dog.id
               return (
-                <tr key={dog.id} className={`${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} ${isDeleting ? 'bg-red-50' : ''}`}>
+                <tr key={dog.id} className={`${isDeleting ? 'bg-red-50' : i % 2 === 0 ? 'bg-[#fff9ef]' : 'bg-[#f5f0e8]/60'}`}>
                   {/* Dog */}
                   <td className="px-4 py-3">
-                    <p className="font-semibold text-[#111]">{dog.name}</p>
-                    <p className="text-xs text-[#9ca3af]">{dog.breed}{dog.mix ? ' mix' : ''}{dog.age_years ? ` · ${dog.age_years}y` : ''}</p>
+                    <p className="font-semibold text-[#13241d]">{dog.name}</p>
+                    <p className="text-xs text-[#5d6a64]">{dog.breed}{dog.mix ? ' mix' : ''}{dog.age_years ? ` · ${dog.age_years}y` : ''}</p>
                   </td>
 
                   {/* Shelter */}
-                  <td className="px-4 py-3 text-[#6b7280]">{dog.organizations?.name ?? '—'}</td>
+                  <td className="px-4 py-3 text-[#5d6a64]">{dog.organizations?.name ?? '—'}</td>
 
                   {/* Status dropdown */}
                   <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       {risk && (
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${risk.cls}`}>{risk.label}</span>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 uppercase tracking-[0.1em] ${risk.cls}`}>{risk.label}</span>
                       )}
                       <select
                         value={dog.status ?? 'available'}
                         disabled={loading === dog.id}
                         onChange={e => updateDog(dog.id, { status: e.target.value })}
-                        className="text-xs font-semibold border border-gray-200 rounded-lg px-2 py-1.5 bg-white text-[#111] outline-none disabled:opacity-50"
+                        className="text-xs font-semibold border border-[#13241d]/20 px-2 py-1.5 bg-white text-[#13241d] outline-none disabled:opacity-50"
                       >
                         {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
                       </select>
@@ -155,22 +160,22 @@ export default function AdminDogsTable({ dogs: initialDogs }: { dogs: Dog[] }) {
                           type="date"
                           value={dateValue}
                           onChange={e => setDateValue(e.target.value)}
-                          className="text-xs border border-gray-200 rounded px-2 py-1 outline-none focus:border-[#f59e0b]"
+                          className="text-xs border border-[#13241d]/20 px-2 py-1 outline-none focus:border-[#13241d] bg-white"
                         />
                         <button
                           onClick={() => { updateDog(dog.id, { euthanasia_date: dateValue || null }); setEditingDate(null) }}
-                          className="text-xs font-bold text-green-600 hover:text-green-700"
+                          className="text-xs font-bold text-green-700 hover:text-green-800"
                         >Save</button>
-                        <button onClick={() => setEditingDate(null)} className="text-xs text-[#9ca3af] hover:text-[#111]">×</button>
+                        <button onClick={() => setEditingDate(null)} className="text-xs text-[#5d6a64] hover:text-[#13241d]">×</button>
                       </div>
                     ) : (
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-[#6b7280]">
+                        <span className="text-xs text-[#5d6a64]">
                           {dog.euthanasia_date ? new Date(dog.euthanasia_date).toLocaleDateString() : '—'}
                         </span>
                         <button
                           onClick={() => { setEditingDate(dog.id); setDateValue(dog.euthanasia_date?.split('T')[0] ?? '') }}
-                          className="text-[10px] font-bold text-[#9ca3af] hover:text-[#f59e0b] transition-colors"
+                          className="text-[10px] font-bold text-[#5d6a64] hover:text-[#13241d] transition-colors uppercase tracking-[0.1em]"
                         >
                           {dog.euthanasia_date ? 'Edit' : 'Set'}
                         </button>
@@ -185,7 +190,7 @@ export default function AdminDogsTable({ dogs: initialDogs }: { dogs: Dog[] }) {
                   </td>
 
                   {/* Added */}
-                  <td className="px-4 py-3 text-[#9ca3af] text-xs">
+                  <td className="px-4 py-3 text-[#5d6a64]/60 text-xs whitespace-nowrap">
                     {dog.created_at ? new Date(dog.created_at).toLocaleDateString() : '—'}
                   </td>
 
@@ -197,24 +202,24 @@ export default function AdminDogsTable({ dogs: initialDogs }: { dogs: Dog[] }) {
                         <button
                           onClick={() => deleteDog(dog.id)}
                           disabled={loading === dog.id + '-delete'}
-                          className="text-xs font-bold px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
+                          className="text-xs font-bold px-2 py-1 bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
                         >
                           {loading === dog.id + '-delete' ? '...' : 'Yes'}
                         </button>
-                        <button onClick={() => setConfirmDelete(null)} className="text-xs font-bold text-[#6b7280] hover:text-[#111]">No</button>
+                        <button onClick={() => setConfirmDelete(null)} className="text-xs font-bold text-[#5d6a64] hover:text-[#13241d]">No</button>
                       </div>
                     ) : (
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => resendAlerts(dog.id)}
                           disabled={loading === dog.id + '-alerts'}
-                          className="text-xs font-bold px-2 py-1 bg-[#fffbeb] text-[#451a03] border border-gray-200 rounded hover:bg-amber-50 disabled:opacity-50 whitespace-nowrap"
+                          className="text-xs font-bold px-2 py-1 bg-[#13241d] text-[#f4b942] hover:bg-[#1a2e1a] disabled:opacity-50 whitespace-nowrap uppercase tracking-[0.1em]"
                         >
                           {loading === dog.id + '-alerts' ? '...' : 'Resend Alerts'}
                         </button>
                         <button
                           onClick={() => setConfirmDelete(dog.id)}
-                          className="text-xs font-bold px-2 py-1 bg-red-50 text-red-600 border border-red-100 rounded hover:bg-red-100"
+                          className="text-xs font-bold px-2 py-1 bg-red-50 text-red-600 hover:bg-red-100 uppercase tracking-[0.1em]"
                         >
                           Delete
                         </button>
@@ -224,7 +229,7 @@ export default function AdminDogsTable({ dogs: initialDogs }: { dogs: Dog[] }) {
                 </tr>
               )
             }) : (
-              <tr><td colSpan={6} className="px-4 py-8 text-center text-[#9ca3af]">No dogs found</td></tr>
+              <tr><td colSpan={6} className="px-4 py-12 text-center text-[#5d6a64]">No dogs found</td></tr>
             )}
           </tbody>
         </table>

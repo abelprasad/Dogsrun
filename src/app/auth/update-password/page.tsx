@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 
 export default function UpdatePasswordPage() {
@@ -13,7 +14,6 @@ export default function UpdatePasswordPage() {
   const router = useRouter()
 
   useEffect(() => {
-    // Supabase puts the recovery token in the URL hash — exchanging it sets the session
     const supabase = createClient()
     supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') setReady(true)
@@ -47,15 +47,16 @@ export default function UpdatePasswordPage() {
 
   if (!ready) {
     return (
-      <div className="min-h-screen bg-white">
-        <header className="bg-[#fffbeb] border-b border-gray-200 py-12 px-8">
+      <div className="min-h-screen bg-[#f5f0e8]">
+        <header className="bg-[#13241d] py-12 px-8">
           <div className="max-w-7xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-[900] tracking-tight text-[#111] mb-4">Set new password</h1>
+            <p className="text-xs uppercase tracking-[0.24em] text-[#f4b942]/70 mb-3 font-bold">DOGSRUN</p>
+            <h1 className="text-4xl md:text-5xl font-black tracking-tight text-[#f4b942]">Set New Password</h1>
           </div>
         </header>
-        <main className="py-8 px-8 flex items-center justify-center">
-          <div className="max-w-md w-full bg-white border border-gray-100 rounded-xl p-8 text-center">
-            <p className="text-[#6b7280] text-sm">Verifying your reset link...</p>
+        <main className="py-16 px-8 flex items-center justify-center">
+          <div className="max-w-md w-full bg-[#fff9ef] outline outline-1 outline-[#13241d]/10 p-10 text-center">
+            <p className="text-[#5d6a64] text-sm">Verifying your reset link...</p>
           </div>
         </main>
       </div>
@@ -63,22 +64,25 @@ export default function UpdatePasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <header className="bg-[#fffbeb] border-b border-gray-200 py-12 px-8">
+    <div className="min-h-screen bg-[#f5f0e8]">
+      <header className="bg-[#13241d] py-12 px-8">
         <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl font-[900] tracking-tight text-[#111] mb-4">Set new password</h1>
-          <p className="text-[#6b7280]">Choose a new password for your account</p>
+          <p className="text-xs uppercase tracking-[0.24em] text-[#f4b942]/70 mb-3 font-bold">DOGSRUN</p>
+          <h1 className="text-4xl md:text-5xl font-black tracking-tight text-[#f4b942]">Set New Password</h1>
+          <p className="text-[#f5f0e8]/60 mt-3 text-sm">Choose a new password for your account</p>
         </div>
       </header>
-      <main className="py-8 px-8 flex items-center justify-center">
+      <main className="py-16 px-8 flex items-center justify-center">
         <div className="max-w-md w-full">
-          <div className="bg-white rounded-xl border border-gray-100 p-8">
+          <div className="bg-[#fff9ef] outline outline-1 outline-[#13241d]/10 p-10">
             {error && (
-              <div className="p-4 bg-red-50 text-red-700 text-sm rounded-lg border border-red-100 mb-6">{error}</div>
+              <div className="p-4 bg-red-50 text-red-700 text-sm border border-red-200 mb-6">{error}</div>
             )}
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">New password</label>
+                <label className="block text-xs uppercase tracking-[0.24em] font-bold text-[#13241d] mb-2">
+                  New Password
+                </label>
                 <input
                   type="password"
                   value={password}
@@ -86,11 +90,13 @@ export default function UpdatePasswordPage() {
                   placeholder="••••••••"
                   required
                   minLength={6}
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] outline-none transition-all text-[#111] placeholder-[#9ca3af] text-sm"
+                  className="w-full px-4 py-3 border border-[#13241d]/20 bg-white focus:border-[#13241d] focus:ring-0 outline-none transition-colors text-[#13241d] placeholder-[#5d6a64]/40 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Confirm password</label>
+                <label className="block text-xs uppercase tracking-[0.24em] font-bold text-[#13241d] mb-2">
+                  Confirm Password
+                </label>
                 <input
                   type="password"
                   value={confirm}
@@ -98,18 +104,23 @@ export default function UpdatePasswordPage() {
                   placeholder="••••••••"
                   required
                   minLength={6}
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] outline-none transition-all text-[#111] placeholder-[#9ca3af] text-sm"
+                  className="w-full px-4 py-3 border border-[#13241d]/20 bg-white focus:border-[#13241d] focus:ring-0 outline-none transition-all text-[#13241d] placeholder-[#5d6a64]/40 text-sm"
                 />
               </div>
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 bg-[#111] text-white font-semibold rounded-lg hover:bg-black transition-colors disabled:opacity-50"
+                className="w-full py-3 bg-[#13241d] text-[#f4b942] text-xs uppercase tracking-[0.24em] font-bold hover:bg-[#1a2e1a] transition-colors disabled:opacity-50"
               >
-                {loading ? 'Updating...' : 'Update password'}
+                {loading ? 'Updating...' : 'Update Password'}
               </button>
             </form>
           </div>
+          <p className="text-center mt-8">
+            <Link href="/auth/login" className="text-xs uppercase tracking-[0.24em] font-bold text-[#13241d] hover:text-[#f4b942] transition-colors">
+              ← Back to Login
+            </Link>
+          </p>
         </div>
       </main>
     </div>

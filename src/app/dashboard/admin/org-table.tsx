@@ -74,44 +74,44 @@ export default function AdminOrgTable({ orgs, alertsByOrg }: Props) {
       {pendingOrgs.length > 0 && (
         <div>
           <div className="flex items-center gap-3 mb-4">
-            <h3 className="text-base font-bold text-[#111]">Pending Approvals</h3>
-            <span className="inline-block px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700">
+            <p className="text-xs uppercase tracking-[0.24em] font-bold text-[#5d6a64]">Pending Approvals</p>
+            <span className="inline-block px-2 py-0.5 text-xs font-bold bg-[#f4b942]/20 text-[#13241d]">
               {pendingOrgs.length} pending
             </span>
           </div>
           <div className="space-y-3">
             {pendingOrgs.map(org => (
-              <div key={org.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-xl border border-amber-200 bg-[#fffbeb]">
+              <div key={org.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-[#fff9ef] outline outline-1 outline-[#f4b942]/30">
                 <div>
                   <div className="flex items-center gap-2 mb-0.5">
-                    <p className="font-bold text-[#111]">{org.name}</p>
-                    <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                    <p className="font-black text-[#13241d]">{org.name}</p>
+                    <span className={`inline-block px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] ${
                       org.type === 'shelter' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
                     }`}>{org.type}</span>
                   </div>
-                  <p className="text-sm text-[#6b7280]">{org.email} · {org.city}, {org.state}</p>
-                  <p className="text-xs text-[#9ca3af] mt-0.5">Applied {new Date(org.created_at).toLocaleDateString()}</p>
+                  <p className="text-sm text-[#5d6a64]">{org.email} · {org.city}, {org.state}</p>
+                  <p className="text-xs text-[#5d6a64]/60 mt-0.5">Applied {new Date(org.created_at).toLocaleDateString()}</p>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   {org.tax_doc_url && (
                     <button
                       onClick={() => viewDocument(org.tax_doc_url!)}
-                      className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white border border-gray-200 text-[#6b7280] hover:text-[#111] hover:border-gray-300 transition-colors"
+                      className="px-3 py-1.5 text-xs font-bold bg-[#f5f0e8] text-[#13241d] hover:bg-[#13241d] hover:text-[#f4b942] transition-colors uppercase tracking-[0.1em]"
                     >
-                      View Doc
+                      Doc
                     </button>
                   )}
                   <button
                     onClick={() => handleApproval(org.id, 'reject')}
                     disabled={loading === org.id + '-reject'}
-                    className="px-3 py-1.5 rounded-lg text-xs font-bold bg-red-50 text-red-600 hover:bg-red-100 transition-colors disabled:opacity-50"
+                    className="px-3 py-1.5 text-xs font-bold bg-red-50 text-red-600 hover:bg-red-100 transition-colors disabled:opacity-50 uppercase tracking-[0.1em]"
                   >
                     {loading === org.id + '-reject' ? '...' : 'Reject'}
                   </button>
                   <button
                     onClick={() => handleApproval(org.id, 'approve')}
                     disabled={loading === org.id + '-approve'}
-                    className="px-3 py-1.5 rounded-lg text-xs font-bold bg-green-50 text-green-700 hover:bg-green-100 transition-colors disabled:opacity-50"
+                    className="px-3 py-1.5 text-xs font-bold bg-[#13241d] text-[#f4b942] hover:bg-[#1a2e1a] transition-colors disabled:opacity-50 uppercase tracking-[0.1em]"
                   >
                     {loading === org.id + '-approve' ? '...' : 'Approve'}
                   </button>
@@ -129,10 +129,10 @@ export default function AdminOrgTable({ orgs, alertsByOrg }: Props) {
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors ${
+              className={`px-4 py-1.5 text-xs font-bold uppercase tracking-[0.24em] transition-colors ${
                 filter === f
-                  ? 'bg-[#111] text-white'
-                  : 'bg-gray-100 text-[#6b7280] hover:bg-gray-200'
+                  ? 'bg-[#13241d] text-[#f4b942]'
+                  : 'bg-[#f5f0e8] text-[#5d6a64] hover:bg-[#13241d]/10'
               }`}
             >
               {f === 'all' ? `All (${orgList.length})` : f === 'shelter' ? `Shelters (${orgList.filter(o => o.type === 'shelter').length})` : `Rescues (${orgList.filter(o => o.type === 'rescue').length})`}
@@ -140,61 +140,55 @@ export default function AdminOrgTable({ orgs, alertsByOrg }: Props) {
           ))}
         </div>
 
-        <div className="overflow-x-auto rounded-xl border border-gray-200">
+        <div className="overflow-x-auto bg-[#fff9ef] outline outline-1 outline-[#13241d]/10">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="text-left px-4 py-3 font-semibold text-[#6b7280] uppercase tracking-wider text-xs">Org</th>
-                <th className="text-left px-4 py-3 font-semibold text-[#6b7280] uppercase tracking-wider text-xs">Type</th>
-                <th className="text-left px-4 py-3 font-semibold text-[#6b7280] uppercase tracking-wider text-xs">Location</th>
-                <th className="text-left px-4 py-3 font-semibold text-[#6b7280] uppercase tracking-wider text-xs">Email</th>
-                <th className="text-left px-4 py-3 font-semibold text-[#6b7280] uppercase tracking-wider text-xs">Alerts</th>
-                <th className="text-left px-4 py-3 font-semibold text-[#6b7280] uppercase tracking-wider text-xs">Joined</th>
-                <th className="text-left px-4 py-3 font-semibold text-[#6b7280] uppercase tracking-wider text-xs">Approval</th>
-                <th className="text-left px-4 py-3 font-semibold text-[#6b7280] uppercase tracking-wider text-xs">Active</th>
-                <th className="text-left px-4 py-3 font-semibold text-[#6b7280] uppercase tracking-wider text-xs">Action</th>
+              <tr className="bg-[#13241d]">
+                {['Org', 'Type', 'Location', 'Email', 'Alerts', 'Joined', 'Approval', 'Active', 'Action'].map(h => (
+                  <th key={h} className="text-left px-4 py-3 font-bold text-[#f4b942]/70 uppercase tracking-[0.24em] text-xs whitespace-nowrap">{h}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {filtered.length > 0 ? filtered.map((org, i) => {
                 const stats = alertsByOrg[org.id]
                 return (
-                  <tr key={org.id} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}>
-                    <td className="px-4 py-3 font-semibold text-[#111]">{org.name}</td>
+                  <tr key={org.id} className={i % 2 === 0 ? 'bg-[#fff9ef]' : 'bg-[#f5f0e8]/60'}>
+                    <td className="px-4 py-3 font-semibold text-[#13241d] whitespace-nowrap">{org.name}</td>
                     <td className="px-4 py-3">
-                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold ${
+                      <span className={`inline-block px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] ${
                         org.type === 'shelter' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
                       }`}>
                         {org.type}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-[#6b7280]">{org.city}, {org.state}</td>
-                    <td className="px-4 py-3 text-[#6b7280]">{org.email}</td>
-                    <td className="px-4 py-3 text-[#6b7280]">
+                    <td className="px-4 py-3 text-[#5d6a64] whitespace-nowrap">{org.city}, {org.state}</td>
+                    <td className="px-4 py-3 text-[#5d6a64]">{org.email}</td>
+                    <td className="px-4 py-3 text-[#5d6a64] whitespace-nowrap">
                       {stats ? (
-                        <span>{stats.sent} sent / <span className="text-green-600 font-semibold">{stats.responded} interested</span></span>
+                        <span>{stats.sent} sent / <span className="text-green-700 font-semibold">{stats.responded} interested</span></span>
                       ) : (
-                        <span className="text-[#9ca3af]">—</span>
+                        <span className="text-[#5d6a64]/40">—</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-[#9ca3af]">
+                    <td className="px-4 py-3 text-[#5d6a64]/60 text-xs whitespace-nowrap">
                       {org.created_at ? new Date(org.created_at).toLocaleDateString() : '—'}
                     </td>
                     <td className="px-4 py-3">
-                      {org.type === 'rescue' ? (
-                        <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold ${
+                      {org.approval_status ? (
+                        <span className={`inline-block px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] ${
                           org.approval_status === 'approved' ? 'bg-green-100 text-green-700' :
                           org.approval_status === 'rejected' ? 'bg-red-100 text-red-600' :
-                          'bg-amber-100 text-amber-700'
+                          'bg-[#f4b942]/20 text-[#13241d]'
                         }`}>
-                          {org.approval_status ?? 'pending'}
+                          {org.approval_status}
                         </span>
                       ) : (
-                        <span className="text-[#9ca3af] text-xs">—</span>
+                        <span className="text-[#5d6a64]/40 text-xs">—</span>
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold ${
+                      <span className={`inline-block px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] ${
                         org.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'
                       }`}>
                         {org.is_active ? 'Active' : 'Inactive'}
@@ -205,7 +199,7 @@ export default function AdminOrgTable({ orgs, alertsByOrg }: Props) {
                         {org.tax_doc_url && (
                           <button
                             onClick={() => viewDocument(org.tax_doc_url!)}
-                            className="px-3 py-1 rounded-lg text-xs font-bold bg-gray-50 border border-gray-200 text-[#6b7280] hover:text-[#111] hover:border-gray-300 transition-colors"
+                            className="px-2 py-1 text-xs font-bold bg-[#f5f0e8] text-[#13241d] hover:bg-[#13241d] hover:text-[#f4b942] transition-colors uppercase tracking-[0.1em]"
                           >
                             Doc
                           </button>
@@ -213,7 +207,7 @@ export default function AdminOrgTable({ orgs, alertsByOrg }: Props) {
                         <button
                           onClick={() => toggleActive(org.id, org.is_active)}
                           disabled={loading === org.id + '-active'}
-                          className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-50 ${
+                          className={`px-2 py-1 text-xs font-bold uppercase tracking-[0.1em] transition-colors disabled:opacity-50 ${
                             org.is_active
                               ? 'bg-red-50 text-red-600 hover:bg-red-100'
                               : 'bg-green-50 text-green-700 hover:bg-green-100'
@@ -227,7 +221,7 @@ export default function AdminOrgTable({ orgs, alertsByOrg }: Props) {
                 )
               }) : (
                 <tr>
-                  <td colSpan={9} className="px-4 py-8 text-center text-[#9ca3af]">No organizations found</td>
+                  <td colSpan={9} className="px-4 py-12 text-center text-[#5d6a64]">No organizations found</td>
                 </tr>
               )}
             </tbody>

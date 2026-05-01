@@ -47,46 +47,49 @@ export default async function AdminPage() {
   }
 
   const stats = [
-    { label: 'Total Orgs', value: totalOrgs, color: '' },
-    { label: 'Shelters', value: totalShelters, color: '' },
-    { label: 'Rescues', value: totalRescues, color: '' },
-    { label: 'Dogs Listed', value: totalDogs, color: '' },
-    { label: 'Response Rate', value: `${responseRate}%`, color: '' },
-    { label: 'Alerts Sent', value: totalAlerts, color: '' },
-    { label: 'Interested', value: totalInterested, color: 'text-green-600' },
-    { label: 'At Risk', value: atRiskDogs, color: atRiskDogs > 0 ? 'text-red-600' : '' },
-    { label: 'Pending', value: pendingOrgs, color: pendingOrgs > 0 ? 'text-amber-600' : '' },
+    { label: 'Total Orgs', value: totalOrgs, accent: false },
+    { label: 'Shelters', value: totalShelters, accent: false },
+    { label: 'Rescues', value: totalRescues, accent: false },
+    { label: 'Dogs Listed', value: totalDogs, accent: false },
+    { label: 'Response Rate', value: `${responseRate}%`, accent: false },
+    { label: 'Alerts Sent', value: totalAlerts, accent: false },
+    { label: 'Interested', value: totalInterested, accent: totalInterested > 0 },
+    { label: 'At Risk', value: atRiskDogs, accent: false, warn: atRiskDogs > 0 },
+    { label: 'Pending', value: pendingOrgs, accent: false, warn: pendingOrgs > 0 },
   ]
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="bg-[#111] border-t border-white/5 py-2 px-8">
+    <div className="min-h-screen bg-[#f5f0e8]">
+      {/* Subnav */}
+      <div className="bg-[#13241d] py-2 px-8">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <span className="text-xs font-bold text-[#f59e0b] uppercase tracking-widest">Admin Panel</span>
+          <span className="text-xs font-bold text-[#f4b942] uppercase tracking-[0.24em]">Admin Panel</span>
           <div className="flex items-center gap-4">
-            <span className="text-xs font-bold text-[#9ca3af] uppercase tracking-widest">{user.email}</span>
+            <span className="text-xs font-bold text-[#f5f0e8]/40 uppercase tracking-[0.24em]">{user.email}</span>
             <SignOutButton />
           </div>
         </div>
       </div>
 
-      <header className="bg-[#fffbeb] border-b border-gray-200 py-12 px-8">
+      {/* Header */}
+      <header className="bg-[#13241d] pb-12 px-8 pt-8 border-t border-white/5">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-[900] tracking-tight text-[#111] mb-2">Admin Panel</h1>
-          <p className="text-[#6b7280]">Manage organizations, dogs, and network activity.</p>
+          <p className="text-xs uppercase tracking-[0.24em] text-[#f4b942]/70 mb-3 font-bold">DOGSRUN</p>
+          <h1 className="text-4xl md:text-5xl font-black tracking-tight text-[#f4b942]">Admin Panel</h1>
+          <p className="text-[#f5f0e8]/50 mt-2 text-sm">Manage organizations, dogs, and network activity.</p>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto py-8 px-8 space-y-12">
+      <main className="max-w-7xl mx-auto py-10 px-8 space-y-14">
 
         {/* Stats */}
         <section>
-          <h2 className="text-xl font-bold text-[#111] mb-6">Overview</h2>
-          <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-4">
-            {stats.map(({ label, value, color }) => (
-              <div key={label} className="bg-[#fffbeb] rounded-xl border border-gray-200 p-4 text-center">
-                <div className={`text-2xl font-[900] mb-1 ${color || 'text-[#111]'}`}>{value}</div>
-                <div className="text-[10px] font-semibold text-[#6b7280] uppercase tracking-widest leading-tight">{label}</div>
+          <p className="text-xs uppercase tracking-[0.24em] font-bold text-[#5d6a64] mb-6">Overview</p>
+          <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-3">
+            {stats.map(({ label, value, accent, warn }: { label: string; value: string | number; accent?: boolean; warn?: boolean }) => (
+              <div key={label} className="bg-[#fff9ef] outline outline-1 outline-[#13241d]/10 p-4 text-center">
+                <div className={`text-2xl font-black mb-1 ${warn ? 'text-[#d95f4b]' : accent ? 'text-green-700' : 'text-[#13241d]'}`}>{value}</div>
+                <div className="text-[10px] font-bold text-[#5d6a64] uppercase tracking-[0.24em] leading-tight">{label}</div>
               </div>
             ))}
           </div>
@@ -94,51 +97,57 @@ export default async function AdminPage() {
 
         {/* Organizations */}
         <section>
-          <h2 className="text-xl font-bold text-[#111] mb-6">Organizations</h2>
+          <p className="text-xs uppercase tracking-[0.24em] font-bold text-[#5d6a64] mb-6">Organizations</p>
           <AdminOrgTable orgs={orgs ?? []} alertsByOrg={alertsByOrg} />
         </section>
 
         {/* Dogs */}
         <section>
-          <h2 className="text-xl font-bold text-[#111] mb-6">All Dogs</h2>
+          <p className="text-xs uppercase tracking-[0.24em] font-bold text-[#5d6a64] mb-6">All Dogs</p>
           <AdminDogsTable dogs={dogs ?? []} />
         </section>
 
         {/* Recent Activity */}
         <section>
-          <h2 className="text-xl font-bold text-[#111] mb-6">Recent Activity</h2>
-          <div className="rounded-xl border border-gray-200 overflow-hidden">
+          <p className="text-xs uppercase tracking-[0.24em] font-bold text-[#5d6a64] mb-6">Recent Activity</p>
+          <div className="bg-[#fff9ef] outline outline-1 outline-[#13241d]/10 overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-gray-50 border-b border-gray-200">
+                <tr className="bg-[#13241d]">
                   {['Dog', 'Rescue', 'Status', 'Date'].map(h => (
-                    <th key={h} className="text-left px-4 py-3 font-semibold text-[#6b7280] uppercase tracking-wider text-xs">{h}</th>
+                    <th key={h} className="text-left px-4 py-3 font-bold text-[#f4b942]/70 uppercase tracking-[0.24em] text-xs">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
+<<<<<<< HEAD
                 {recentAlerts && recentAlerts.length > 0 ? recentAlerts.map((alert: { id: string; dogs: { name: string; breed: string } | null; organizations: { name: string } | null; status: string; sent_at: string | null }, i: number) => (
                   <tr key={alert.id} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}>
                     <td className="px-4 py-3 font-semibold text-[#111]">
+=======
+                {recentAlerts && recentAlerts.length > 0 ? recentAlerts.map((alert: any, i: number) => (
+                  <tr key={alert.id} className={i % 2 === 0 ? 'bg-[#fff9ef]' : 'bg-[#f5f0e8]/60'}>
+                    <td className="px-4 py-3 font-semibold text-[#13241d]">
+>>>>>>> 0032f87 (fix: admin link on all shelter pages, my dogs + add dog restyled to dark green/cream)
                       {alert.dogs?.name ?? '—'}
-                      <span className="text-[#9ca3af] font-normal"> · {alert.dogs?.breed ?? ''}</span>
+                      <span className="text-[#5d6a64] font-normal"> · {alert.dogs?.breed ?? ''}</span>
                     </td>
-                    <td className="px-4 py-3 text-[#6b7280]">{alert.organizations?.name ?? '—'}</td>
+                    <td className="px-4 py-3 text-[#5d6a64]">{alert.organizations?.name ?? '—'}</td>
                     <td className="px-4 py-3">
-                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold ${
+                      <span className={`inline-block px-2 py-0.5 text-xs font-bold uppercase tracking-[0.1em] ${
                         alert.status === 'responded' ? 'bg-green-100 text-green-700' :
-                        alert.status === 'declined' ? 'bg-gray-100 text-gray-500' :
-                        'bg-amber-100 text-amber-700'
+                        alert.status === 'declined' ? 'bg-[#f5f0e8] text-[#5d6a64]' :
+                        'bg-[#13241d]/10 text-[#13241d]'
                       }`}>
                         {alert.status === 'responded' ? 'Interested' : alert.status === 'declined' ? 'Passed' : 'Sent'}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-[#9ca3af]">
+                    <td className="px-4 py-3 text-[#5d6a64] text-xs">
                       {alert.sent_at ? new Date(alert.sent_at).toLocaleDateString() : '—'}
                     </td>
                   </tr>
                 )) : (
-                  <tr><td colSpan={4} className="px-4 py-8 text-center text-[#9ca3af]">No activity yet</td></tr>
+                  <tr><td colSpan={4} className="px-4 py-12 text-center text-[#5d6a64] text-sm">No activity yet</td></tr>
                 )}
               </tbody>
             </table>
