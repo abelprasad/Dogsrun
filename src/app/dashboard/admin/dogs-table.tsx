@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const STATUSES = ['available', 'urgent', 'pending', 'rescue_requested', 'placed', 'adopted', 'deceased', 'transferred']
 
@@ -23,13 +23,12 @@ export default function AdminDogsTable({ dogs: initialDogs }: { dogs: Dog[] }) {
   const [dateValue, setDateValue] = useState('')
   const [filter, setFilter] = useState<'all' | 'at_risk' | 'urgent'>('all')
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
-<<<<<<< HEAD
   const [now, setNow] = useState(() => Date.now())
 
-  // Refresh "now" every minute so risk labels stay accurate without calling Date.now() during render
-  useState(() => { const id = setInterval(() => setNow(Date.now()), 60_000); return () => clearInterval(id) })
-=======
->>>>>>> 0032f87 (fix: admin link on all shelter pages, my dogs + add dog restyled to dark green/cream)
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 60_000)
+    return () => clearInterval(id)
+  }, [])
 
   const filtered = dogs.filter(d => {
     if (filter === 'urgent') return d.status === 'urgent'

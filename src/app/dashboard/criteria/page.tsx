@@ -18,6 +18,7 @@ export default async function CriteriaPage() {
 
   if (!org || org.type !== 'rescue') redirect('/dashboard')
 
+  // Check if user is admin
   const serviceClient = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -37,6 +38,7 @@ export default async function CriteriaPage() {
 
   return (
     <div className="min-h-screen bg-[#f5f0e8]">
+      {/* Subnav */}
       <div className="bg-[#13241d] py-2 px-8">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex gap-6">
@@ -53,6 +55,7 @@ export default async function CriteriaPage() {
         </div>
       </div>
 
+      {/* Header */}
       <header className="bg-[#13241d] pb-12 px-8 pt-8 border-t border-white/5">
         <div className="max-w-7xl mx-auto">
           <p className="text-xs uppercase tracking-[0.24em] text-[#f4b942]/70 mb-3 font-bold">Rescue Portal</p>

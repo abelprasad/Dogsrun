@@ -33,7 +33,7 @@ test.describe('Public Pages', () => {
   test('about page loads with mission and nonprofit info', async ({ page }) => {
     await page.goto(`${BASE}/about`)
     await expect(page.locator('text=About DOGSRUN')).toBeVisible()
-    await expect(page.locator('text=Our Mission')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Our Mission' })).toBeVisible()
     await expect(page.locator('text=EIN')).toBeVisible()
   })
 
@@ -107,12 +107,12 @@ test.describe('Register Page', () => {
 
   test('shelter tab is active by default', async ({ page }) => {
     await page.goto(`${BASE}/register`)
-    await expect(page.locator('button:text("Shelter")').first()).toHaveCSS('background-color', 'rgb(245, 158, 11)')
+    await expect(page.locator('button:text("Shelter")').first()).toHaveCSS('background-color', 'rgb(244, 185, 66)')
   })
 
   test('?type=rescue pre-selects rescue tab', async ({ page }) => {
     await page.goto(`${BASE}/register?type=rescue`)
-    await expect(page.locator('button:text("Rescue")').first()).toHaveCSS('background-color', 'rgb(245, 158, 11)')
+    await expect(page.locator('button:text("Rescue")').first()).toHaveCSS('background-color', 'rgb(244, 185, 66)')
   })
 
   test('shows all required fields', async ({ page }) => {
@@ -125,13 +125,13 @@ test.describe('Register Page', () => {
 
   test('shows 501(c)(3) upload for shelter', async ({ page }) => {
     await page.goto(`${BASE}/register`)
-    await expect(page.locator('text=501(c)(3)')).toBeVisible()
+    await expect(page.locator('form').locator('text=501(c)(3)')).toBeVisible()
   })
 
   test('shows 501(c)(3) upload for rescue', async ({ page }) => {
     await page.goto(`${BASE}/register`)
     await page.locator('button:text("Rescue")').first().click()
-    await expect(page.locator('text=501(c)(3)')).toBeVisible()
+    await expect(page.locator('form').locator('text=501(c)(3)')).toBeVisible()
   })
 
   test('submit button label updates with tab', async ({ page }) => {

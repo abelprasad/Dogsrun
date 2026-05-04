@@ -18,13 +18,13 @@ interface Alert {
     id: string
     name: string
     breed: string
-    age_years: number
-    sex: string
-    photo_url: string
-    status: string
+    age_years: number | null
+    sex: string | null
+    photo_url: string | null
+    status: string | null
     euthanasia_date: string | null
-    organizations: { name: string; city: string; state: string }
-  }
+    organizations: { name: string | null; city: string | null; state: string | null } | null
+  } | null
 }
 
 export default async function RescuePortalPage() {
@@ -89,44 +89,52 @@ export default async function RescuePortalPage() {
       <main className="max-w-7xl mx-auto py-10 px-8">
         <div className="space-y-4">
           {alerts.length > 0 ? (
-            alerts.map((alert) => (
-              <div key={alert.id} className="bg-[#fff9ef] outline outline-1 outline-[#13241d]/10 overflow-hidden">
-                <div className="p-8">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div className="flex items-start gap-6">
-                      <div className="w-16 h-16 bg-[#13241d] flex items-center justify-center text-2xl font-black text-[#f4b942] flex-shrink-0 overflow-hidden relative">
-                        {alert.dogs?.photo_url ? (
-                          <Image src={alert.dogs.photo_url} alt={alert.dogs.name} fill className="object-cover" unoptimized />
-                        ) : (
-                          alert.dogs?.name?.[0] || 'D'
-                        )}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-3 mb-1">
-                          <h2 className="text-xl font-black text-[#13241d]">{alert.dogs?.name || 'Unnamed Dog'}</h2>
-                          <StatusBadge status={(alert.dogs?.status as DogStatus) || 'available'} euthanasiaDate={alert.dogs?.euthanasia_date} />
+            alerts.map((alert) => {
+              const dog = alert.dogs
+              const shelter = dog?.organizations
+              const shelterLocation = [shelter?.city, shelter?.state].filter(Boolean).join(', ')
+
+              return (
+                <div key={alert.id} className="bg-[#fff9ef] outline outline-1 outline-[#13241d]/10 overflow-hidden">
+                  <div className="p-8">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                      <div className="flex items-start gap-6">
+                        <div className="w-16 h-16 bg-[#13241d] flex items-center justify-center text-2xl font-black text-[#f4b942] flex-shrink-0 overflow-hidden relative">
+                          {dog?.photo_url ? (
+                            <Image src={dog.photo_url} alt={dog.name || 'Dog photo'} fill className="object-cover" unoptimized />
+                          ) : (
+                            dog?.name?.[0] || 'D'
+                          )}
                         </div>
-                        <p className="text-sm text-[#5d6a64] mb-2">
-                          {alert.dogs?.breed || 'Unknown breed'} · {alert.dogs?.age_years ? `${alert.dogs.age_years}y` : '—'} · {alert.dogs?.sex || '—'}
-                        </p>
-                        <p className="text-[10px] font-bold text-[#5d6a64] uppercase tracking-[0.24em]">
-                          Listed by <span className="text-[#13241d]">{alert.dogs?.organizations?.name}</span> · {alert.dogs?.organizations?.city}, {alert.dogs?.organizations?.state}
-                        </p>
+                        <div>
+                          <div className="flex items-center gap-3 mb-1">
+                            <h2 className="text-xl font-black text-[#13241d]">{dog?.name || 'Unnamed Dog'}</h2>
+                            <StatusBadge status={(dog?.status as DogStatus) || 'available'} euthanasiaDate={dog?.euthanasia_date} />
+                          </div>
+                          <p className="text-sm text-[#5d6a64] mb-2">
+                            {dog?.breed || 'Unknown breed'}{dog?.age_years ? ` · ${dog.age_years}y` : ''}{dog?.sex ? ` · ${dog.sex}` : ''}
+                          </p>
+                          {(shelter?.name || shelterLocation) && (
+                            <p className="text-[10px] font-bold text-[#5d6a64] uppercase tracking-[0.24em]">
+                              Listed by{shelter?.name ? <span className="text-[#13241d]"> {shelter.name}</span> : null}{shelterLocation ? ` · ${shelterLocation}` : ''}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                    <div className="shrink-0">
-                      <AlertActions alertId={alert.id} currentStatus={alert.status} />
+                      <div className="shrink-0">
+                        <AlertActions alertId={alert.id} currentStatus={alert.status} />
+                      </div>
                     </div>
                   </div>
+                  <div className="bg-[#f5f0e8] px-8 py-3 border-t border-[#13241d]/10 flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-[#5d6a64] uppercase tracking-[0.24em]">
+                      Received {alert.sent_at ? new Date(alert.sent_at).toLocaleDateString() : 'Unknown date'}
+                    </span>
+                    <Link href={`/dogs/${alert.dog_id}`} className="text-xs font-bold text-[#13241d] hover:text-[#f4b942] transition-colors uppercase tracking-[0.24em]">View Profile</Link>
+                  </div>
                 </div>
-                <div className="bg-[#f5f0e8] px-8 py-3 border-t border-[#13241d]/10 flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-[#5d6a64] uppercase tracking-[0.24em]">
-                    Received {new Date(alert.sent_at).toLocaleDateString()}
-                  </span>
-                  <Link href={`/dogs/${alert.dog_id}`} className="text-xs font-bold text-[#13241d] hover:text-[#f4b942] transition-colors uppercase tracking-[0.24em]">View Profile →</Link>
-                </div>
-              </div>
-            ))
+              )
+            })
           ) : (
             <div className="py-20 bg-[#fff9ef] outline outline-1 outline-[#13241d]/10 text-center">
               <p className="text-xs uppercase tracking-[0.24em] font-bold text-[#5d6a64] mb-4">No Alerts Yet</p>

@@ -29,6 +29,16 @@ export async function POST(req: NextRequest) {
 
   if (!alert) return NextResponse.json({ error: 'Alert not found' }, { status: 404 })
 
+  const { data: adminRow } = await supabaseAuth
+    .from('admins')
+    .select('id')
+    .eq('email', user.email)
+    .maybeSingle()
+
+  if (!adminRow && alert.rescue_id !== user.id) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
   const dog = alert.dogs
   const rescue = alert.organizations
 

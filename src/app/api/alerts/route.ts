@@ -47,6 +47,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  const [{ data: requesterOrg }, { data: adminRow }] = await Promise.all([
+    supabase
+      .from('organizations')
+      .select('id, type, approval_status')
+      .eq('id', user.id)
+      .maybeSingle(),
+    supabase
+      .from('admins')
+      .select('id')
+      .eq('email', user.email)
+      .maybeSingle(),
+  ])
+  const isAdmin = !!adminRow
+
   let dog_id: string
   try {
     const body = await req.json()
@@ -67,6 +81,15 @@ export async function POST(req: NextRequest) {
 
   if (dogError || !dog) {
     return NextResponse.json({ error: 'Dog not found' }, { status: 404 })
+  }
+
+  const canTriggerAlerts = isAdmin ||
+    (requesterOrg?.type === 'shelter' &&
+      requesterOrg.approval_status === 'approved' &&
+      dog.shelter_id === requesterOrg.id)
+
+  if (!canTriggerAlerts) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
   const { data: criteriaList } = await supabase
