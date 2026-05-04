@@ -4,6 +4,7 @@ import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import SignOutButton from '../../../sign-out-button'
 import EditDogForm from './edit-form'
+import ResendAlertsButton from './resend-alerts-button'
 import EuthanasiaCountdown from '@/components/euthanasia-countdown'
 import StatusBadge from '@/components/status-badge'
 
@@ -79,6 +80,7 @@ export default async function EditDogPage({ params }: { params: Promise<{ id: st
                   {alerts?.length || 0} sent
                 </span>
               </div>
+              <ResendAlertsButton dogId={dog.id} />
               <div className="divide-y divide-[#13241d]/10">
                 {alerts && alerts.length > 0 ? (
                   alerts.map((alert: { id: string; status: string; sent_at: string | null; organizations: { name: string; city: string; state: string } | null }) => (
