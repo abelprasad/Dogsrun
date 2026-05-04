@@ -52,6 +52,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <Link href="/about" className="text-sm font-medium text-[#9ca3af] hover:text-white transition-colors">About</Link>
                 <Link href="/faq" className="text-sm font-medium text-[#9ca3af] hover:text-white transition-colors">FAQ</Link>
                 <Link href="/contact" className="text-sm font-medium text-[#9ca3af] hover:text-white transition-colors">Contact</Link>
+                <Link href="/merch" className="text-sm font-medium text-[#9ca3af] hover:text-white transition-colors">Shop</Link>
               </div>
               <div className="text-[#6b7280] text-xs font-medium">
                 © {new Date().getFullYear()} DOGSRUN | 501(c)(3) nonprofit
