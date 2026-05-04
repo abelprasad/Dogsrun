@@ -4,7 +4,7 @@ const products = [
   {
     name: 'DOGSRUN Tumbler',
     description: 'Stainless steel insulated tumbler. Keep your drinks hot or cold while supporting our mission to end shelter euthanasia.',
-    price: '$26.99',
+    price: null,
     image: 'https://m.media-amazon.com/images/I/71dSvhkivFL._AC_SX679_.jpg',
     url: 'https://www.amazon.com/DOGSRUN-Tumbler-Stainless-Steel-Insulated/dp/B0DTJS6VPT',
   },
