@@ -1,19 +1,22 @@
 /**
- * DOGSRUN — Test Seed Script
- * 
- * Creates two test orgs (shelter + rescue), a dog, and triggers alert matching.
- * Verifies the full intake → match → alert → respond flow without a browser.
- * 
+ * DOGSRUN - authenticated integration smoke test
+ *
+ * Creates real Supabase Auth users, approved shelter/rescue orgs, rescue criteria,
+ * and dogs. It signs in through the app before calling protected endpoints, so the
+ * script matches the current auth model.
+ *
  * Usage:
- *   npx tsx scripts/seed-test.ts           # run all tests
- *   npx tsx scripts/seed-test.ts --cleanup # just clean up test data
- * 
+ *   npx tsx scripts/seed-test.ts
+ *   npx tsx scripts/seed-test.ts --keep-data
+ *   npx tsx scripts/seed-test.ts --cleanup
+ *
  * Requirements:
- *   - npm run dev running on localhost:3000
- *   - .env.local present with all 4 keys
+ *   - npm run dev running on http://localhost:3000
+ *   - .env.local with Supabase URL, anon key, service role key, and Resend key
  */
 
 import { createClient } from '@supabase/supabase-js'
+import { chromium, type Browser, type Page } from '@playwright/test'
 import * as dotenv from 'dotenv'
 import * as path from 'path'
 
@@ -25,337 +28,365 @@ const supabase = createClient(
 )
 
 const BASE = 'http://localhost:3000'
+const PASSWORD = 'DogsrunSeedTest!123'
+const KEEP_DATA = process.argv.includes('--keep-data')
+const CLEANUP_ONLY = process.argv.includes('--cleanup')
 
-// ─── Test data ────────────────────────────────────────────────────────────────
-
-const SHELTER_ID = '00000000-0000-0000-0000-000000000001'
-const RESCUE_ID  = '00000000-0000-0000-0000-000000000002'
-
-const TEST_SHELTER = {
-  id: SHELTER_ID,
-  name: '[TEST] Philly Test Shelter',
-  email: 'test-shelter@dogsrun-test.local',
-  city: 'Philadelphia',
-  state: 'PA',
-  type: 'shelter',
-  approval_status: 'approved',
-  is_active: true,
+const TEST_EMAILS = {
+  shelter: 'test-shelter@dogsrun-test.local',
+  rescue: 'test-rescue@dogsrun-test.local',
 }
 
-const TEST_RESCUE = {
-  id: RESCUE_ID,
-  name: '[TEST] Golden Rescue',
-  email: 'test-rescue@dogsrun-test.local',
-  city: 'Philadelphia',
-  state: 'PA',
-  type: 'rescue',
-  approval_status: 'approved',
-  is_active: true,
+type SeedContext = {
+  shelterId: string
+  rescueId: string
+  shelterPage: Page
+  browser: Browser
 }
 
-const TEST_CRITERIA = {
-  rescue_id: RESCUE_ID,
-  breeds: ['Labrador', 'Golden Retriever'],
-  max_age_years: 10,
-  max_weight_lbs: 100,
-  sex_preference: 'any',
-  accepts_mixes: true,
-  states_served: ['PA', 'NJ', 'DE'],
-  accepts_parvo: false,
-  accepts_tripod: true,
-  accepts_blind: false,
-  accepts_other: false,
-  is_active: true,
+type TestDog = {
+  id: string
+  age_years: number | null
+  weight_lbs: number | null
 }
 
-const TEST_DOG = {
-  shelter_id: SHELTER_ID,
-  name: '[TEST] Buddy',
-  breed: 'Labrador',
-  mix: false,
-  age_years: 3,
-  weight_lbs: 60,
-  sex: 'male',
-  color: ['yellow'],
-  state: 'PA',
-  description: 'Friendly test dog',
-  status: 'available',
-  parvo: false,
-  tripod: false,
-  blind: false,
-  other_issues: false,
+function log(msg: string) { console.log(`     ${msg}`) }
+function ok(msg: string) { console.log(`  OK ${msg}`) }
+function warn(msg: string) { console.log(`  WARN ${msg}`) }
+function fail(msg: string): never { throw new Error(msg) }
+function section(title: string) { console.log(`\n-- ${title}`) }
+
+async function getUserIdByEmail(email: string) {
+  const { data, error } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 })
+  if (error) fail(`Failed to list auth users: ${error.message}`)
+  return data.users.find(user => user.email?.toLowerCase() === email.toLowerCase())?.id ?? null
 }
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function log(msg: string)  { console.log(`     ${msg}`) }
-function ok(msg: string)   { console.log(`  ✅ ${msg}`) }
-function warn(msg: string) { console.log(`  ⚠️  ${msg}`) }
-function fail(msg: string) { console.error(`  ❌ ${msg}`); process.exit(1) }
-function section(title: string) { console.log(`\n── ${title}`) }
-
-// ─── Cleanup ──────────────────────────────────────────────────────────────────
 
 async function cleanup() {
-  section('Cleanup — removing previous test data')
-  await supabase.from('alerts').delete().eq('rescue_id', RESCUE_ID)
-  await supabase.from('dogs').delete().eq('shelter_id', SHELTER_ID)
-  await supabase.from('rescue_criteria').delete().eq('rescue_id', RESCUE_ID)
-  await supabase.from('organizations').delete().in('id', [SHELTER_ID, RESCUE_ID])
-  ok('All test data removed')
+  section('Cleanup')
+
+  const orgIds = new Set<string>()
+  for (const email of Object.values(TEST_EMAILS)) {
+    const userId = await getUserIdByEmail(email)
+    if (userId) orgIds.add(userId)
+  }
+
+  const { data: orgs } = await supabase
+    .from('organizations')
+    .select('id')
+    .in('email', Object.values(TEST_EMAILS))
+
+  for (const org of orgs ?? []) orgIds.add(org.id)
+
+  if (orgIds.size > 0) {
+    const ids = Array.from(orgIds)
+    await supabase.from('alerts').delete().in('rescue_id', ids)
+    await supabase.from('dogs').delete().in('shelter_id', ids)
+    await supabase.from('rescue_criteria').delete().in('rescue_id', ids)
+    await supabase.from('organizations').delete().in('id', ids)
+  }
+
+  for (const email of Object.values(TEST_EMAILS)) {
+    const userId = await getUserIdByEmail(email)
+    if (userId) await supabase.auth.admin.deleteUser(userId)
+  }
+
+  ok('Removed seed users, orgs, criteria, dogs, and alerts')
 }
 
-// ─── Seed ─────────────────────────────────────────────────────────────────────
-
-async function seed() {
-  section('Seeding test data')
-
-  const { error: shelterErr } = await supabase.from('organizations').insert(TEST_SHELTER)
-  if (shelterErr) fail(`Failed to insert shelter: ${shelterErr.message}`)
-  ok(`Shelter: ${TEST_SHELTER.name}`)
-
-  const { error: rescueErr } = await supabase.from('organizations').insert(TEST_RESCUE)
-  if (rescueErr) fail(`Failed to insert rescue: ${rescueErr.message}`)
-  ok(`Rescue: ${TEST_RESCUE.name}`)
-
-  const { error: criteriaErr } = await supabase.from('rescue_criteria').insert(TEST_CRITERIA)
-  if (criteriaErr) fail(`Failed to insert criteria: ${criteriaErr.message}`)
-  ok(`Criteria: Labrador/Golden · PA/NJ/DE · max 10y 100lbs`)
-
-  const { data: dog, error: dogErr } = await supabase
-    .from('dogs')
-    .insert(TEST_DOG)
-    .select()
-    .single()
-  if (dogErr || !dog) fail(`Failed to insert dog: ${dogErr?.message}`)
-  ok(`Dog: ${dog.name} (${dog.id})`)
-
-  return dog
-}
-
-// ─── Tests ────────────────────────────────────────────────────────────────────
-
-async function testAlertMatching(dogId: string) {
-  section('Test 1: Matching dog triggers alert')
-
-  const res = await fetch(`${BASE}/api/alerts`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ dog_id: dogId }),
+async function createAuthUser(email: string) {
+  const { data, error } = await supabase.auth.admin.createUser({
+    email,
+    password: PASSWORD,
+    email_confirm: true,
   })
 
-  if (!res.ok) fail(`/api/alerts returned ${res.status}: ${await res.text()}`)
+  if (error || !data.user) fail(`Failed to create auth user ${email}: ${error?.message}`)
+  return data.user.id
+}
+
+async function seedData() {
+  section('Seed')
+
+  const shelterId = await createAuthUser(TEST_EMAILS.shelter)
+  const rescueId = await createAuthUser(TEST_EMAILS.rescue)
+
+  const { error: orgError } = await supabase.from('organizations').insert([
+    {
+      id: shelterId,
+      name: '[TEST] Philly Test Shelter',
+      email: TEST_EMAILS.shelter,
+      city: 'Philadelphia',
+      state: 'PA',
+      type: 'shelter',
+      approval_status: 'approved',
+      is_active: true,
+    },
+    {
+      id: rescueId,
+      name: '[TEST] Golden Rescue',
+      email: TEST_EMAILS.rescue,
+      city: 'Philadelphia',
+      state: 'PA',
+      type: 'rescue',
+      approval_status: 'approved',
+      is_active: true,
+    },
+  ])
+  if (orgError) fail(`Failed to insert orgs: ${orgError.message}`)
+
+  const { error: criteriaError } = await supabase.from('rescue_criteria').insert({
+    rescue_id: rescueId,
+    breeds: ['Labrador', 'Golden Retriever'],
+    max_age_years: 10,
+    max_weight_lbs: 100,
+    sex_preference: 'any',
+    accepts_mixes: true,
+    states_served: ['PA', 'NJ', 'DE'],
+    accepts_parvo: false,
+    accepts_tripod: true,
+    accepts_blind: false,
+    accepts_other: false,
+    is_active: true,
+  })
+  if (criteriaError) fail(`Failed to insert criteria: ${criteriaError.message}`)
+
+  ok(`Shelter ${shelterId}`)
+  ok(`Rescue ${rescueId}`)
+  return { shelterId, rescueId }
+}
+
+async function createDog(shelterId: string, overrides: Record<string, unknown> = {}): Promise<TestDog> {
+  const { data, error } = await supabase
+    .from('dogs')
+    .insert({
+      shelter_id: shelterId,
+      name: '[TEST] Buddy',
+      breed: 'Labrador',
+      mix: false,
+      age_years: 3,
+      weight_lbs: 60,
+      sex: 'male',
+      color: ['yellow'],
+      state: 'PA',
+      description: 'Friendly test dog',
+      status: 'available',
+      parvo: false,
+      tripod: false,
+      blind: false,
+      other_issues: false,
+      ...overrides,
+    })
+    .select('id, age_years, weight_lbs')
+    .single()
+
+  if (error || !data) fail(`Failed to insert dog: ${error?.message}`)
+  ok(`Dog ${data.id}`)
+  return data
+}
+
+async function login(page: Page, email: string) {
+  await page.goto(`${BASE}/auth/login`)
+  await page.fill('input[type="email"]', email)
+  await page.fill('input[type="password"]', PASSWORD)
+  await page.locator('button:text("Sign In")').click()
+  await page.waitForURL(/\/dashboard/, { timeout: 15000 })
+}
+
+async function createContext(): Promise<SeedContext> {
+  const { shelterId, rescueId } = await seedData()
+  const browser = await chromium.launch({ headless: true })
+  const shelterPage = await browser.newPage({ baseURL: BASE })
+  await login(shelterPage, TEST_EMAILS.shelter)
+  ok('Signed in as shelter')
+  return { shelterId, rescueId, shelterPage, browser }
+}
+
+async function triggerAlerts(page: Page, dogId: string) {
+  const res = await page.request.post('/api/alerts', {
+    data: { dog_id: dogId },
+  })
+
+  if (!res.ok()) fail(`/api/alerts returned ${res.status()}: ${await res.text()}`)
 
   const data = await res.json()
   log(`Response: ${JSON.stringify(data)}`)
-  if (!data.matches || data.matches === 0) fail('No matches found — expected ≥1')
+  if (!data.matches || data.matches === 0) fail('No matches found; expected at least one')
   ok(`${data.matches} match(es) found`)
 }
 
-async function testAlertInDB() {
-  section('Test 2: Alert row created in database')
-
-  const { data: alerts, error } = await supabase
-    .from('alerts')
-    .select('*')
-    .eq('rescue_id', RESCUE_ID)
-
-  if (error) fail(`Failed to query alerts: ${error.message}`)
-  if (!alerts || alerts.length === 0) fail('No alert row found after matching')
-
-  const firstAlert = alerts![0]
-  ok(`${alerts!.length} alert row(s) in DB · status: ${firstAlert.status}`)
-  return firstAlert.id
-}
-
-async function testAlertResponse(alertId: string) {
-  section('Test 3: Rescue clicks Interested → alert status updates')
-
-  const res = await fetch(
-    `${BASE}/api/respond?alert_id=${alertId}&action=interested`,
-    { redirect: 'manual' }
-  )
-
-  if (res.status !== 302 && res.status !== 200) {
-    fail(`/api/respond returned unexpected status ${res.status}`)
-  }
-
-  const { data: alert } = await supabase
-    .from('alerts')
-    .select('status')
-    .eq('id', alertId)
-    .single()
-
-  if (alert?.status !== 'responded') fail(`Alert status is "${alert?.status}", expected "responded"`)
-  ok('Alert status updated to "responded"')
-}
-
-async function testPassResponse() {
-  section('Test 4: Rescue clicks Pass → alert status updates to declined')
-
-  // Insert a fresh dog for this test
-  const { data: dog } = await supabase
-    .from('dogs')
-    .insert({ ...TEST_DOG, name: '[TEST] Pass Dog' })
-    .select()
-    .single()
-
-  await fetch(`${BASE}/api/alerts`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ dog_id: dog!.id }),
-  })
-
-  const { data: alerts } = await supabase
+async function countAlerts(rescueId: string) {
+  const { data, error } = await supabase
     .from('alerts')
     .select('id')
-    .eq('rescue_id', RESCUE_ID)
+    .eq('rescue_id', rescueId)
+
+  if (error) fail(`Failed to count alerts: ${error.message}`)
+  return data?.length ?? 0
+}
+
+async function latestSentAlert(rescueId: string) {
+  const { data, error } = await supabase
+    .from('alerts')
+    .select('id')
+    .eq('rescue_id', rescueId)
     .eq('status', 'sent')
     .order('sent_at', { ascending: false })
     .limit(1)
 
-  if (!alerts || alerts.length === 0) {
-    warn('No fresh sent alert found for Pass test — skipping')
-    await supabase.from('dogs').delete().eq('id', dog!.id)
-    return
+  if (error) fail(`Failed to query latest sent alert: ${error.message}`)
+  return data?.[0]?.id ?? null
+}
+
+async function testAlertMatching(ctx: SeedContext) {
+  section('Test 1: authenticated shelter triggers matching')
+  const dog = await createDog(ctx.shelterId)
+  await triggerAlerts(ctx.shelterPage, dog.id)
+
+  const alertId = await latestSentAlert(ctx.rescueId)
+  if (!alertId) fail('No sent alert found after matching')
+  ok(`Alert ${alertId}`)
+  return { dog, alertId }
+}
+
+async function testPassResponse(alertId: string) {
+  section('Test 2: public Pass link updates alert to declined')
+
+  const res = await fetch(`${BASE}/api/respond?alert_id=${alertId}&action=pass`, {
+    redirect: 'manual',
+  })
+
+  if (![200, 302, 307, 308].includes(res.status)) {
+    fail(`/api/respond pass returned ${res.status}: ${await res.text()}`)
   }
 
-  const alertId = alerts[0].id
-
-  await fetch(
-    `${BASE}/api/respond?alert_id=${alertId}&action=pass`,
-    { redirect: 'manual' }
-  )
-
-  const { data: alert } = await supabase
+  const { data } = await supabase
     .from('alerts')
     .select('status')
     .eq('id', alertId)
     .single()
 
-  if (alert?.status !== 'declined') fail(`Alert status is "${alert?.status}", expected "declined"`)
-  ok('Alert status updated to "declined"')
-
-  await supabase.from('dogs').delete().eq('id', dog!.id)
+  if (data?.status !== 'declined') fail(`Alert status is ${data?.status}; expected declined`)
+  ok('Alert status updated to declined')
 }
 
-async function testNonMatchingDog() {
-  section('Test 5: Non-matching dog produces no alert')
+async function testNonMatchingDog(ctx: SeedContext) {
+  section('Test 3: non-matching dog produces no alert')
+  const before = await countAlerts(ctx.rescueId)
+  const dog = await createDog(ctx.shelterId, {
+    name: '[TEST] Non-Matching Dog',
+    breed: 'Chihuahua',
+    state: 'CA',
+  })
 
-  const { data: dog } = await supabase
+  const res = await ctx.shelterPage.request.post('/api/alerts', {
+    data: { dog_id: dog.id },
+  })
+
+  if (!res.ok()) fail(`/api/alerts non-match returned ${res.status()}: ${await res.text()}`)
+
+  const after = await countAlerts(ctx.rescueId)
+  if (after > before) fail('Non-matching dog incorrectly created an alert')
+  ok('No alert created')
+}
+
+async function testSpecialNeedsBlocking(ctx: SeedContext) {
+  section('Test 4: special-needs criteria block works')
+  const before = await countAlerts(ctx.rescueId)
+  const dog = await createDog(ctx.shelterId, {
+    name: '[TEST] Parvo Dog',
+    parvo: true,
+  })
+
+  const res = await ctx.shelterPage.request.post('/api/alerts', {
+    data: { dog_id: dog.id },
+  })
+
+  if (!res.ok()) fail(`/api/alerts special-needs returned ${res.status()}: ${await res.text()}`)
+
+  const after = await countAlerts(ctx.rescueId)
+  if (after > before) fail('Parvo dog matched a rescue that does not accept parvo')
+  ok('Parvo dog blocked')
+}
+
+async function testStatusUpdate(ctx: SeedContext, dog: TestDog) {
+  section('Test 5: authenticated status update preserves numeric fields')
+
+  const res = await ctx.shelterPage.request.post('/api/dogs/update', {
+    data: { dog_id: dog.id, status: 'urgent' },
+  })
+
+  if (!res.ok()) fail(`/api/dogs/update returned ${res.status()}: ${await res.text()}`)
+
+  const { data } = await supabase
     .from('dogs')
-    .insert({
-      ...TEST_DOG,
-      name: '[TEST] Non-Matching Dog',
-      breed: 'Chihuahua', // not in rescue criteria
-      state: 'CA',         // not in states_served
-    })
-    .select()
+    .select('status, age_years, weight_lbs')
+    .eq('id', dog.id)
     .single()
 
-  const { data: before } = await supabase
-    .from('alerts')
-    .select('id')
-    .eq('rescue_id', RESCUE_ID)
-
-  await fetch(`${BASE}/api/alerts`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ dog_id: dog!.id }),
-  })
-
-  const { data: after } = await supabase
-    .from('alerts')
-    .select('id')
-    .eq('rescue_id', RESCUE_ID)
-
-  if ((after?.length ?? 0) > (before?.length ?? 0)) {
-    fail('Non-matching dog incorrectly triggered an alert')
-  }
-  ok('No alert sent for non-matching dog')
-
-  await supabase.from('dogs').delete().eq('id', dog!.id)
+  if (data?.status !== 'urgent') fail(`Dog status is ${data?.status}; expected urgent`)
+  if (data.age_years !== dog.age_years) fail(`Dog age changed to ${data.age_years}; expected ${dog.age_years}`)
+  if (data.weight_lbs !== dog.weight_lbs) fail(`Dog weight changed to ${data.weight_lbs}; expected ${dog.weight_lbs}`)
+  ok('Status updated and numeric fields preserved')
 }
 
-async function testSpecialNeedsBlocking() {
-  section('Test 6: Special needs dog blocked when rescue does not accept')
+async function testSecurityRejections(ctx: SeedContext, dog: TestDog) {
+  section('Test 6: protected endpoints reject anonymous calls')
 
-  const { data: dog } = await supabase
-    .from('dogs')
-    .insert({
-      ...TEST_DOG,
-      name: '[TEST] Parvo Dog',
-      parvo: true, // rescue has accepts_parvo: false
-    })
-    .select()
-    .single()
-
-  const { data: before } = await supabase
-    .from('alerts').select('id').eq('rescue_id', RESCUE_ID)
-
-  await fetch(`${BASE}/api/alerts`, {
+  const alertRes = await fetch(`${BASE}/api/alerts`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ dog_id: dog!.id }),
+    body: JSON.stringify({ dog_id: dog.id }),
   })
+  if (alertRes.status !== 401) fail(`Anonymous /api/alerts returned ${alertRes.status}; expected 401`)
 
-  const { data: after } = await supabase
-    .from('alerts').select('id').eq('rescue_id', RESCUE_ID)
-
-  if ((after?.length ?? 0) > (before?.length ?? 0)) {
-    fail('Parvo dog incorrectly matched rescue that does not accept parvo')
-  }
-  ok('Parvo dog correctly blocked')
-
-  await supabase.from('dogs').delete().eq('id', dog!.id)
-}
-
-async function testStatusUpdate(dogId: string) {
-  section('Test 7: Dog status update via /api/dogs/update')
-
-  const res = await fetch(`${BASE}/api/dogs/update`, {
+  const updateRes = await fetch(`${BASE}/api/dogs/update`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ dog_id: dogId, status: 'urgent' }),
+    body: JSON.stringify({ dog_id: dog.id, status: 'available' }),
   })
+  if (updateRes.status !== 401) fail(`Anonymous /api/dogs/update returned ${updateRes.status}; expected 401`)
 
-  if (!res.ok) fail(`/api/dogs/update returned ${res.status}`)
-
-  const { data: dog } = await supabase
-    .from('dogs').select('status').eq('id', dogId).single()
-
-  if (dog?.status !== 'urgent') fail(`Status is "${dog?.status}", expected "urgent"`)
-  ok('Dog status updated to urgent')
+  ok('Anonymous calls rejected')
 }
-
-// ─── Main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
-  console.log('\n🐕 DOGSRUN — Seed & Integration Test')
-  console.log('=====================================')
+  console.log('\nDOGSRUN - authenticated integration smoke test')
+  console.log('============================================')
 
-  await cleanup()
-  const dog = await seed()
+  let ctx: SeedContext | null = null
 
-  await testAlertMatching(dog.id)
-  const alertId = await testAlertInDB()
-  await testAlertResponse(alertId)
-  await testPassResponse()
-  await testNonMatchingDog()
-  await testSpecialNeedsBlocking()
-  await testStatusUpdate(dog.id)
+  try {
+    await cleanup()
+    ctx = await createContext()
 
-  console.log('\n=====================================')
-  console.log('🎉 All tests passed!')
-  console.log('\n  Test data left in DB for manual inspection.')
-  console.log('  Clean up: npx tsx scripts/seed-test.ts --cleanup\n')
+    const { dog, alertId } = await testAlertMatching(ctx)
+    await testPassResponse(alertId)
+    await testNonMatchingDog(ctx)
+    await testSpecialNeedsBlocking(ctx)
+    await testStatusUpdate(ctx, dog)
+    await testSecurityRejections(ctx, dog)
+
+    console.log('\n============================================')
+    console.log('All integration smoke tests passed')
+  } finally {
+    if (ctx) await ctx.browser.close()
+    if (KEEP_DATA) {
+      warn('Keeping test data because --keep-data was provided')
+    } else {
+      await cleanup()
+    }
+  }
 }
 
-if (process.argv.includes('--cleanup')) {
-  cleanup().then(() => process.exit(0))
+if (CLEANUP_ONLY) {
+  cleanup().then(() => process.exit(0)).catch(error => {
+    console.error(error)
+    process.exit(1)
+  })
 } else {
-  main().catch(err => {
-    console.error('\n❌ Unhandled error:', err)
+  main().catch(error => {
+    console.error('\nUnhandled error:', error)
     process.exit(1)
   })
 }

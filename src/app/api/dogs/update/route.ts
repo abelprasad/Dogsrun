@@ -44,14 +44,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
+    const updates = { ...updateFields }
+    if ('age_years' in updates) {
+      updates.age_years = updates.age_years ? parseFloat(updates.age_years) : null
+    }
+    if ('weight_lbs' in updates) {
+      updates.weight_lbs = updates.weight_lbs ? parseFloat(updates.weight_lbs) : null
+    }
+
     const { error } = await supabase
       .from('dogs')
-      .update({
-        ...updateFields,
-        // Ensure numeric fields are correctly typed if they came in as strings
-        age_years: updateFields.age_years ? parseFloat(updateFields.age_years) : null,
-        weight_lbs: updateFields.weight_lbs ? parseFloat(updateFields.weight_lbs) : null,
-      })
+      .update(updates)
       .eq('id', dog_id)
 
     if (error) {
