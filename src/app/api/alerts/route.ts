@@ -101,6 +101,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: 'No active rescue criteria found' })
   }
 
+  // Fetch existing alerts for this dog to prevent duplicates
+  const { data: existingAlerts } = await supabase
+    .from('alerts')
+    .select('rescue_id')
+    .eq('dog_id', dog_id)
+
+  const alreadyAlerted = new Set((existingAlerts || []).map((a: { rescue_id: string }) => a.rescue_id))
+
   const matches: Match[] = []
 
   for (const criteria of (criteriaList as unknown as RescueCriteria[])) {
@@ -109,6 +117,7 @@ export async function POST(req: NextRequest) {
 
     if (org.id === dog.shelter_id) continue
     if (org.approval_status !== 'approved') continue
+    if (alreadyAlerted.has(org.id)) continue  // skip already-alerted rescues
 
     if (dog.parvo && !criteria.accepts_parvo) continue
     if (dog.tripod && !criteria.accepts_tripod) continue
@@ -265,9 +274,10 @@ export async function POST(req: NextRequest) {
 
   const sent = results.filter(r => r.status === 'fulfilled').length
   const failed = results.filter(r => r.status === 'rejected').length
+  const skipped = alreadyAlerted.size
 
   return NextResponse.json({
-    message: `Alerts sent: ${sent}, failed: ${failed}`,
+    message: `Alerts sent: ${sent}, failed: ${failed}${skipped > 0 ? `, skipped (already alerted): ${skipped}` : ''}`,
     matches: matches.length,
   })
 }
