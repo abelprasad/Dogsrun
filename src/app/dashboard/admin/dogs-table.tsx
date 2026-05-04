@@ -144,7 +144,7 @@ export default function AdminDogsTable({ dogs: initialDogs }: { dogs: Dog[] }) {
                         value={dog.status ?? 'available'}
                         disabled={loading === dog.id}
                         onChange={e => updateDog(dog.id, { status: e.target.value })}
-                        className="text-xs font-semibold border border-[#13241d]/20 px-2 py-1.5 bg-white text-[#13241d] outline-none disabled:opacity-50"
+                        className="text-xs font-semibold border border-[#13241d]/20 px-2 py-1.5 bg-[#fffaf2] text-[#13241d] outline-none disabled:opacity-50"
                       >
                         {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
                       </select>
@@ -159,7 +159,7 @@ export default function AdminDogsTable({ dogs: initialDogs }: { dogs: Dog[] }) {
                           type="date"
                           value={dateValue}
                           onChange={e => setDateValue(e.target.value)}
-                          className="text-xs border border-[#13241d]/20 px-2 py-1 outline-none focus:border-[#13241d] bg-white"
+                          className="text-xs border border-[#13241d]/20 px-2 py-1 outline-none focus:border-[#f4b942] bg-[#fffaf2] text-[#13241d]"
                         />
                         <button
                           onClick={() => { updateDog(dog.id, { euthanasia_date: dateValue || null }); setEditingDate(null) }}

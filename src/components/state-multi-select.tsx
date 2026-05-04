@@ -61,7 +61,7 @@ export default function StateMultiSelect({ selected, onChange, label = 'States S
           {selected.map(state => (
             <span key={state} className="flex items-center gap-1 border border-[#13241d]/15 bg-[#f5f0e8] px-2 py-1 text-xs font-black text-[#13241d]">
               {state}
-              <button type="button" onClick={() => remove(state)} className="text-[#9ca3af] hover:text-red-500 leading-none">×</button>
+              <button type="button" onClick={() => remove(state)} className="text-[#5d6a64] hover:text-red-500 leading-none">x</button>
             </span>
           ))}
         </div>
@@ -74,12 +74,12 @@ export default function StateMultiSelect({ selected, onChange, label = 'States S
         onChange={e => { setQuery(e.target.value); setOpen(true) }}
         onFocus={() => setOpen(true)}
         placeholder={selected.length === 0 ? 'Type a state (e.g. PA, NY)...' : 'Add another state...'}
-        className="w-full border border-[#13241d]/20 bg-white px-4 py-3 text-sm text-[#13241d] placeholder-[#9ca3af] transition-all focus:border-[#f4b942] focus:outline-none focus:ring-1 focus:ring-[#f4b942]"
+        className="w-full border border-[#13241d]/20 bg-[#fffaf2] px-4 py-3 text-sm text-[#13241d] placeholder-[#5d6a64]/50 transition-all focus:border-[#f4b942] focus:outline-none focus:ring-1 focus:ring-[#f4b942]"
       />
 
       {/* Dropdown */}
       {open && filtered.length > 0 && (
-        <div className="absolute z-50 mt-1 w-full border border-[#13241d]/20 bg-white shadow-lg max-h-48 overflow-y-auto">
+        <div className="absolute z-50 mt-1 w-full border border-[#13241d]/20 bg-[#fffaf2] shadow-lg max-h-48 overflow-y-auto">
           {filtered.map(state => (
             <button
               key={state}
@@ -99,7 +99,7 @@ export default function StateMultiSelect({ selected, onChange, label = 'States S
       )}
 
       {selected.length === 0 && (
-        <p className="mt-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-[#9ca3af]">Leave empty for all states</p>
+        <p className="mt-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-[#5d6a64]/70">Leave empty for all states</p>
       )}
     </div>
   )

@@ -29,7 +29,7 @@ interface CriteriaFormProps {
   initialCriteria?: RescueCriteria;
 }
 
-const inputClass = "w-full border border-[#13241d]/20 bg-white px-4 py-3 text-sm text-[#13241d] placeholder-[#9ca3af] transition-all focus:border-[#f4b942] focus:outline-none focus:ring-1 focus:ring-[#f4b942]"
+const inputClass = "w-full border border-[#13241d]/20 bg-[#fffaf2] px-4 py-3 text-sm text-[#13241d] placeholder-[#5d6a64]/50 transition-all focus:border-[#f4b942] focus:outline-none focus:ring-1 focus:ring-[#f4b942]"
 const labelClass = "mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-[#5d6a64]"
 
 export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaFormProps) {
@@ -137,7 +137,7 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
 
       {/* Breeds */}
       <div>
-        <label className={labelClass}>Breeds <span className="normal-case font-normal tracking-normal text-[#9ca3af]">— leave empty to match all</span></label>
+        <label className={labelClass}>Breeds <span className="normal-case font-normal tracking-normal text-[#5d6a64]/70">- leave empty to match all</span></label>
         <div className="flex gap-2 mb-3">
           <BreedSelect value={breedInput} onChange={setBreedInput} placeholder="Search or type a breed..." className="flex-1" />
           <button
@@ -154,7 +154,7 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
             {form.breeds.map(breed => (
               <span key={breed} className="flex items-center gap-1 border border-[#13241d]/15 bg-[#f5f0e8] px-3 py-1.5 text-xs font-black text-[#13241d]">
                 {breed}
-                <button type="button" onClick={() => removeBreed(breed)} className="ml-1 text-[#9ca3af] hover:text-red-500">×</button>
+                <button type="button" onClick={() => removeBreed(breed)} className="ml-1 text-[#5d6a64] hover:text-red-500">x</button>
               </span>
             ))}
           </div>
@@ -190,11 +190,11 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
       {/* Age + Weight */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <div>
-          <label className={labelClass}>Max age <span className="normal-case font-normal tracking-normal text-[#9ca3af]">(years)</span></label>
+          <label className={labelClass}>Max age <span className="normal-case font-normal tracking-normal text-[#5d6a64]/70">(years)</span></label>
           <input type="number" placeholder="Any" value={form.max_age_years} onChange={e => setForm({ ...form, max_age_years: e.target.value })} className={inputClass} />
         </div>
         <div>
-          <label className={labelClass}>Max weight <span className="normal-case font-normal tracking-normal text-[#9ca3af]">(lbs)</span></label>
+          <label className={labelClass}>Max weight <span className="normal-case font-normal tracking-normal text-[#5d6a64]/70">(lbs)</span></label>
           <input type="number" placeholder="Any" value={form.max_weight_lbs} onChange={e => setForm({ ...form, max_weight_lbs: e.target.value })} className={inputClass} />
         </div>
       </div>
