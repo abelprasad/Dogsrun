@@ -36,7 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className="flex flex-col md:flex-row justify-between items-center gap-8 text-gray-400 text-sm">
               <div className="flex items-center gap-2">
                 <Image
-                  src="https://dogsrun2.powerappsportals.com/DOGSRUN Logo idea 4.PNG"
+                  src="/logo.png"
                   alt="DOGSRUN logo"
                   width={36}
                   height={36}

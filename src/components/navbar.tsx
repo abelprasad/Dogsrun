@@ -33,7 +33,7 @@ export default async function Navbar() {
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2 group">
             <Image
-              src="https://dogsrun2.powerappsportals.com/DOGSRUN Logo idea 4.PNG"
+              src="/logo.png"
               alt="DOGSRUN logo"
               width={36}
               height={36}
