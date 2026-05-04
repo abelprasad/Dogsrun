@@ -38,33 +38,33 @@ export default function EuthanasiaCountdown({ euthanasiaDate }: { euthanasiaDate
   if (diffMs <= 0) {
     return (
       <div className="flex items-center gap-2 px-3 py-2 bg-red-600 rounded-lg">
-        <span className="text-xs font-black text-white uppercase tracking-widest">⚠ Past Euthanasia Date</span>
+        <span className="text-xs font-black text-white uppercase tracking-widest">Past Euthanasia Date</span>
       </div>
     );
   }
 
   return (
-    <div className={`rounded-xl border px-4 py-3 ${isCritical ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'}`}>
-      <p className={`text-[10px] font-black uppercase tracking-widest mb-2 ${isCritical ? 'text-red-500' : 'text-amber-600'}`}>
-        {isCritical ? '🔴 Critical — Time Running Out' : '⚠ At Risk — Euthanasia Scheduled'}
+    <div className={`rounded-lg border px-4 py-3 ${isCritical ? 'bg-red-50 border-red-200' : 'bg-[#13241d] border-[#f4b942]/30'}`}>
+      <p className={`text-[10px] font-black uppercase tracking-widest mb-2 ${isCritical ? 'text-red-500' : 'text-[#f4b942]'}`}>
+        {isCritical ? 'Critical - Time Running Out' : 'At Risk - Euthanasia Scheduled'}
       </p>
       <div className="flex items-end gap-3">
         {diffDays > 0 && (
           <div className="text-center">
-            <p className={`text-3xl font-[900] leading-none ${isCritical ? 'text-red-600' : 'text-amber-600'}`}>{diffDays}</p>
-            <p className={`text-[10px] font-bold uppercase tracking-widest mt-1 ${isCritical ? 'text-red-400' : 'text-amber-500'}`}>day{diffDays !== 1 ? 's' : ''}</p>
+            <p className={`text-3xl font-[900] leading-none ${isCritical ? 'text-red-600' : 'text-[#f8f1e8]'}`}>{diffDays}</p>
+            <p className={`text-[10px] font-bold uppercase tracking-widest mt-1 ${isCritical ? 'text-red-400' : 'text-[#d8cfc2]'}`}>day{diffDays !== 1 ? 's' : ''}</p>
           </div>
         )}
         <div className="text-center">
-          <p className={`text-3xl font-[900] leading-none ${isCritical ? 'text-red-600' : 'text-amber-600'}`}>{diffHoursRemainder}</p>
-          <p className={`text-[10px] font-bold uppercase tracking-widest mt-1 ${isCritical ? 'text-red-400' : 'text-amber-500'}`}>hr{diffHoursRemainder !== 1 ? 's' : ''}</p>
+          <p className={`text-3xl font-[900] leading-none ${isCritical ? 'text-red-600' : 'text-[#f8f1e8]'}`}>{diffHoursRemainder}</p>
+          <p className={`text-[10px] font-bold uppercase tracking-widest mt-1 ${isCritical ? 'text-red-400' : 'text-[#d8cfc2]'}`}>hr{diffHoursRemainder !== 1 ? 's' : ''}</p>
         </div>
         <div className="text-center">
-          <p className={`text-3xl font-[900] leading-none ${isCritical ? 'text-red-600' : 'text-amber-600'}`}>{diffMins}</p>
-          <p className={`text-[10px] font-bold uppercase tracking-widest mt-1 ${isCritical ? 'text-red-400' : 'text-amber-500'}`}>min</p>
+          <p className={`text-3xl font-[900] leading-none ${isCritical ? 'text-red-600' : 'text-[#f8f1e8]'}`}>{diffMins}</p>
+          <p className={`text-[10px] font-bold uppercase tracking-widest mt-1 ${isCritical ? 'text-red-400' : 'text-[#d8cfc2]'}`}>min</p>
         </div>
         <div className="flex-1 text-right">
-          <p className={`text-[10px] font-semibold ${isCritical ? 'text-red-400' : 'text-amber-500'}`}>
+          <p className={`text-[10px] font-semibold ${isCritical ? 'text-red-400' : 'text-[#d8cfc2]'}`}>
             {new Date(euthanasiaDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
           </p>
         </div>

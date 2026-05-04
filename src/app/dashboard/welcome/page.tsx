@@ -37,19 +37,19 @@ export default async function WelcomePage() {
   const dashboardHref = org.type === 'rescue' ? '/dashboard/rescue' : '/dashboard'
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="bg-[#111] border-t border-white/5 py-2 px-8">
+    <div className="min-h-screen bg-[#f8f1e8]">
+      <div className="bg-[#13241d] border-t border-[#f4b942]/20 py-2 px-8">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <span className="text-xs font-bold text-[#9ca3af] uppercase tracking-widest">{org.name}</span>
+          <span className="text-xs font-bold text-[#d8cfc2] uppercase tracking-widest">{org.name}</span>
           <SignOutButton />
         </div>
       </div>
 
-      <header className="bg-[#fffbeb] border-b border-gray-200 py-12 px-8">
+      <header className="bg-[#13241d] border-b border-[#f4b942]/30 py-12 px-8 text-[#f8f1e8]">
         <div className="max-w-7xl mx-auto">
-          <p className="text-xs font-bold text-[#f59e0b] uppercase tracking-widest mb-3">Getting started</p>
-          <h1 className="text-4xl md:text-5xl font-[900] tracking-tight text-[#111] mb-2">Welcome to DOGSRUN</h1>
-          <p className="text-[#6b7280]">Follow the steps below to get your organization set up.</p>
+          <p className="text-xs font-bold text-[#f4b942] uppercase tracking-widest mb-3">Getting started</p>
+          <h1 className="text-4xl md:text-5xl font-[900] tracking-tight mb-2">Welcome to DOGSRUN</h1>
+          <p className="text-[#d8cfc2]">Follow the steps below to get your organization set up.</p>
         </div>
       </header>
 

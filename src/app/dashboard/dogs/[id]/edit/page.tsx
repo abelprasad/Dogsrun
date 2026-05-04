@@ -40,26 +40,26 @@ export default async function EditDogPage({ params }: { params: Promise<{ id: st
     .order('sent_at', { ascending: false })
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="bg-[#111] border-t border-white/5 py-2 px-8">
+    <div className="min-h-screen bg-[#f8f1e8]">
+      <div className="bg-[#13241d] border-t border-[#f4b942]/20 py-2 px-8">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex gap-6">
-            <Link href="/dashboard" className="text-xs font-bold text-[#9ca3af] hover:text-white uppercase tracking-widest transition-colors">Dashboard</Link>
-            <Link href="/dashboard/dogs" className="text-xs font-bold text-[#9ca3af] hover:text-white uppercase tracking-widest transition-colors">My Dogs</Link>
-            <span className="text-xs font-bold text-[#f59e0b] uppercase tracking-widest">{dog.name}</span>
+            <Link href="/dashboard" className="text-xs font-bold text-[#d8cfc2] hover:text-[#f8f1e8] uppercase tracking-widest transition-colors">Dashboard</Link>
+            <Link href="/dashboard/dogs" className="text-xs font-bold text-[#d8cfc2] hover:text-[#f8f1e8] uppercase tracking-widest transition-colors">My Dogs</Link>
+            <span className="text-xs font-bold text-[#f4b942] uppercase tracking-widest">{dog.name}</span>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-xs font-bold text-[#9ca3af] uppercase tracking-widest">{userOrg.name}</span>
+            <span className="text-xs font-bold text-[#d8cfc2] uppercase tracking-widest">{userOrg.name}</span>
             <SignOutButton />
           </div>
         </div>
       </div>
 
-      <header className="bg-[#fffbeb] border-b border-gray-200 py-8 px-8">
+      <header className="bg-[#13241d] border-b border-[#f4b942]/30 py-8 px-8 text-[#f8f1e8]">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl md:text-4xl font-[900] tracking-tight text-[#111] mb-1">{dog.name}</h1>
-            <p className="text-[#6b7280] text-sm">{dog.breed}{dog.mix ? ' mix' : ''}{dog.age_years ? ` · ${dog.age_years}y` : ''}{dog.sex ? ` · ${dog.sex}` : ''}</p>
+            <h1 className="text-3xl md:text-4xl font-[900] tracking-tight mb-1">{dog.name}</h1>
+            <p className="text-[#d8cfc2] text-sm">{dog.breed}{dog.mix ? ' mix' : ''}{dog.age_years ? ` · ${dog.age_years}y` : ''}{dog.sex ? ` · ${dog.sex}` : ''}</p>
           </div>
           <StatusBadge status={dog.status || 'available'} euthanasiaDate={dog.euthanasia_date} />
         </div>
@@ -72,34 +72,34 @@ export default async function EditDogPage({ params }: { params: Promise<{ id: st
           </div>
           <div className="space-y-6">
             {dog.euthanasia_date && <EuthanasiaCountdown euthanasiaDate={dog.euthanasia_date} />}
-            <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-              <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-                <h3 className="text-sm font-[900] text-[#111] uppercase tracking-widest">Rescue Alerts</h3>
-                <span className="text-[10px] font-bold bg-[#fffbeb] text-[#451a03] px-2 py-1 rounded border border-gray-100">
+            <div className="bg-[#fffaf2] rounded-lg border border-[#13241d]/15 overflow-hidden">
+              <div className="px-5 py-4 border-b border-[#13241d]/10 flex items-center justify-between">
+                <h3 className="text-sm font-[900] text-[#13241d] uppercase tracking-widest">Rescue Alerts</h3>
+                <span className="text-[10px] font-bold bg-[#13241d] text-[#f4b942] px-2 py-1 border border-[#13241d]/10">
                   {alerts?.length || 0} sent
                 </span>
               </div>
-              <div className="divide-y divide-gray-50">
+              <div className="divide-y divide-[#13241d]/10">
                 {alerts && alerts.length > 0 ? (
                   alerts.map((alert: { id: string; status: string; sent_at: string | null; organizations: { name: string; city: string; state: string } | null }) => (
                     <div key={alert.id} className="px-5 py-4">
                       <div className="flex items-center justify-between mb-1">
-                        <p className="font-bold text-[#111] text-sm">{alert.organizations?.name}</p>
+                        <p className="font-bold text-[#13241d] text-sm">{alert.organizations?.name}</p>
                         <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded ${
                           alert.status === 'responded' ? 'bg-green-100 text-green-700' :
-                          alert.status === 'declined' ? 'bg-gray-100 text-gray-500' :
-                          'bg-[#fffbeb] text-[#451a03]'
+                          alert.status === 'declined' ? 'bg-[#efe7dc] text-[#5d6a64]' :
+                          'bg-[#13241d] text-[#f4b942]'
                         }`}>
                           {alert.status === 'responded' ? 'Interested' : alert.status === 'declined' ? 'Passed' : 'Sent'}
                         </span>
                       </div>
-                      <p className="text-xs text-[#9ca3af]">
+                      <p className="text-xs text-[#5d6a64]">
                         {alert.organizations?.city}, {alert.organizations?.state} · {alert.sent_at ? new Date(alert.sent_at).toLocaleDateString() : ''}
                       </p>
                     </div>
                   ))
                 ) : (
-                  <div className="px-5 py-8 text-center text-sm text-[#9ca3af] italic">No alerts sent yet.</div>
+                  <div className="px-5 py-8 text-center text-sm text-[#5d6a64] italic">No alerts sent yet.</div>
                 )}
               </div>
             </div>
