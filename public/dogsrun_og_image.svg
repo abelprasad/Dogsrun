@@ -22,5 +22,5 @@
   <text x="340" y="220" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="400" fill="#7c2d12" opacity="0.85" style="fill:rgb(124, 45, 18);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.85;font-family:system-ui, -apple-system, sans-serif;font-size:22px;font-weight:400;text-anchor:middle;dominant-baseline:auto">Every dog deserves a run to safety.</text>
 
   <!-- URL -->
-  <text x="340" y="310" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="500" fill="#92400e" letter-spacing="1" style="fill:rgb(146, 64, 14);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:system-ui, -apple-system, sans-serif;font-size:16px;font-weight:500;text-anchor:middle;dominant-baseline:auto">dogsrun.net</text>
+  <text x="340" y="310" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="500" fill="#92400e" letter-spacing="1" style="fill:rgb(146, 64, 14);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:system-ui, -apple-system, sans-serif;font-size:16px;font-weight:500;text-anchor:middle;dominant-baseline:auto">dogsrun.org</text>
 </svg>

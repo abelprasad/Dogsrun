@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     description: 'Real-time matching between shelters and rescue organizations. Instant alerts, seamless communication.',
     url: 'https://dogsrun.org',
     siteName: 'DOGSRUN',
-    images: [{ url: 'https://dogsrun.org/dogsrun_og-image.png', width: 1200, height: 630 }],
+    images: [{ url: 'https://dogsrun.org/dogsrun_og_image.png', width: 1200, height: 630 }],
     type: 'website',
   },
   twitter: { card: 'summary_large_image', title: 'DOGSRUN', description: 'Real-time dog matching between shelters and rescues.' }
