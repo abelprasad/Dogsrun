@@ -60,7 +60,6 @@ export default async function AdminPage() {
 
   return (
     <div className="min-h-screen bg-[#f5f0e8]">
-      {/* Subnav */}
       <div className="bg-[#13241d] py-2 px-8">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <span className="text-xs font-bold text-[#f4b942] uppercase tracking-[0.24em]">Admin Panel</span>
@@ -71,7 +70,6 @@ export default async function AdminPage() {
         </div>
       </div>
 
-      {/* Header */}
       <header className="bg-[#13241d] pb-12 px-8 pt-8 border-t border-white/5">
         <div className="max-w-7xl mx-auto">
           <p className="text-xs uppercase tracking-[0.24em] text-[#f4b942]/70 mb-3 font-bold">DOGSRUN</p>
@@ -81,8 +79,6 @@ export default async function AdminPage() {
       </header>
 
       <main className="max-w-7xl mx-auto py-10 px-8 space-y-14">
-
-        {/* Stats */}
         <section>
           <p className="text-xs uppercase tracking-[0.24em] font-bold text-[#5d6a64] mb-6">Overview</p>
           <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-3">
@@ -95,19 +91,16 @@ export default async function AdminPage() {
           </div>
         </section>
 
-        {/* Organizations */}
         <section>
           <p className="text-xs uppercase tracking-[0.24em] font-bold text-[#5d6a64] mb-6">Organizations</p>
           <AdminOrgTable orgs={orgs ?? []} alertsByOrg={alertsByOrg} />
         </section>
 
-        {/* Dogs */}
         <section>
           <p className="text-xs uppercase tracking-[0.24em] font-bold text-[#5d6a64] mb-6">All Dogs</p>
           <AdminDogsTable dogs={dogs ?? []} />
         </section>
 
-        {/* Recent Activity */}
         <section>
           <p className="text-xs uppercase tracking-[0.24em] font-bold text-[#5d6a64] mb-6">Recent Activity</p>
           <div className="bg-[#fff9ef] outline outline-1 outline-[#13241d]/10 overflow-hidden">
@@ -147,7 +140,6 @@ export default async function AdminPage() {
             </table>
           </div>
         </section>
-
       </main>
     </div>
   )
