@@ -35,6 +35,11 @@ export async function POST(req: NextRequest) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
+  const { data: authUser, error: authUserError } = await serviceClient.auth.admin.getUserById(user_id)
+  if (authUserError || !authUser.user || authUser.user.email?.toLowerCase() !== email.toLowerCase()) {
+    return NextResponse.json({ error: 'Invalid registration user' }, { status: 403 })
+  }
+
   // Check for existing org
   const { data: existing } = await serviceClient
     .from('organizations')

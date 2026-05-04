@@ -120,15 +120,9 @@ export default async function AdminPage() {
                 </tr>
               </thead>
               <tbody>
-<<<<<<< HEAD
                 {recentAlerts && recentAlerts.length > 0 ? recentAlerts.map((alert: { id: string; dogs: { name: string; breed: string } | null; organizations: { name: string } | null; status: string; sent_at: string | null }, i: number) => (
-                  <tr key={alert.id} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}>
-                    <td className="px-4 py-3 font-semibold text-[#111]">
-=======
-                {recentAlerts && recentAlerts.length > 0 ? recentAlerts.map((alert: any, i: number) => (
                   <tr key={alert.id} className={i % 2 === 0 ? 'bg-[#fff9ef]' : 'bg-[#f5f0e8]/60'}>
                     <td className="px-4 py-3 font-semibold text-[#13241d]">
->>>>>>> 0032f87 (fix: admin link on all shelter pages, my dogs + add dog restyled to dark green/cream)
                       {alert.dogs?.name ?? '—'}
                       <span className="text-[#5d6a64] font-normal"> · {alert.dogs?.breed ?? ''}</span>
                     </td>

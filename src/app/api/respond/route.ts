@@ -18,6 +18,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Missing params' }, { status: 400 })
   }
 
+  if (!['interested', 'declined', 'pass'].includes(action)) {
+    return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
+  }
+
   const status = action === 'interested' ? 'responded' : 'declined'
 
   // Update alert status
