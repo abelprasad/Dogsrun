@@ -6,10 +6,6 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'dogsrun2.powerappsportals.com',
-      },
-      {
-        protocol: 'https',
         hostname: 'images.pexels.com',
       },
       {
@@ -19,6 +15,10 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'm.media-amazon.com',
       }
     ]
   }

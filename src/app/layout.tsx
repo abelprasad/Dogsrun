@@ -36,7 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className="flex flex-col md:flex-row justify-between items-center gap-8 text-gray-400 text-sm">
               <div className="flex items-center gap-2">
                 <Image
-                  src="https://dogsrun2.powerappsportals.com/DOGSRUN Logo idea 4.PNG"
+                  src="/logo.png"
                   alt="DOGSRUN logo"
                   width={36}
                   height={36}
@@ -52,6 +52,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <Link href="/about" className="text-sm font-medium text-[#9ca3af] hover:text-white transition-colors">About</Link>
                 <Link href="/faq" className="text-sm font-medium text-[#9ca3af] hover:text-white transition-colors">FAQ</Link>
                 <Link href="/contact" className="text-sm font-medium text-[#9ca3af] hover:text-white transition-colors">Contact</Link>
+                <Link href="/merch" className="text-sm font-medium text-[#9ca3af] hover:text-white transition-colors">Shop</Link>
               </div>
               <div className="text-[#6b7280] text-xs font-medium">
                 © {new Date().getFullYear()} DOGSRUN | 501(c)(3) nonprofit
