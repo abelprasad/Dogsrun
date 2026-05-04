@@ -47,8 +47,8 @@ export default function DogRowActions({ dogId, currentStatus }: { dogId: string;
         value={pendingStatus}
         disabled={statusLoading}
         onChange={(e) => setPendingStatus(e.target.value)}
-        className={`text-xs font-semibold border rounded-lg px-3 py-2 bg-white text-[#111] outline-none transition-all disabled:opacity-50 cursor-pointer ${
-          isDirty ? 'border-[#f59e0b] ring-1 ring-[#f59e0b]' : 'border-gray-200'
+        className={`text-xs font-semibold border px-3 py-2 bg-[#fffaf2] text-[#13241d] outline-none transition-all disabled:opacity-50 cursor-pointer ${
+          isDirty ? 'border-[#f4b942] ring-1 ring-[#f4b942]' : 'border-[#13241d]/20'
         }`}
       >
         {STATUSES.map((s) => (
@@ -61,7 +61,7 @@ export default function DogRowActions({ dogId, currentStatus }: { dogId: string;
         <button
           onClick={handleApplyStatus}
           disabled={statusLoading}
-          className="text-xs font-bold px-3 py-2 rounded-lg bg-[#111] text-white hover:bg-black transition-colors whitespace-nowrap disabled:opacity-50"
+          className="text-xs font-bold px-3 py-2 bg-[#13241d] text-[#f4b942] hover:bg-[#1f332a] transition-colors whitespace-nowrap disabled:opacity-50"
         >
           {statusLoading ? 'Saving...' : 'Apply'}
         </button>
@@ -70,7 +70,7 @@ export default function DogRowActions({ dogId, currentStatus }: { dogId: string;
       {/* Edit */}
       <Link
         href={`/dashboard/dogs/${dogId}/edit`}
-        className="text-xs font-semibold px-3 py-2 rounded-lg bg-[#f59e0b] text-[#451a03] hover:bg-[#d97706] transition-colors whitespace-nowrap"
+        className="text-xs font-semibold px-3 py-2 bg-[#f4b942] text-[#13241d] hover:bg-[#e3a72c] transition-colors whitespace-nowrap"
       >
         Edit
       </Link>

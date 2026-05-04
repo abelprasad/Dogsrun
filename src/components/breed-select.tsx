@@ -59,10 +59,10 @@ export default function BreedSelect({ value, onChange, placeholder = 'Search bre
         onChange={handleInputChange}
         onFocus={() => setOpen(true)}
         placeholder={placeholder}
-        className="w-full border border-[#13241d]/20 bg-white px-4 py-3 text-sm text-[#13241d] placeholder-[#9ca3af] transition-all focus:border-[#f4b942] focus:outline-none focus:ring-1 focus:ring-[#f4b942]"
+        className="w-full border border-[#13241d]/20 bg-[#fffaf2] px-4 py-3 text-sm text-[#13241d] placeholder-[#5d6a64]/50 transition-all focus:border-[#f4b942] focus:outline-none focus:ring-1 focus:ring-[#f4b942]"
       />
       {open && (
-        <div className="absolute z-50 mt-1 w-full border border-[#13241d]/20 bg-white shadow-lg max-h-56 overflow-y-auto">
+        <div className="absolute z-50 mt-1 w-full border border-[#13241d]/20 bg-[#fffaf2] shadow-lg max-h-56 overflow-y-auto">
           {filtered.length > 0 ? (
             filtered.map(breed => (
               <button
@@ -75,7 +75,7 @@ export default function BreedSelect({ value, onChange, placeholder = 'Search bre
               </button>
             ))
           ) : (
-            <div className="px-4 py-2.5 text-sm text-[#9ca3af]">
+            <div className="px-4 py-2.5 text-sm text-[#5d6a64]">
               No match — press Enter to use <span className="font-black text-[#13241d]">&ldquo;{query}&rdquo;</span>
             </div>
           )}

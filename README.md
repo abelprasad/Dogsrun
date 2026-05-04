@@ -13,6 +13,7 @@ Shelter-to-rescue dog matching platform. Shelters add dogs on intake, DOGSRUN au
 | Styling | Tailwind CSS |
 | Database + Auth | Supabase (PostgreSQL + RLS + Auth) |
 | Email | Resend |
+| Monitoring | Sentry |
 | Hosting | Vercel |
 
 ## Local Development
@@ -23,6 +24,15 @@ npm run dev
 ```
 
 Requires `.env.local` — see handoff doc for keys.
+
+## Production Monitoring
+Sentry is wired for client, server, edge, App Router render errors, source maps, and error-session replay.
+
+Set these in Vercel:
+- `NEXT_PUBLIC_SENTRY_DSN`
+- `SENTRY_ORG`
+- `SENTRY_PROJECT`
+- `SENTRY_AUTH_TOKEN`
 
 ## Features
 - Shelter dog intake with photo upload (Supabase Storage)

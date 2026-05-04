@@ -20,7 +20,7 @@ export default function StateSelect({ value, onChange, className = '', placehold
     <select
       value={value}
       onChange={e => onChange(e.target.value)}
-      className={`w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] text-[#111] transition-all bg-white text-sm ${className}`}
+      className={`w-full border border-[#13241d]/20 bg-[#fffaf2] px-4 py-2.5 focus:outline-none focus:border-[#f4b942] focus:ring-1 focus:ring-[#f4b942] text-[#13241d] transition-all text-sm ${className}`}
     >
       <option value="">{placeholder}</option>
       {US_STATES.map(s => (

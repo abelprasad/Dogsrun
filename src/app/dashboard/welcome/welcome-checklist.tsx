@@ -98,13 +98,13 @@ export default function WelcomeChecklist({
     <div className="max-w-2xl">
       {/* Progress */}
       <div className="flex items-center gap-4 mb-8">
-        <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+        <div className="flex-1 h-2 bg-[#13241d]/10 overflow-hidden">
           <div
-            className="h-full bg-[#f59e0b] rounded-full transition-all duration-500"
+            className="h-full bg-[#f4b942] transition-all duration-500"
             style={{ width: `${(completedCount / steps.length) * 100}%` }}
           />
         </div>
-        <span className="text-sm font-bold text-[#6b7280] whitespace-nowrap">
+        <span className="text-sm font-bold text-[#5d6a64] whitespace-nowrap">
           {completedCount} / {steps.length} done
         </span>
       </div>
@@ -114,17 +114,17 @@ export default function WelcomeChecklist({
         {steps.map((step, i) => (
           <div
             key={step.id}
-            className={`flex gap-5 p-6 rounded-xl border transition-all ${
+            className={`flex gap-5 p-6 rounded-lg border transition-all ${
               step.done
-                ? 'bg-gray-50 border-gray-100 opacity-60'
-                : 'bg-white border-gray-200'
+                ? 'bg-[#efe7dc] border-[#13241d]/10 opacity-70'
+                : 'bg-[#fffaf2] border-[#13241d]/15'
             }`}
           >
             {/* Number / check */}
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold ${
+            <div className={`w-8 h-8 flex items-center justify-center flex-shrink-0 text-sm font-bold ${
               step.done
-                ? 'bg-green-100 text-green-600'
-                : 'bg-[#fffbeb] text-[#f59e0b]'
+                ? 'bg-[#dbe7d6] text-[#2f5d3a]'
+                : 'bg-[#13241d] text-[#f4b942]'
             }`}>
               {step.done ? (
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -136,14 +136,14 @@ export default function WelcomeChecklist({
             </div>
 
             <div className="flex-1 min-w-0">
-              <p className={`font-bold mb-1 ${step.done ? 'text-[#6b7280] line-through' : 'text-[#111]'}`}>
+              <p className={`font-bold mb-1 ${step.done ? 'text-[#5d6a64] line-through' : 'text-[#13241d]'}`}>
                 {step.label}
               </p>
-              <p className="text-sm text-[#9ca3af] mb-3">{step.description}</p>
+              <p className="text-sm text-[#5d6a64] mb-3">{step.description}</p>
               {!step.done && step.href && step.cta && (
                 <Link
                   href={step.href}
-                  className="inline-block px-4 py-1.5 bg-[#111] text-white text-xs font-bold rounded-lg hover:bg-black transition-colors"
+                  className="inline-block px-4 py-1.5 bg-[#13241d] text-[#f8f1e8] text-xs font-bold hover:bg-[#1f332a] transition-colors"
                 >
                   {step.cta} →
                 </Link>
@@ -157,13 +157,13 @@ export default function WelcomeChecklist({
       <div className="flex items-center gap-4">
         <Link
           href={dashboardHref}
-          className="inline-block bg-[#f59e0b] text-[#451a03] font-semibold rounded-lg px-5 py-2.5 hover:bg-[#d97706] transition-colors"
+          className="inline-block bg-[#f4b942] text-[#13241d] font-semibold px-5 py-2.5 hover:bg-[#e3a72c] transition-colors"
         >
           Go to Dashboard
         </Link>
         <button
           onClick={dismiss}
-          className="text-sm text-[#9ca3af] hover:text-[#6b7280] transition-colors"
+          className="text-sm text-[#5d6a64] hover:text-[#13241d] transition-colors"
         >
           Don&apos;t show this again
         </button>

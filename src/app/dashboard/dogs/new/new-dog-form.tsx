@@ -43,7 +43,7 @@ export default function NewDogForm({ orgName, isAdmin }: Props) {
     parvo: false, tripod: false, blind: false, other_issues: false, other_issues_notes: '',
   })
 
-  const inputCls = "w-full border border-[#13241d]/20 bg-white px-4 py-3 focus:outline-none focus:border-[#13241d] text-[#13241d] placeholder-[#5d6a64]/40 text-sm"
+  const inputCls = "w-full border border-[#13241d]/20 bg-[#fffaf2] px-4 py-3 focus:outline-none focus:border-[#f4b942] focus:ring-1 focus:ring-[#f4b942] text-[#13241d] placeholder-[#5d6a64]/40 text-sm"
   const labelCls = "block text-xs uppercase tracking-[0.24em] font-bold text-[#13241d] mb-2"
 
   const field = (key: keyof DogForm, label: string, type = 'text', placeholder = '', min?: string, step?: string) => (
