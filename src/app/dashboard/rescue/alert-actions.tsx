@@ -35,6 +35,21 @@ export default function AlertActions({ alertId, currentStatus }: { alertId: stri
     )
   }
 
+  if (status === 'declined') {
+    return (
+      <div className="flex items-center gap-3">
+        <span className="text-sm font-bold text-gray-400 uppercase tracking-[0.12em]">Passed</span>
+        <button
+          onClick={() => updateStatus('sent')}
+          disabled={loading}
+          className="border border-gray-300 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-gray-500 transition hover:border-[#13241d] hover:text-[#13241d] disabled:opacity-50"
+        >
+          {loading ? '...' : 'Undo'}
+        </button>
+      </div>
+    )
+  }
+
   return (
     <button
       onClick={() => updateStatus('responded')}
