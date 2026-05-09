@@ -16,6 +16,16 @@ export default async function PublicDogProfilePage({ params }: { params: Promise
 
   if (!dog) notFound()
 
+  // Strip internal [pgeo:XXXXXXX] import tag wherever it appears in description
+  const cleanDescription = dog.description
+    ? dog.description.replace(/\[pgeo:[A-Z0-9]+\]\s*/g, '').trim() || null
+    : null
+
+  // Location: prefer city+state, fall back to org name only (imported dogs have no city/state)
+  const locationLine = (dog.organizations?.city && dog.organizations?.state)
+    ? `${dog.organizations.city}, ${dog.organizations.state}`
+    : null
+
   return (
     <div className="bg-[#f5f0e8] text-[#13241d]">
       {/* Hero */}
@@ -65,7 +75,7 @@ export default async function PublicDogProfilePage({ params }: { params: Promise
                   ['Age', dog.age_years ? `${dog.age_years} years` : '—'],
                   ['Sex', dog.sex || '—'],
                   ['Weight', dog.weight_lbs ? `${dog.weight_lbs} lbs` : '—'],
-                  ['Color', dog.color || '—'],
+                  ['Color', Array.isArray(dog.color) ? dog.color.join(', ') : (dog.color || '—')],
                 ].map(([label, value]) => (
                   <div key={label} className="bg-[#fff9ef] p-4">
                     <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#7a877f]">{label}</p>
@@ -75,18 +85,22 @@ export default async function PublicDogProfilePage({ params }: { params: Promise
               </div>
             </div>
 
-            <div className="border-t border-[#13241d]/10 pt-8">
-              <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.22em] text-[#7a877f]">Description</p>
-              <p className="leading-7 text-[#5d6a64] italic">
-                &quot;{dog.description || "No additional notes provided for this dog."}&quot;
-              </p>
-            </div>
+            {cleanDescription && (
+              <div className="border-t border-[#13241d]/10 pt-8">
+                <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.22em] text-[#7a877f]">Description</p>
+                <p className="leading-7 text-[#5d6a64] italic">
+                  &quot;{cleanDescription}&quot;
+                </p>
+              </div>
+            )}
 
             <div className="border-t border-[#13241d]/10 pt-8 space-y-4">
               <div className="border-l-4 border-[#f59e0b] bg-[#13241d] p-5 text-[#f8f1e8]">
                 <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#f4b942] mb-1">Location</p>
-                <p className="font-black text-[#f8f1e8]">{dog.organizations?.name}</p>
-                <p className="text-sm text-[#c8d3ce]">{dog.organizations?.city}, {dog.organizations?.state}</p>
+                <p className="font-black text-[#f8f1e8]">{dog.organizations?.name || '—'}</p>
+                {locationLine && (
+                  <p className="text-sm text-[#c8d3ce]">{locationLine}</p>
+                )}
               </div>
 
               <Link
