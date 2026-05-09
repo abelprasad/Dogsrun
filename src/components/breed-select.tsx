@@ -3,15 +3,61 @@
 import { useState, useRef, useEffect } from 'react'
 
 const COMMON_BREEDS = [
-  'American Pit Bull Terrier', 'American Staffordshire Terrier', 'Australian Shepherd',
-  'Basset Hound', 'Beagle', 'Bernese Mountain Dog', 'Bichon Frise', 'Border Collie',
-  'Boston Terrier', 'Boxer', 'Bulldog', 'Cavalier King Charles Spaniel', 'Chihuahua',
-  'Chow Chow', 'Cocker Spaniel', 'Dachshund', 'Dalmatian', 'Doberman Pinscher',
-  'French Bulldog', 'German Shepherd', 'Golden Retriever', 'Great Dane', 'Greyhound',
-  'Havanese', 'Husky', 'Jack Russell Terrier', 'Labrador Retriever', 'Maltese',
-  'Miniature Schnauzer', 'Pomeranian', 'Poodle', 'Pug', 'Rottweiler', 'Saint Bernard',
-  'Shih Tzu', 'Terrier Mix', 'Vizsla', 'Weimaraner', 'Welsh Corgi', 'Yorkshire Terrier',
-]
+  // Sporting
+  'Brittany Spaniel', 'Cocker Spaniel', 'English Setter', 'English Springer Spaniel',
+  'German Shorthaired Pointer', 'German Wirehaired Pointer', 'Golden Retriever',
+  'Irish Setter', 'Labrador Retriever', 'Pointer', 'Vizsla', 'Weimaraner',
+  // Hound
+  'Afghan Hound', 'Basset Hound', 'Beagle', 'Bloodhound', 'Borzoi',
+  'Dachshund', 'Greyhound', 'Ibizan Hound', 'Irish Wolfhound', 'Plott Hound',
+  'Rhodesian Ridgeback', 'Saluki', 'Whippet',
+  // Working
+  'Akita', 'Alaskan Malamute', 'Bernese Mountain Dog', 'Boerboel', 'Boxer',
+  'Bullmastiff', 'Cane Corso', 'Doberman Pinscher', 'Giant Schnauzer',
+  'Great Dane', 'Great Pyrenees', 'Leonberger', 'Mastiff',
+  'Newfoundland', 'Portuguese Water Dog', 'Presa Canario', 'Rottweiler',
+  'Saint Bernard', 'Samoyed', 'Siberian Husky',
+  // Terrier
+  'Airedale Terrier', 'American Pit Bull Terrier', 'American Staffordshire Terrier',
+  'Australian Terrier', 'Border Terrier', 'Bull Terrier', 'Cairn Terrier',
+  'Jack Russell Terrier', 'Jack (Parson) Russell Terrier', 'Manchester Terrier',
+  'Miniature Bull Terrier', 'Miniature Schnauzer', 'Norfolk Terrier',
+  'Pit Bull Terrier', 'Scottish Terrier', 'Soft Coated Wheaten Terrier',
+  'Staffordshire Bull Terrier', 'Welsh Terrier', 'West Highland White Terrier',
+  'Yorkshire Terrier',
+  // Toy
+  'Affenpinscher', 'Brussels Griffon', 'Cavalier King Charles Spaniel',
+  'Chihuahua', 'Chihuahua - Long Haired', 'Chihuahua - Smooth Coated',
+  'Chinese Crested', 'Havanese', 'Italian Greyhound', 'Maltese',
+  'Miniature Pinscher', 'Papillon', 'Pekingese', 'Pomeranian',
+  'Poodle - Toy', 'Pug', 'Shih Tzu', 'Toy Fox Terrier',
+  // Non-Sporting
+  'American Bulldog', 'Bichon Frise', 'Boston Terrier', 'Bulldog',
+  'Chow Chow', 'Dalmatian', 'English Bulldog', 'Feist',
+  'Finnish Spitz', 'French Bulldog', 'Keeshond', 'Lhasa Apso',
+  'Lowchen', 'Poodle - Standard', 'Poodle - Miniature',
+  'Schipperke', 'Shiba Inu', 'Tibetan Spaniel',
+  // Herding
+  'Australian Cattle Dog', 'Australian Shepherd', 'Belgian Malinois',
+  'Belgian Sheepdog', 'Belgian Tervuren', 'Border Collie', 'Bouvier des Flandres',
+  'Briard', 'Cardigan Welsh Corgi', 'Collie', 'Dutch Shepherd',
+  'German Shepherd', 'German Shepherd Dog', 'Miniature American Shepherd',
+  'Old English Sheepdog', 'Pembroke Welsh Corgi', 'Shetland Sheepdog',
+  // Hound / Misc
+  'Alaskan Husky', 'Husky', 'Malinois', 'Mutt',
+  // Mix variants common in shelters
+  'American Bulldog mix', 'American Pit Bull Terrier mix',
+  'American Staffordshire Terrier mix', 'Boerboel mix',
+  'Boxer mix', 'Chihuahua mix', 'Chihuahua - Smooth Coated mix',
+  'Chow Chow mix', 'French Bulldog mix', 'German Shepherd Dog mix',
+  'German Shepherd mix', 'Great Pyrenees mix',
+  'Jack (Parson) Russell Terrier mix', 'Labrador Retriever mix',
+  'Pit Bull Terrier mix', 'Rottweiler mix', 'Siberian Husky mix',
+  'Staffordshire Bull Terrier mix', 'Terrier Mix',
+].sort()
+
+// Deduplicate
+const BREEDS = [...new Set(COMMON_BREEDS)]
 
 interface BreedSelectProps {
   value: string
@@ -26,8 +72,8 @@ export default function BreedSelect({ value, onChange, placeholder = 'Search bre
   const ref = useRef<HTMLDivElement>(null)
 
   const filtered = query.length > 0
-    ? COMMON_BREEDS.filter(b => b.toLowerCase().includes(query.toLowerCase()))
-    : COMMON_BREEDS
+    ? BREEDS.filter(b => b.toLowerCase().includes(query.toLowerCase()))
+    : BREEDS
 
   useEffect(() => { setQuery(value) }, [value])
 

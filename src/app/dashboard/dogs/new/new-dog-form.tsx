@@ -25,6 +25,8 @@ interface DogForm {
   blind: boolean;
   other_issues: boolean;
   other_issues_notes: string;
+  intake_date: string;
+  euthanasia_date: string;
 }
 
 interface Props {
@@ -41,6 +43,7 @@ export default function NewDogForm({ orgName, isAdmin }: Props) {
     name: '', breed: '', mix: false, age_years: '', weight_lbs: '',
     sex: 'unknown', color: [], state: '', description: '',
     parvo: false, tripod: false, blind: false, other_issues: false, other_issues_notes: '',
+    intake_date: '', euthanasia_date: '',
   })
 
   const inputCls = "w-full border border-[#13241d]/20 bg-[#fffaf2] px-4 py-3 focus:outline-none focus:border-[#f4b942] focus:ring-1 focus:ring-[#f4b942] text-[#13241d] placeholder-[#5d6a64]/40 text-sm"
@@ -93,6 +96,8 @@ export default function NewDogForm({ orgName, isAdmin }: Props) {
       state: form.state || null, description: form.description,
       parvo: form.parvo, tripod: form.tripod, blind: form.blind,
       other_issues: form.other_issues, other_issues_notes: form.other_issues_notes,
+      intake_date: form.intake_date || null,
+      euthanasia_date: form.euthanasia_date || null,
       shelter_id: org.id, status: 'available', photo_url,
     }).select().single()
 
@@ -168,6 +173,37 @@ export default function NewDogForm({ orgName, isAdmin }: Props) {
             <div>
               <label className={labelCls}>State</label>
               <StateSelect value={form.state} onChange={val => setForm(f => ({ ...f, state: val }))} />
+            </div>
+          </div>
+
+          {/* Intake & Euthanasia dates */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className={labelCls}>Date Brought to Shelter</label>
+              <input
+                type="date"
+                value={form.intake_date}
+                onChange={e => setForm(f => ({ ...f, intake_date: e.target.value }))}
+                className={inputCls}
+              />
+            </div>
+            <div>
+              <label className={labelCls}>
+                Euthanasia Date
+                <span className="ml-2 normal-case tracking-normal font-normal text-[#5d6a64]">(if applicable)</span>
+              </label>
+              <input
+                type="date"
+                value={form.euthanasia_date}
+                onChange={e => setForm(f => ({ ...f, euthanasia_date: e.target.value }))}
+                min={new Date().toISOString().split('T')[0]}
+                className={`${inputCls} ${form.euthanasia_date ? 'border-red-400 focus:border-red-500 focus:ring-red-400' : ''}`}
+              />
+              {form.euthanasia_date && (
+                <p className="mt-1.5 text-xs text-red-600 font-semibold">
+                  ⚠ This dog will be marked at-risk and shown as urgent to rescues.
+                </p>
+              )}
             </div>
           </div>
 
