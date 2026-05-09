@@ -1,14 +1,19 @@
-import { createClient } from '@/lib/supabase'
+import { createClient as createAnonClient } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
 import Link from 'next/link'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import StatusBadge from '@/components/status-badge'
 
+const serviceClient = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
+
 export default async function PublicDogProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const supabase = createClient()
 
-  const { data: dog } = await supabase
+  const { data: dog } = await serviceClient
     .from('dogs')
     .select('*, organizations(*)')
     .eq('id', id)
@@ -21,7 +26,7 @@ export default async function PublicDogProfilePage({ params }: { params: Promise
     ? dog.description.replace(/\[pgeo:[A-Z0-9]+\]\s*/g, '').trim() || null
     : null
 
-  // Location: prefer city+state, fall back to org name only (imported dogs have no city/state)
+  // Location: prefer city+state, fall back to org name only
   const locationLine = (dog.organizations?.city && dog.organizations?.state)
     ? `${dog.organizations.city}, ${dog.organizations.state}`
     : null
