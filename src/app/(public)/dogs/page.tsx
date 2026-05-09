@@ -10,6 +10,9 @@ const serviceClient = createClient(
 
 const PAGE_SIZE = 12
 
+// TODO: Remove once admin orgs are separated from shelter/rescue orgs
+const TEST_EMAILS = ['abelprasad5@gmail.com', 'amypitrra@gmail.com']
+
 type Tab = 'dogs' | 'shelters' | 'rescues'
 
 const TABS: { key: Tab; label: string }[] = [
@@ -70,6 +73,7 @@ export default async function BrowsePage({
       .select('id, name, city, state')
       .eq('type', 'shelter')
       .eq('approval_status', 'approved')
+      .not('email', 'in', `(${TEST_EMAILS.join(',')})`)
       .order('name')
     shelters = data || []
 
@@ -95,6 +99,7 @@ export default async function BrowsePage({
       .select('id, name, city, state')
       .eq('type', 'rescue')
       .eq('approval_status', 'approved')
+      .not('email', 'in', `(${TEST_EMAILS.join(',')})`)
       .order('name')
     const orgs = data || []
 
