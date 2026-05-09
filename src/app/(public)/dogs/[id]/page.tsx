@@ -40,6 +40,9 @@ export default async function PublicDogProfilePage({ params }: { params: Promise
             <div className="mb-4 inline-flex items-center gap-3 border-y border-[#f4b942]/30 py-3 text-[11px] font-bold uppercase tracking-[0.28em] text-[#f4b942]">
               <span className="h-2 w-2 rounded-full bg-[#f4b942]" />
               Dog profile
+              {dog.dogsrun_id && (
+                <span className="ml-2 text-[#f4b942]/60">· {dog.dogsrun_id}</span>
+              )}
             </div>
             <h1 className="text-5xl font-black leading-[0.9] tracking-tight text-[#f4b942] sm:text-6xl lg:text-7xl">
               {dog.name}

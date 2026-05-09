@@ -9,6 +9,7 @@ import EuthanasiaCountdown from '@/components/euthanasia-countdown'
 
 interface Dog {
   id: string
+  dogsrun_id: string | null
   name: string
   breed: string
   mix: boolean
@@ -77,6 +78,9 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
           <div>
             <h1 className="text-4xl md:text-5xl font-[900] tracking-tight mb-2">{dog.name}</h1>
             <p className="text-[#d8cfc2] font-bold">{dog.breed}{dog.mix ? ' mix' : ''}</p>
+            {dog.dogsrun_id && (
+              <p className="mt-1 text-xs font-bold uppercase tracking-[0.2em] text-[#f4b942]/60">{dog.dogsrun_id}</p>
+            )}
           </div>
           <StatusBadge status={(dog.status as DogStatus) || 'available'} euthanasiaDate={dog.euthanasia_date} />
         </div>

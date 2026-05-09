@@ -218,9 +218,14 @@ export default async function BrowsePage({
                       </div>
 
                       <div className="mt-5 flex items-center justify-between gap-4 border-t border-[#13241d]/10 pt-4">
-                        <p className="min-w-0 text-xs leading-5 text-[#617069]">
-                          From <span className="font-black text-[#13241d]">{dog.organizations?.name || 'Shelter partner'}</span>
-                        </p>
+                        <div className="min-w-0">
+                          <p className="text-xs leading-5 text-[#617069]">
+                            From <span className="font-black text-[#13241d]">{dog.organizations?.name || 'Shelter partner'}</span>
+                          </p>
+                          {dog.dogsrun_id && (
+                            <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#7a877f]">{dog.dogsrun_id}</p>
+                          )}
+                        </div>
                         <span className="shrink-0 text-xs font-black uppercase tracking-[0.18em] text-[#d95f4b]">
                           Review
                         </span>
