@@ -27,6 +27,16 @@ export default async function Navbar() {
   );
   const { data: { user } } = await supabase.auth.getUser();
 
+  let dashboardHref = "/dashboard";
+  if (user?.email) {
+    const { data: admin } = await supabase
+      .from("admins")
+      .select("id")
+      .eq("email", user.email)
+      .maybeSingle();
+    if (admin) dashboardHref = "/admin";
+  }
+
   return (
     <nav className="bg-[#111] border-b border-white/5 sticky top-0 z-50" style={{ backgroundColor: '#111' }}>
       <div className="max-w-7xl mx-auto px-8 h-16 flex items-center justify-between">
@@ -55,7 +65,7 @@ export default async function Navbar() {
         <div className="flex items-center gap-6">
           {user ? (
             <Link
-              href="/dashboard"
+              href={dashboardHref}
               className="bg-[#f59e0b] text-[#451a03] px-4 py-2 rounded-lg font-semibold text-sm hover:bg-[#d97706] transition-colors"
             >
               Dashboard
