@@ -2,6 +2,27 @@ import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 
+const EDITABLE_DOG_FIELDS = [
+  'name',
+  'breed',
+  'mix',
+  'age_years',
+  'weight_lbs',
+  'sex',
+  'color',
+  'state',
+  'description',
+  'photo_url',
+  'parvo',
+  'tripod',
+  'blind',
+  'other_issues',
+  'other_issues_notes',
+  'euthanasia_date',
+] as const
+
+const VALID_SEXES = new Set(['male', 'female', 'unknown'])
+
 export async function POST(req: NextRequest) {
   try {
     // Auth check — must be a logged-in user
@@ -44,12 +65,30 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    const updates = { ...updateFields }
+    const updates: Record<string, unknown> = {}
+    for (const field of EDITABLE_DOG_FIELDS) {
+      if (field in updateFields) updates[field] = updateFields[field]
+    }
+
+    if ('sex' in updates && typeof updates.sex === 'string' && !VALID_SEXES.has(updates.sex)) {
+      return NextResponse.json({ error: 'Invalid sex value' }, { status: 400 })
+    }
     if ('age_years' in updates) {
-      updates.age_years = updates.age_years ? parseFloat(updates.age_years) : null
+      const age = updates.age_years ? Number(updates.age_years) : null
+      if (age !== null && (!Number.isFinite(age) || age < 0)) {
+        return NextResponse.json({ error: 'Invalid age_years value' }, { status: 400 })
+      }
+      updates.age_years = age
     }
     if ('weight_lbs' in updates) {
-      updates.weight_lbs = updates.weight_lbs ? parseFloat(updates.weight_lbs) : null
+      const weight = updates.weight_lbs ? Number(updates.weight_lbs) : null
+      if (weight !== null && (!Number.isFinite(weight) || weight < 0)) {
+        return NextResponse.json({ error: 'Invalid weight_lbs value' }, { status: 400 })
+      }
+      updates.weight_lbs = weight
+    }
+    if ('color' in updates && updates.color !== null && !Array.isArray(updates.color)) {
+      return NextResponse.json({ error: 'Invalid color value' }, { status: 400 })
     }
 
     const { error } = await supabase
