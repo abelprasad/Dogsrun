@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { escapeHtml, escapeHtmlOrDash } from '@/lib/html'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -172,7 +173,7 @@ export async function POST(req: NextRequest) {
       if (dog.parvo) specialNeeds.push('Parvo')
       if (dog.tripod) specialNeeds.push('Tripod / Amputee')
       if (dog.blind) specialNeeds.push('Blind / Vision Impaired')
-      if (dog.other_issues) specialNeeds.push(`Other — "${dog.other_issues_notes}"`)
+      if (dog.other_issues) specialNeeds.push(`Other &mdash; &quot;${escapeHtml(dog.other_issues_notes)}&quot;`)
 
       const specialNeedsRow = specialNeeds.length > 0 ? `
         <tr>
@@ -184,9 +185,16 @@ export async function POST(req: NextRequest) {
       const colorRow = dog.color && dog.color.length > 0 ? `
         <tr>
           <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #6b7280; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Color</td>
-          <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #111827; font-size: 16px;">${dog.color.join(', ')}</td>
+          <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #111827; font-size: 16px;">${dog.color.map((color: string) => escapeHtml(color)).join(', ')}</td>
         </tr>
       ` : ''
+      const safeDogName = escapeHtmlOrDash(dog.name)
+      const safeBreed = escapeHtmlOrDash(dog.breed)
+      const safeState = escapeHtmlOrDash(dog.state)
+      const safeSex = escapeHtmlOrDash(dog.sex)
+      const safeShelterName = escapeHtmlOrDash(shelter?.name)
+      const safeShelterCity = escapeHtml(shelter?.city)
+      const safeShelterState = escapeHtml(shelter?.state)
 
       const { data: alertData, error: alertError } = await supabase.from('alerts').insert({
         dog_id: dog.id,
@@ -213,16 +221,16 @@ export async function POST(req: NextRequest) {
                   A dog matching your criteria is available
                 </h1>
                 <p style="color: #4b5563; font-size: 16px; line-height: 24px; margin-bottom: 32px; text-align: center;">
-                  A new dog has just been listed by a shelter that matches your rescue organization's saved matching criteria.
+                  A new dog has just been listed by a shelter that matches your rescue organization&apos;s saved matching criteria.
                 </p>
                 <table style="width: 100%; border-collapse: collapse; margin-bottom: 32px; border-radius: 8px; overflow: hidden; background-color: #fdfaf5;">
                   <tr>
                     <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #6b7280; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; width: 35%;">Name</td>
-                    <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #111827; font-size: 16px; font-weight: 700;">${dog.name ?? '—'}</td>
+                    <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #111827; font-size: 16px; font-weight: 700;">${safeDogName}</td>
                   </tr>
                   <tr>
                     <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #6b7280; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Breed</td>
-                    <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #111827; font-size: 16px;">${dog.breed ?? '—'}${dog.mix ? ' mix' : ''}</td>
+                    <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #111827; font-size: 16px;">${safeBreed}${dog.mix ? ' mix' : ''}</td>
                   </tr>
                   ${colorRow}
                   ${specialNeedsRow}
@@ -236,19 +244,19 @@ export async function POST(req: NextRequest) {
                   </tr>
                   <tr>
                     <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #6b7280; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Sex</td>
-                    <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #111827; font-size: 16px;">${dog.sex ?? '—'}</td>
+                    <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #111827; font-size: 16px;">${safeSex}</td>
                   </tr>
                   <tr>
                     <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #6b7280; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">State</td>
-                    <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #111827; font-size: 16px;">${dog.state ?? '—'}</td>
+                    <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #111827; font-size: 16px;">${safeState}</td>
                   </tr>
                   <tr>
                     <td style="padding: 12px 16px; color: #6b7280; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Shelter</td>
-                    <td style="padding: 12px 16px; color: #111827; font-size: 16px;">${shelter?.name ?? '—'}, ${shelter?.city ?? ''} ${shelter?.state ?? ''}</td>
+                    <td style="padding: 12px 16px; color: #111827; font-size: 16px;">${safeShelterName}, ${safeShelterCity} ${safeShelterState}</td>
                   </tr>
                 </table>
                 <div style="text-align: center; margin-bottom: 32px;">
-                  <a href="https://dogsrun.org/api/respond?alert_id=${alertData.id}&action=interested"
+                  <a href="https://dogsrun.org/api/respond?alert_id=${encodeURIComponent(alertData.id)}&amp;action=interested"
                      style="background-color: #f59e0b; color: #ffffff; padding: 16px 32px; border-radius: 12px; text-decoration: none; display: inline-block; font-weight: 700; font-size: 16px;">
                     Interested
                   </a>

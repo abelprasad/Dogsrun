@@ -15,6 +15,42 @@ const TEST_EMAILS = ['abelprasad5@gmail.com', 'amypitrra@gmail.com']
 
 type Tab = 'dogs' | 'shelters' | 'rescues'
 
+interface OrganizationSummary {
+  id: string
+  name: string | null
+  city: string | null
+  state: string | null
+}
+
+interface DogCard {
+  id: string
+  name: string | null
+  breed: string | null
+  mix: boolean | null
+  age_years: number | null
+  weight_lbs: number | null
+  sex: string | null
+  color?: string[] | null
+  status: string | null
+  euthanasia_date: string | null
+  photo_url: string | null
+  dogsrun_id: string | null
+  organizations: OrganizationSummary | null
+}
+
+interface ShelterCard extends OrganizationSummary {
+  dog_count: number
+}
+
+interface RescueCriteriaSummary {
+  breeds: string[] | null
+  states_served: string[] | null
+}
+
+interface RescueCard extends OrganizationSummary {
+  criteria: RescueCriteriaSummary | null
+}
+
 const TABS: { key: Tab; label: string }[] = [
   { key: 'dogs', label: 'Dogs' },
   { key: 'shelters', label: 'Shelters' },
@@ -32,8 +68,17 @@ const HERO: Record<Tab, { heading: string; sub: string }> = {
   },
   rescues: {
     heading: 'Rescues looking for their next dog.',
-    sub: 'Active rescue organizations in the DOGSRUN network and the dogs they\'re ready to take.',
+    sub: "Active rescue organizations in the DOGSRUN network and the dogs they're ready to take.",
   },
+}
+
+function parsePageParam(value: string | undefined): number {
+  const parsed = Number.parseInt(value || '1', 10)
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1
+}
+
+function excludedEmailList(): string {
+  return `(${TEST_EMAILS.map((email) => JSON.stringify(email)).join(',')})`
 }
 
 export default async function BrowsePage({
@@ -43,12 +88,12 @@ export default async function BrowsePage({
 }) {
   const { tab: tabParam, page: pageParam } = await searchParams
   const tab: Tab = (tabParam === 'shelters' || tabParam === 'rescues') ? tabParam : 'dogs'
-  const page = Math.max(1, parseInt(pageParam || '1', 10))
+  const page = parsePageParam(pageParam)
   const from = (page - 1) * PAGE_SIZE
   const to = from + PAGE_SIZE - 1
 
   // ── Dogs ──────────────────────────────────────────────────────────────────
-  let dogs: any[] = []
+  let dogs: DogCard[] = []
   let dogCount = 0
   let totalPages = 1
 
@@ -59,13 +104,13 @@ export default async function BrowsePage({
       .in('status', ['available', 'urgent'])
       .order('created_at', { ascending: false })
       .range(from, to)
-    dogs = data || []
+    dogs = (data || []) as DogCard[]
     dogCount = count || 0
-    totalPages = Math.ceil(dogCount / PAGE_SIZE)
+    totalPages = Math.max(1, Math.ceil(dogCount / PAGE_SIZE))
   }
 
   // ── Shelters ───────────────────────────────────────────────────────────────
-  let shelters: any[] = []
+  let shelters: ShelterCard[] = []
 
   if (tab === 'shelters') {
     const { data } = await serviceClient
@@ -73,13 +118,13 @@ export default async function BrowsePage({
       .select('id, name, city, state')
       .eq('type', 'shelter')
       .eq('approval_status', 'approved')
-      .not('email', 'in', `(${TEST_EMAILS.join(',')})`)
+      .not('email', 'in', excludedEmailList())
       .order('name')
-    shelters = data || []
+    const shelterOrgs = (data || []) as OrganizationSummary[]
 
     // Attach dog counts
     const counts = await Promise.all(
-      shelters.map(s =>
+      shelterOrgs.map(s =>
         serviceClient
           .from('dogs')
           .select('id', { count: 'exact', head: true })
@@ -87,11 +132,11 @@ export default async function BrowsePage({
           .in('status', ['available', 'urgent'])
       )
     )
-    shelters = shelters.map((s, i) => ({ ...s, dog_count: counts[i].count || 0 }))
+    shelters = shelterOrgs.map((s, i) => ({ ...s, dog_count: counts[i].count || 0 }))
   }
 
   // ── Rescues ────────────────────────────────────────────────────────────────
-  let rescues: any[] = []
+  let rescues: RescueCard[] = []
 
   if (tab === 'rescues') {
     const { data } = await serviceClient
@@ -99,9 +144,9 @@ export default async function BrowsePage({
       .select('id, name, city, state')
       .eq('type', 'rescue')
       .eq('approval_status', 'approved')
-      .not('email', 'in', `(${TEST_EMAILS.join(',')})`)
+      .not('email', 'in', excludedEmailList())
       .order('name')
-    const orgs = data || []
+    const orgs = (data || []) as OrganizationSummary[]
 
     const criteria = await Promise.all(
       orgs.map(o =>
@@ -113,7 +158,7 @@ export default async function BrowsePage({
           .maybeSingle()
       )
     )
-    rescues = orgs.map((o, i) => ({ ...o, criteria: criteria[i].data }))
+    rescues = orgs.map((o, i) => ({ ...o, criteria: criteria[i].data as RescueCriteriaSummary | null }))
   }
 
   const hero = HERO[tab]
@@ -170,7 +215,7 @@ export default async function BrowsePage({
                       {dog.photo_url ? (
                         <Image
                           src={dog.photo_url}
-                          alt={dog.name}
+                          alt={dog.name || 'Dog photo'}
                           fill
                           className="object-cover saturate-[0.92] transition duration-700 group-hover:scale-105"
                           unoptimized
@@ -182,7 +227,7 @@ export default async function BrowsePage({
                         </div>
                       )}
                       <div className="absolute left-4 top-4">
-                        <StatusBadge status={dog.status} euthanasiaDate={dog.euthanasia_date} />
+                        <StatusBadge status={dog.status || 'available'} euthanasiaDate={dog.euthanasia_date} />
                       </div>
                       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#13241d]/75 to-transparent p-4 pt-16">
                         <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#f8f1e8]/80">
@@ -194,7 +239,7 @@ export default async function BrowsePage({
                     <div className="flex flex-1 flex-col p-5">
                       <div className="flex items-start justify-between gap-4">
                         <div>
-                          <h2 className="text-2xl font-black tracking-tight text-[#13241d]">{dog.name}</h2>
+                          <h2 className="text-2xl font-black tracking-tight text-[#13241d]">{dog.name || 'Unnamed Dog'}</h2>
                           <p className="mt-1 text-sm font-semibold text-[#617069]">
                             {dog.breed}{dog.mix ? ' mix' : ''}
                           </p>
@@ -321,7 +366,7 @@ export default async function BrowsePage({
             <div className="border border-dashed border-[#13241d]/20 bg-[#fff9ef] px-6 py-20 text-center">
               <p className="text-sm font-bold uppercase tracking-[0.22em] text-[#436154]">No shelter partners yet</p>
               <p className="mx-auto mt-4 max-w-md text-base leading-7 text-[#617069]">
-                Shelters will appear here once they've been approved by the DOGSRUN team.
+                Shelters will appear here once they&apos;ve been approved by the DOGSRUN team.
               </p>
             </div>
           )
@@ -399,7 +444,7 @@ export default async function BrowsePage({
             <div className="border border-dashed border-[#13241d]/20 bg-[#fff9ef] px-6 py-20 text-center">
               <p className="text-sm font-bold uppercase tracking-[0.22em] text-[#436154]">No rescue partners yet</p>
               <p className="mx-auto mt-4 max-w-md text-base leading-7 text-[#617069]">
-                Rescue organizations will appear here once they've been approved by the DOGSRUN team.
+                Rescue organizations will appear here once they&apos;ve been approved by the DOGSRUN team.
               </p>
             </div>
           )

@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
+import { escapeHtml } from '@/lib/html'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
@@ -42,6 +43,7 @@ export async function POST(req: NextRequest) {
   }
 
   const subject = action === 'approve' ? `You're approved on DOGSRUN!` : `DOGSRUN — Application Update`
+  const safeOrgName = escapeHtml(org.name)
 
   const html = action === 'approve' ? `
     <div style="background-color:#f5f0e8;padding:40px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
@@ -51,7 +53,7 @@ export async function POST(req: NextRequest) {
           <h1 style="color:#f4b942;font-size:28px;font-weight:900;letter-spacing:-0.025em;margin:0;">You're Approved!</h1>
         </div>
         <div style="padding:40px;">
-          <p style="color:#5d6a64;font-size:15px;line-height:26px;margin:0 0 32px 0;">Hi <strong style="color:#13241d;">${org.name}</strong>, your 501(c)(3) verification has been reviewed and your organization is now approved on DOGSRUN. Welcome to the network.</p>
+          <p style="color:#5d6a64;font-size:15px;line-height:26px;margin:0 0 32px 0;">Hi <strong style="color:#13241d;">${safeOrgName}</strong>, your 501(c)(3) verification has been reviewed and your organization is now approved on DOGSRUN. Welcome to the network.</p>
           <div style="text-align:center;margin-bottom:32px;">
             <a href="https://dogsrun.org/dashboard" style="background-color:#13241d;color:#f4b942;padding:14px 32px;text-decoration:none;display:inline-block;font-weight:700;font-size:11px;letter-spacing:0.24em;text-transform:uppercase;">Go to Your Dashboard</a>
           </div>
@@ -71,7 +73,7 @@ export async function POST(req: NextRequest) {
           <h1 style="color:#f4b942;font-size:28px;font-weight:900;letter-spacing:-0.025em;margin:0;">Application Update</h1>
         </div>
         <div style="padding:40px;">
-          <p style="color:#5d6a64;font-size:15px;line-height:26px;margin:0 0 24px 0;">Hi <strong style="color:#13241d;">${org.name}</strong>, we were unable to verify your 501(c)(3) status at this time.</p>
+          <p style="color:#5d6a64;font-size:15px;line-height:26px;margin:0 0 24px 0;">Hi <strong style="color:#13241d;">${safeOrgName}</strong>, we were unable to verify your 501(c)(3) status at this time.</p>
           <p style="color:#5d6a64;font-size:15px;line-height:26px;margin:0 0 32px 0;">Please contact us at <a href="mailto:admin@dogsrun.org" style="color:#13241d;font-weight:700;">admin@dogsrun.org</a> to resubmit your documentation or ask any questions.</p>
         </div>
         <div style="background-color:#13241d;padding:20px 40px;text-align:center;">

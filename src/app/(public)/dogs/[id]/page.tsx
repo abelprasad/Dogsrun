@@ -1,4 +1,3 @@
-import { createClient as createAnonClient } from '@/lib/supabase'
 import { createClient } from '@supabase/supabase-js'
 import Link from 'next/link'
 import Image from 'next/image'

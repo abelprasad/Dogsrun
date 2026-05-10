@@ -201,6 +201,35 @@ test.describe('API security', () => {
     expectJsonError(await response.json(), /forbidden/)
   })
 
+  test('dog update endpoint ignores protected fields from shelter users', async ({ page }) => {
+    const shelter = await createAuthOrg('shelter')
+    const otherShelterId = await createOrgOnly('shelter')
+    const dogId = await createDog(shelter.id)
+
+    await login(page, shelter.email, shelter.password)
+
+    const response = await page.request.post('/api/dogs/update', {
+      data: {
+        dog_id: dogId,
+        name: '[TEST] Updated safe dog name',
+        shelter_id: otherShelterId,
+        status: 'adopted',
+      },
+    })
+
+    expect(response.status()).toBe(200)
+
+    const { data: dog } = await serviceClient
+      .from('dogs')
+      .select('name, shelter_id, status')
+      .eq('id', dogId)
+      .single()
+
+    expect(dog?.name).toBe('[TEST] Updated safe dog name')
+    expect(dog?.shelter_id).toBe(shelter.id)
+    expect(dog?.status).toBe('available')
+  })
+
   test('notify-shelter rejects rescues that do not own the alert', async ({ page }) => {
     const alertOwner = await createAuthOrg('rescue')
     const otherRescue = await createAuthOrg('rescue')
