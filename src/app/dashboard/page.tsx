@@ -59,7 +59,7 @@ export default async function DashboardPage() {
             <Link href="/dashboard/dogs" className="text-xs font-bold text-[#9ca3af] hover:text-white uppercase tracking-widest transition-colors">My Dogs</Link>
             <Link href="/dashboard/dogs/new" className="text-xs font-bold text-[#9ca3af] hover:text-white uppercase tracking-widest transition-colors">Add Dog</Link>
             {isAdmin && (
-              <Link href="/dashboard/admin" className="text-xs font-bold text-[#f4b942]/60 hover:text-[#f4b942] uppercase tracking-widest transition-colors">Admin</Link>
+              <Link href="/admin" className="text-xs font-bold text-[#f4b942]/60 hover:text-[#f4b942] uppercase tracking-widest transition-colors">Admin</Link>
             )}
           </div>
           <div className="flex items-center gap-4">

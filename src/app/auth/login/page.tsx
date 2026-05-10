@@ -30,19 +30,6 @@ export default function LoginPage() {
       }
 
       const { data: { user: signedInUser } } = await supabase.auth.getUser()
-
-      // Admin check — takes priority over org routing
-      const { data: admin } = await supabase
-        .from('admins')
-        .select('id')
-        .eq('email', signedInUser?.email)
-        .maybeSingle()
-
-      if (admin) {
-        router.push('/admin')
-        return
-      }
-
       const { data: org } = await supabase
         .from('organizations')
         .select('type')
