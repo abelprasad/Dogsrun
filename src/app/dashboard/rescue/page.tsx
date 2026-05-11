@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { redirect } from 'next/navigation'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { requireAuthContext } from '@/lib/auth-context'
 import StatusBadge, { DogStatus } from '@/components/status-badge'
 import ApprovalWall from '@/components/approval-wall'
 import AlertActions from './alert-actions'
@@ -26,15 +26,7 @@ interface Alert {
 }
 
 export default async function RescuePortalPage() {
-  const supabase = await createSupabaseServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
-
-  const { data: org } = await supabase
-    .from('organizations')
-    .select('*')
-    .eq('id', user.id)
-    .single()
+  const { supabase, org } = await requireAuthContext()
 
   if (!org || org.type !== 'rescue') redirect('/dashboard')
   if (org.approval_status !== 'approved') return <ApprovalWall org={org} />
