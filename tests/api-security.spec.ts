@@ -16,6 +16,7 @@ const createdUserIds: string[] = []
 const createdOrgIds: string[] = []
 const createdDogIds: string[] = []
 const createdAlertIds: string[] = []
+const createdAdminEmails: string[] = []
 
 type OrgType = 'shelter' | 'rescue'
 
@@ -66,6 +67,28 @@ async function createOrgOnly(type: OrgType, approvalStatus = 'approved') {
   return id
 }
 
+async function createAdminOnlyUser() {
+  const email = `test-admin-${randomUUID()}@dogsrun-test.local`
+  const { data, error } = await serviceClient.auth.admin.createUser({
+    email,
+    password: PASSWORD,
+    email_confirm: true,
+  })
+
+  if (error || !data.user) throw new Error(`Failed to create admin auth user: ${error?.message}`)
+
+  const { error: adminError } = await serviceClient.from('admins').insert({
+    id: randomUUID(),
+    email,
+  })
+
+  if (adminError) throw new Error(`Failed to create admin row: ${adminError.message}`)
+
+  createdUserIds.push(data.user.id)
+  createdAdminEmails.push(email)
+  return { id: data.user.id, email, password: PASSWORD }
+}
+
 async function createDog(shelterId: string) {
   const { data, error } = await serviceClient
     .from('dogs')
@@ -111,12 +134,29 @@ async function createAlert(dogId: string, rescueId: string) {
   return data.id
 }
 
+async function createCriteria(rescueId: string) {
+  const { error } = await serviceClient.from('rescue_criteria').insert({
+    rescue_id: rescueId,
+    is_active: true,
+    breeds: ['Labrador'],
+    states_served: ['PA'],
+    sex_preference: 'any',
+    accepts_mixes: true,
+    accepts_parvo: false,
+    accepts_tripod: false,
+    accepts_blind: false,
+    accepts_other: false,
+  })
+
+  if (error) throw new Error(`Failed to create criteria: ${error.message}`)
+}
+
 async function login(page: Page, email: string, password: string) {
   await page.goto('/auth/login')
   await page.fill('input[type="email"]', email)
   await page.fill('input[type="password"]', password)
   await page.locator('button:text("Sign In")').click()
-  await page.waitForURL(/\/dashboard/, { timeout: 15000 })
+  await page.waitForURL(/\/(dashboard|admin)/, { timeout: 15000 })
 }
 
 function expectJsonError(responseBody: unknown, pattern: RegExp) {
@@ -133,6 +173,9 @@ test.afterAll(async () => {
   if (createdOrgIds.length > 0) {
     await serviceClient.from('rescue_criteria').delete().in('rescue_id', createdOrgIds)
     await serviceClient.from('organizations').delete().in('id', createdOrgIds)
+  }
+  if (createdAdminEmails.length > 0) {
+    await serviceClient.from('admins').delete().in('email', createdAdminEmails)
   }
   for (const userId of createdUserIds) {
     await serviceClient.auth.admin.deleteUser(userId)
@@ -245,6 +288,36 @@ test.describe('API security', () => {
 
     expect(response.status()).toBe(403)
     expectJsonError(await response.json(), /forbidden/)
+  })
+
+  test('admin-only users go to admin instead of registration', async ({ page }) => {
+    const admin = await createAdminOnlyUser()
+
+    await login(page, admin.email, admin.password)
+
+    await expect(page).toHaveURL(/\/admin$/)
+    await expect(page.getByRole('heading', { name: 'Admin Panel' })).toBeVisible()
+
+    await page.goto('/dashboard')
+    await expect(page).toHaveURL(/\/admin$/)
+  })
+
+  test('returning shelters skip the welcome checklist', async ({ page }) => {
+    const shelter = await createAuthOrg('shelter')
+    await createDog(shelter.id)
+
+    await login(page, shelter.email, shelter.password)
+
+    await expect(page).toHaveURL(/\/dashboard$/)
+  })
+
+  test('returning rescues skip the welcome checklist', async ({ page }) => {
+    const rescue = await createAuthOrg('rescue')
+    await createCriteria(rescue.id)
+
+    await login(page, rescue.email, rescue.password)
+
+    await expect(page).toHaveURL(/\/dashboard\/rescue$/)
   })
 })
 

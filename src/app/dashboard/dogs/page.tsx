@@ -1,10 +1,8 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { redirect } from 'next/navigation'
-import { createClient } from '@supabase/supabase-js'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import StatusBadge, { DogStatus } from '@/components/status-badge'
-import SignOutButton from '../sign-out-button'
 import DogRowActions from './dog-row-actions'
 
 const PAGE_SIZE = 10
@@ -27,18 +25,6 @@ export default async function MyDogsPage({ searchParams }: { searchParams: Promi
 
   if (!org || org.type !== 'shelter') redirect('/dashboard')
 
-  const serviceClient = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
-
-  const { data: adminRow } = await serviceClient
-    .from('admins')
-    .select('id')
-    .eq('email', user.email)
-    .maybeSingle()
-  const isAdmin = !!adminRow
-
   const { data: dogs, count } = await supabase
     .from('dogs')
     .select('*, alerts(status)', { count: 'exact' })
@@ -50,24 +36,6 @@ export default async function MyDogsPage({ searchParams }: { searchParams: Promi
 
   return (
     <div className="min-h-screen bg-[#f5f0e8]">
-      {/* Subnav */}
-      <div className="bg-[#13241d] py-2 px-8">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex gap-6">
-            <Link href="/dashboard" className="text-xs font-bold text-[#f5f0e8]/40 hover:text-[#f4b942] uppercase tracking-[0.24em] transition-colors">Dashboard</Link>
-            <Link href="/dashboard/dogs" className="text-xs font-bold text-[#f4b942] uppercase tracking-[0.24em]">My Dogs</Link>
-            <Link href="/dashboard/dogs/new" className="text-xs font-bold text-[#f5f0e8]/40 hover:text-[#f4b942] uppercase tracking-[0.24em] transition-colors">Add Dog</Link>
-            {isAdmin && (
-              <Link href="/dashboard/admin" className="text-xs font-bold text-[#f5f0e8]/40 hover:text-[#f4b942] uppercase tracking-[0.24em] transition-colors">Admin</Link>
-            )}
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-xs font-bold text-[#f5f0e8]/40 uppercase tracking-[0.24em]">{org.name}</span>
-            <SignOutButton />
-          </div>
-        </div>
-      </div>
-
       {/* Header */}
       <header className="bg-[#13241d] pb-12 px-8 pt-8 border-t border-white/5">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-4">

@@ -26,6 +26,28 @@ export async function GET(request: NextRequest) {
       }
     )
     await supabase.auth.exchangeCodeForSession(code)
+
+    if (next === '/dashboard/welcome') {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const [{ data: admin }, { data: org }] = await Promise.all([
+          supabase
+            .from('admins')
+            .select('id')
+            .eq('email', user.email)
+            .maybeSingle(),
+          supabase
+            .from('organizations')
+            .select('id')
+            .eq('id', user.id)
+            .maybeSingle(),
+        ])
+
+        if (admin && !org) {
+          return NextResponse.redirect(new URL('/admin', request.url))
+        }
+      }
+    }
   }
 
   return NextResponse.redirect(new URL(next, request.url))

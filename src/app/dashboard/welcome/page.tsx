@@ -1,20 +1,14 @@
-import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
-import SignOutButton from '../sign-out-button'
+import { requireAuthContext } from '@/lib/auth-context'
 import WelcomeChecklist from './welcome-checklist'
 
 export default async function WelcomePage() {
-  const supabase = await createSupabaseServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
+  const { supabase, org, isAdmin } = await requireAuthContext()
 
-  const { data: org } = await supabase
-    .from('organizations')
-    .select('*')
-    .eq('id', user.id)
-    .single()
-
-  if (!org) redirect('/register')
+  if (!org) {
+    if (isAdmin) redirect('/admin')
+    redirect('/register')
+  }
 
   let hasDogs = false
   if (org.type === 'shelter') {
@@ -36,15 +30,12 @@ export default async function WelcomePage() {
 
   const dashboardHref = org.type === 'rescue' ? '/dashboard/rescue' : '/dashboard'
 
+  if ((org.type === 'shelter' && hasDogs) || (org.type === 'rescue' && hasCriteria)) {
+    redirect(dashboardHref)
+  }
+
   return (
     <div className="min-h-screen bg-[#f8f1e8]">
-      <div className="bg-[#13241d] border-t border-[#f4b942]/20 py-2 px-8">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <span className="text-xs font-bold text-[#d8cfc2] uppercase tracking-widest">{org.name}</span>
-          <SignOutButton />
-        </div>
-      </div>
-
       <header className="bg-[#13241d] border-b border-[#f4b942]/30 py-12 px-8 text-[#f8f1e8]">
         <div className="max-w-7xl mx-auto">
           <p className="text-xs font-bold text-[#f4b942] uppercase tracking-widest mb-3">Getting started</p>

@@ -1,31 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { dashboardPathFor, getAuthContext } from "@/lib/auth-context";
 
 export default async function Navbar() {
-  const cookieStore = await cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            );
-          } catch {
-            // Server Component — ignore
-          }
-        },
-      },
-    }
-  );
-  const { data: { user } } = await supabase.auth.getUser();
+  const { user, org, isAdmin } = await getAuthContext();
+  const signedInHref = dashboardPathFor(org, isAdmin);
+  const signedInLabel = isAdmin && !org ? "Admin" : "Dashboard";
 
   return (
     <nav className="bg-[#111] border-b border-white/5 sticky top-0 z-50" style={{ backgroundColor: '#111' }}>
@@ -55,10 +35,10 @@ export default async function Navbar() {
         <div className="flex items-center gap-6">
           {user ? (
             <Link
-              href="/dashboard"
+              href={signedInHref}
               className="bg-[#f59e0b] text-[#451a03] px-4 py-2 rounded-lg font-semibold text-sm hover:bg-[#d97706] transition-colors"
             >
-              Dashboard
+              {signedInLabel}
             </Link>
           ) : (
             <>

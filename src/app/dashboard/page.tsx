@@ -2,33 +2,19 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { redirect } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { requireAuthContext } from '@/lib/auth-context'
 import StatusBadge from '@/components/status-badge'
-import SignOutButton from './sign-out-button'
 import ApprovalWall from '@/components/approval-wall'
 
 export default async function DashboardPage() {
-  const supabase = await createSupabaseServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
+  const { org, isAdmin } = await requireAuthContext()
 
-  const { data: org } = await supabase
-    .from('organizations')
-    .select('*')
-    .eq('id', user.id)
-    .single()
-
-  if (!org) redirect('/register')
+  if (!org) {
+    if (isAdmin) redirect('/admin')
+    redirect('/register')
+  }
   if (org.type === 'rescue') redirect('/dashboard/rescue')
   if (org.approval_status !== 'approved') return <ApprovalWall org={org} />
-
-  const { data: admin } = await supabase
-    .from('admins')
-    .select('id')
-    .eq('email', user.email)
-    .maybeSingle()
-
-  const isAdmin = !!admin
 
   const serviceClient = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -51,24 +37,6 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#f5f0e8] text-[#13241d]">
-      {/* Sub-nav */}
-      <div className="bg-[#13241d] border-b border-white/5 py-2 px-8">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex gap-6">
-            <Link href="/dashboard" className="text-xs font-bold text-[#f4b942] uppercase tracking-widest">Dashboard</Link>
-            <Link href="/dashboard/dogs" className="text-xs font-bold text-[#9ca3af] hover:text-white uppercase tracking-widest transition-colors">My Dogs</Link>
-            <Link href="/dashboard/dogs/new" className="text-xs font-bold text-[#9ca3af] hover:text-white uppercase tracking-widest transition-colors">Add Dog</Link>
-            {isAdmin && (
-              <Link href="/admin" className="text-xs font-bold text-[#f4b942]/60 hover:text-[#f4b942] uppercase tracking-widest transition-colors">Admin</Link>
-            )}
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-xs font-bold text-[#9ca3af] uppercase tracking-widest">{org.name}</span>
-            <SignOutButton />
-          </div>
-        </div>
-      </div>
-
       {/* Header */}
       <header className="bg-[#13241d] px-5 py-14 sm:px-8 lg:px-12">
         <div className="mx-auto max-w-7xl">
