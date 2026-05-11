@@ -1,20 +1,15 @@
-import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
+import { requireAuthContext } from '@/lib/auth-context'
 import SignOutButton from '../sign-out-button'
 import WelcomeChecklist from './welcome-checklist'
 
 export default async function WelcomePage() {
-  const supabase = await createSupabaseServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
+  const { supabase, org, isAdmin } = await requireAuthContext()
 
-  const { data: org } = await supabase
-    .from('organizations')
-    .select('*')
-    .eq('id', user.id)
-    .single()
-
-  if (!org) redirect('/register')
+  if (!org) {
+    if (isAdmin) redirect('/admin')
+    redirect('/register')
+  }
 
   let hasDogs = false
   if (org.type === 'shelter') {
@@ -35,6 +30,10 @@ export default async function WelcomePage() {
   }
 
   const dashboardHref = org.type === 'rescue' ? '/dashboard/rescue' : '/dashboard'
+
+  if ((org.type === 'shelter' && hasDogs) || (org.type === 'rescue' && hasCriteria)) {
+    redirect(dashboardHref)
+  }
 
   return (
     <div className="min-h-screen bg-[#f8f1e8]">

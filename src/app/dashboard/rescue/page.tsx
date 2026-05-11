@@ -1,12 +1,10 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { redirect } from 'next/navigation'
-import { createClient } from '@supabase/supabase-js'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import StatusBadge, { DogStatus } from '@/components/status-badge'
 import ApprovalWall from '@/components/approval-wall'
 import AlertActions from './alert-actions'
-import SignOutButton from '../sign-out-button'
 
 interface Alert {
   id: string
@@ -41,17 +39,6 @@ export default async function RescuePortalPage() {
   if (!org || org.type !== 'rescue') redirect('/dashboard')
   if (org.approval_status !== 'approved') return <ApprovalWall org={org} />
 
-  const serviceClient = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
-  const { data: adminRow } = await serviceClient
-    .from('admins')
-    .select('id')
-    .eq('email', user.email)
-    .maybeSingle()
-  const isAdmin = !!adminRow
-
   const { data: alertsData } = await supabase
     .from('alerts')
     .select('*, dogs(*, organizations(name, city, state))')
@@ -62,22 +49,6 @@ export default async function RescuePortalPage() {
 
   return (
     <div className="min-h-screen bg-[#f5f0e8]">
-      <div className="bg-[#13241d] py-2 px-8">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex gap-6">
-            <Link href="/dashboard/rescue" className="text-xs font-bold text-[#f4b942] uppercase tracking-[0.24em]">Incoming Alerts</Link>
-            <Link href="/dashboard/criteria" className="text-xs font-bold text-[#f5f0e8]/40 hover:text-[#f4b942] uppercase tracking-[0.24em] transition-colors">Matching Criteria</Link>
-            {isAdmin && (
-              <Link href="/dashboard/admin" className="text-xs font-bold text-[#f5f0e8]/40 hover:text-[#f4b942] uppercase tracking-[0.24em] transition-colors">Admin</Link>
-            )}
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-xs font-bold text-[#f5f0e8]/40 uppercase tracking-[0.24em]">{org.name}</span>
-            <SignOutButton />
-          </div>
-        </div>
-      </div>
-
       <header className="bg-[#13241d] pb-12 px-8 pt-8 border-t border-white/5">
         <div className="max-w-7xl mx-auto">
           <p className="text-xs uppercase tracking-[0.24em] text-[#f4b942]/70 mb-3 font-bold">Rescue Portal</p>

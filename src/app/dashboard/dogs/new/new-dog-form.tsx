@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import SignOutButton from '../../sign-out-button'
 import imageCompression from 'browser-image-compression'
 import BreedSelect from '@/components/breed-select'
 import ColorPicker from '@/components/color-picker'
@@ -31,10 +30,9 @@ interface DogForm {
 
 interface Props {
   orgName: string
-  isAdmin: boolean
 }
 
-export default function NewDogForm({ orgName, isAdmin }: Props) {
+export default function NewDogForm({ orgName }: Props) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [photo, setPhoto] = useState<File | null>(null)
@@ -118,24 +116,6 @@ export default function NewDogForm({ orgName, isAdmin }: Props) {
 
   return (
     <div className="min-h-screen bg-[#f5f0e8]">
-      {/* Subnav */}
-      <div className="bg-[#13241d] py-2 px-8">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex gap-6">
-            <Link href="/dashboard" className="text-xs font-bold text-[#f5f0e8]/40 hover:text-[#f4b942] uppercase tracking-[0.24em] transition-colors">Dashboard</Link>
-            <Link href="/dashboard/dogs" className="text-xs font-bold text-[#f5f0e8]/40 hover:text-[#f4b942] uppercase tracking-[0.24em] transition-colors">My Dogs</Link>
-            <Link href="/dashboard/dogs/new" className="text-xs font-bold text-[#f4b942] uppercase tracking-[0.24em]">Add Dog</Link>
-            {isAdmin && (
-              <Link href="/dashboard/admin" className="text-xs font-bold text-[#f5f0e8]/40 hover:text-[#f4b942] uppercase tracking-[0.24em] transition-colors">Admin</Link>
-            )}
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-xs font-bold text-[#f5f0e8]/40 uppercase tracking-[0.24em]">{orgName}</span>
-            <SignOutButton />
-          </div>
-        </div>
-      </div>
-
       {/* Header */}
       <header className="bg-[#13241d] pb-12 px-8 pt-8 border-t border-white/5">
         <div className="max-w-7xl mx-auto">

@@ -1,20 +1,13 @@
 import { redirect } from 'next/navigation'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { requireAuthContext, dashboardPathFor } from '@/lib/auth-context'
 import Link from 'next/link'
 import SignOutButton from '@/app/dashboard/sign-out-button'
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createSupabaseServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
+  const { user, org, isAdmin } = await requireAuthContext()
 
-  const { data: admin } = await supabase
-    .from('admins')
-    .select('id')
-    .eq('email', user.email)
-    .maybeSingle()
-
-  if (!admin) redirect('/dashboard')
+  if (!isAdmin) redirect(dashboardPathFor(org, false))
+  const dashboardHref = org ? dashboardPathFor(org, true) : '/'
 
   return (
     <div>
@@ -25,10 +18,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               <span className="text-xs font-bold text-[#f4b942] uppercase tracking-[0.24em]">Admin Panel</span>
             </Link>
             <Link
-              href="/dashboard"
+              href={dashboardHref}
               className="text-xs font-bold text-[#f5f0e8]/30 hover:text-[#f5f0e8]/70 uppercase tracking-[0.24em] transition-colors"
             >
-              Dashboard →
+              {org ? 'Dashboard ->' : 'Public Site ->'}
             </Link>
           </div>
           <div className="flex items-center gap-4">

@@ -30,13 +30,20 @@ export default function LoginPage() {
       }
 
       const { data: { user: signedInUser } } = await supabase.auth.getUser()
-      const { data: org } = await supabase
-        .from('organizations')
-        .select('type')
-        .eq('id', signedInUser?.id)
-        .maybeSingle()
+      const [{ data: admin }, { data: org }] = await Promise.all([
+        supabase
+          .from('admins')
+          .select('id')
+          .eq('email', signedInUser?.email)
+          .maybeSingle(),
+        supabase
+          .from('organizations')
+          .select('type')
+          .eq('id', signedInUser?.id)
+          .maybeSingle(),
+      ])
 
-      router.push(org ? '/dashboard/welcome' : '/dashboard')
+      router.push(admin && !org ? '/admin' : org ? '/dashboard/welcome' : '/dashboard')
     } else {
       const { error } = await supabase.auth.signInWithOtp({
         email,

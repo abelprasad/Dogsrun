@@ -1,5 +1,4 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@supabase/supabase-js'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import NewDogForm from './new-dog-form'
 
@@ -16,16 +15,5 @@ export default async function NewDogPage() {
 
   if (!org || org.type !== 'shelter') redirect('/dashboard')
 
-  const serviceClient = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
-  const { data: adminRow } = await serviceClient
-    .from('admins')
-    .select('id')
-    .eq('email', user.email)
-    .maybeSingle()
-  const isAdmin = !!adminRow
-
-  return <NewDogForm orgName={org.name} isAdmin={isAdmin} />
+  return <NewDogForm orgName={org.name} />
 }

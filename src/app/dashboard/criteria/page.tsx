@@ -1,8 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { createClient } from '@supabase/supabase-js'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
-import SignOutButton from '../sign-out-button'
 import CriteriaForm from './criteria-form'
 
 export default async function CriteriaPage() {
@@ -18,18 +16,6 @@ export default async function CriteriaPage() {
 
   if (!org || org.type !== 'rescue') redirect('/dashboard')
 
-  // Check if user is admin
-  const serviceClient = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
-  const { data: adminRow } = await serviceClient
-    .from('admins')
-    .select('id')
-    .eq('email', user.email)
-    .maybeSingle()
-  const isAdmin = !!adminRow
-
   const { data: criteria } = await supabase
     .from('rescue_criteria')
     .select('*')
@@ -38,23 +24,6 @@ export default async function CriteriaPage() {
 
   return (
     <div className="min-h-screen bg-[#f5f0e8]">
-      {/* Subnav */}
-      <div className="bg-[#13241d] py-2 px-8">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex gap-6">
-            <Link href="/dashboard/rescue" className="text-xs font-bold text-[#f5f0e8]/40 hover:text-[#f4b942] uppercase tracking-[0.24em] transition-colors">Incoming Alerts</Link>
-            <Link href="/dashboard/criteria" className="text-xs font-bold text-[#f4b942] uppercase tracking-[0.24em]">Matching Criteria</Link>
-            {isAdmin && (
-              <Link href="/dashboard/admin" className="text-xs font-bold text-[#f5f0e8]/40 hover:text-[#f4b942] uppercase tracking-[0.24em] transition-colors">Admin</Link>
-            )}
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-xs font-bold text-[#f5f0e8]/40 uppercase tracking-[0.24em]">{org.name}</span>
-            <SignOutButton />
-          </div>
-        </div>
-      </div>
-
       {/* Header */}
       <header className="bg-[#13241d] pb-12 px-8 pt-8 border-t border-white/5">
         <div className="max-w-7xl mx-auto">

@@ -146,7 +146,7 @@ export async function POST(req: NextRequest) {
                 </tr>
               </table>
               <div style="text-align:center;">
-                <a href="https://dogsrun.org/dashboard/admin" style="background-color:#13241d;color:#f4b942;padding:14px 32px;text-decoration:none;display:inline-block;font-weight:700;font-size:11px;letter-spacing:0.24em;text-transform:uppercase;">Review in Admin Panel</a>
+                <a href="https://dogsrun.org/admin" style="background-color:#13241d;color:#f4b942;padding:14px 32px;text-decoration:none;display:inline-block;font-weight:700;font-size:11px;letter-spacing:0.24em;text-transform:uppercase;">Review in Admin Panel</a>
               </div>
             </div>
             <div style="background-color:#13241d;padding:20px 40px;text-align:center;">
