@@ -134,6 +134,23 @@ async function createAlert(dogId: string, rescueId: string) {
   return data.id
 }
 
+async function createCriteria(rescueId: string) {
+  const { error } = await serviceClient.from('rescue_criteria').insert({
+    rescue_id: rescueId,
+    is_active: true,
+    breeds: ['Labrador'],
+    states_served: ['PA'],
+    sex_preference: 'any',
+    accepts_mixes: true,
+    accepts_parvo: false,
+    accepts_tripod: false,
+    accepts_blind: false,
+    accepts_other: false,
+  })
+
+  if (error) throw new Error(`Failed to create criteria: ${error.message}`)
+}
+
 async function login(page: Page, email: string, password: string) {
   await page.goto('/auth/login')
   await page.fill('input[type="email"]', email)
@@ -283,6 +300,24 @@ test.describe('API security', () => {
 
     await page.goto('/dashboard')
     await expect(page).toHaveURL(/\/admin$/)
+  })
+
+  test('returning shelters skip the welcome checklist', async ({ page }) => {
+    const shelter = await createAuthOrg('shelter')
+    await createDog(shelter.id)
+
+    await login(page, shelter.email, shelter.password)
+
+    await expect(page).toHaveURL(/\/dashboard$/)
+  })
+
+  test('returning rescues skip the welcome checklist', async ({ page }) => {
+    const rescue = await createAuthOrg('rescue')
+    await createCriteria(rescue.id)
+
+    await login(page, rescue.email, rescue.password)
+
+    await expect(page).toHaveURL(/\/dashboard\/rescue$/)
   })
 })
 

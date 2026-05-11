@@ -15,5 +15,5 @@ export default async function NewDogPage() {
 
   if (!org || org.type !== 'shelter') redirect('/dashboard')
 
-  return <NewDogForm orgName={org.name} />
+  return <NewDogForm />
 }

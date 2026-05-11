@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import imageCompression from 'browser-image-compression'
 import BreedSelect from '@/components/breed-select'
 import ColorPicker from '@/components/color-picker'
@@ -28,11 +27,7 @@ interface DogForm {
   euthanasia_date: string;
 }
 
-interface Props {
-  orgName: string
-}
-
-export default function NewDogForm({ orgName }: Props) {
+export default function NewDogForm() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [photo, setPhoto] = useState<File | null>(null)
