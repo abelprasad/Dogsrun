@@ -15,9 +15,19 @@ export default function UpdatePasswordPage() {
 
   useEffect(() => {
     const supabase = createClient()
-    supabase.auth.onAuthStateChange((event) => {
+
+    const isRecoveryRedirect = new URLSearchParams(window.location.search).get('recovery') === '1'
+    if (isRecoveryRedirect) {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        setReady(Boolean(session))
+      })
+    }
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') setReady(true)
     })
+
+    return () => subscription.unsubscribe()
   }, [])
 
   async function handleSubmit(e: React.FormEvent) {

@@ -34,20 +34,27 @@ export async function GET(request: NextRequest) {
     const { data: { user }, error } = await supabase.auth.verifyOtp({ token_hash, type })
 
     if (!error && user) {
+      const url = new URL(request.url)
+      url.searchParams.delete('token_hash')
+      url.searchParams.delete('type')
+
+      if (type === 'recovery') {
+        url.pathname = '/auth/update-password'
+        url.searchParams.set('recovery', '1')
+        return NextResponse.redirect(url)
+      }
+
       const { data: org } = await supabase
         .from('organizations')
         .select('type')
         .eq('email', user.email)
         .maybeSingle()
 
-      const url = new URL(request.url)
       if (org?.type === 'rescue') {
         url.pathname = '/dashboard/rescue'
       } else {
         url.pathname = '/dashboard'
       }
-      url.searchParams.delete('token_hash')
-      url.searchParams.delete('type')
       
       return NextResponse.redirect(url)
     }
