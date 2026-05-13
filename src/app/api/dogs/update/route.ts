@@ -19,13 +19,13 @@ const EDITABLE_DOG_FIELDS = [
   'other_issues',
   'other_issues_notes',
   'euthanasia_date',
+  'intake_date',
 ] as const
 
 const VALID_SEXES = new Set(['male', 'female', 'unknown'])
 
 export async function POST(req: NextRequest) {
   try {
-    // Auth check — must be a logged-in user
     const supabaseAuth = await createSupabaseServerClient()
     const { data: { user } } = await supabaseAuth.auth.getUser()
     if (!user) {
@@ -44,7 +44,6 @@ export async function POST(req: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
-    // Ownership check — dog must belong to user's org
     const { data: org } = await supabase
       .from('organizations')
       .select('id')
