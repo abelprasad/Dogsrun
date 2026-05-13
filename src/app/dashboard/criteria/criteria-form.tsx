@@ -12,8 +12,8 @@ interface RescueCriteria {
   rescue_id?: string;
   breeds?: string[];
   colors?: string[];
-  max_age_years?: number | string;
-  max_weight_lbs?: number | string;
+  age_ranges?: string[];
+  size_classes?: string[];
   sex_preference?: string;
   accepts_mixes?: boolean;
   states_served?: string[];
@@ -32,6 +32,25 @@ interface CriteriaFormProps {
 const inputClass = "w-full border border-[#13241d]/20 bg-[#fffaf2] px-4 py-3 text-sm text-[#13241d] placeholder-[#5d6a64]/50 transition-all focus:border-[#f4b942] focus:outline-none focus:ring-1 focus:ring-[#f4b942]"
 const labelClass = "mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-[#5d6a64]"
 
+const AGE_RANGES = [
+  { value: 'puppy', label: 'Puppy', sub: '0–1 yr' },
+  { value: 'youth', label: 'Youth', sub: '1–2 yrs' },
+  { value: 'adult', label: 'Adult', sub: '2–8 yrs' },
+  { value: 'senior', label: 'Senior', sub: '8+ yrs' },
+]
+
+const SIZE_CLASSES = [
+  { value: 'xsmall', label: 'XSmall', sub: '<20 lbs' },
+  { value: 'small', label: 'Small', sub: '20–30 lbs' },
+  { value: 'medium', label: 'Medium', sub: '30–50 lbs' },
+  { value: 'large', label: 'Large', sub: '50–90 lbs' },
+  { value: 'xlarge', label: 'XLarge', sub: '90+ lbs' },
+]
+
+function toggleItem(arr: string[], val: string): string[] {
+  return arr.includes(val) ? arr.filter(v => v !== val) : [...arr, val]
+}
+
 export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaFormProps) {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(!initialCriteria);
@@ -40,8 +59,8 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
   const [form, setForm] = useState({
     breeds: initialCriteria?.breeds || [] as string[],
     colors: initialCriteria?.colors || [] as string[],
-    max_age_years: initialCriteria?.max_age_years || '',
-    max_weight_lbs: initialCriteria?.max_weight_lbs || '',
+    age_ranges: initialCriteria?.age_ranges || [] as string[],
+    size_classes: initialCriteria?.size_classes || [] as string[],
     sex_preference: initialCriteria?.sex_preference || 'any',
     accepts_mixes: initialCriteria?.accepts_mixes ?? true,
     states_served: initialCriteria?.states_served || [] as string[],
@@ -71,8 +90,8 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
       rescue_id: rescueId,
       breeds: form.breeds,
       colors: form.colors.length > 0 ? form.colors : null,
-      max_age_years: form.max_age_years ? parseInt(form.max_age_years.toString()) : null,
-      max_weight_lbs: form.max_weight_lbs ? parseInt(form.max_weight_lbs.toString()) : null,
+      age_ranges: form.age_ranges.length > 0 ? form.age_ranges : null,
+      size_classes: form.size_classes.length > 0 ? form.size_classes : null,
       sex_preference: form.sex_preference,
       accepts_mixes: form.accepts_mixes,
       states_served: form.states_served,
@@ -90,6 +109,13 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
 
   // View mode
   if (!isEditing && initialCriteria) {
+    const ageLabel = initialCriteria.age_ranges?.length
+      ? initialCriteria.age_ranges.map(r => AGE_RANGES.find(a => a.value === r)?.label || r).join(', ')
+      : 'All ages'
+    const sizeLabel = initialCriteria.size_classes?.length
+      ? initialCriteria.size_classes.map(s => SIZE_CLASSES.find(c => c.value === s)?.label || s).join(', ')
+      : 'All sizes'
+
     return (
       <div className="border border-[#13241d]/10 bg-[#fff9ef]">
         <div className="flex items-center justify-between px-8 py-4 border-b border-[#13241d]/10">
@@ -108,8 +134,8 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
             { label: 'Colors', value: initialCriteria.colors?.join(', ') || 'All' },
             { label: 'States', value: initialCriteria.states_served?.join(', ') || 'All' },
             { label: 'Sex', value: initialCriteria.sex_preference || 'Any' },
-            { label: 'Max Age', value: initialCriteria.max_age_years ? `${initialCriteria.max_age_years}y` : 'Any' },
-            { label: 'Max Weight', value: initialCriteria.max_weight_lbs ? `${initialCriteria.max_weight_lbs} lbs` : 'Any' },
+            { label: 'Age Ranges', value: ageLabel },
+            { label: 'Sizes', value: sizeLabel },
             { label: 'Mixes', value: initialCriteria.accepts_mixes ? 'Yes' : 'No' },
             {
               label: 'Special Needs',
@@ -137,7 +163,7 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
 
       {/* Breeds */}
       <div>
-        <label className={labelClass}>Breeds <span className="normal-case font-normal tracking-normal text-[#5d6a64]/70">- leave empty to match all</span></label>
+        <label className={labelClass}>Breeds <span className="normal-case font-normal tracking-normal text-[#5d6a64]/70">— leave empty to match all</span></label>
         <div className="flex gap-2 mb-3">
           <BreedSelect value={breedInput} onChange={setBreedInput} placeholder="Search or type a breed..." className="flex-1" />
           <button
@@ -162,12 +188,60 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
       </div>
 
       {/* Colors */}
+      <ColorPicker
+        selected={form.colors}
+        onChange={colors => setForm(f => ({ ...f, colors }))}
+        label="Colors — leave empty to accept all"
+      />
+
+      {/* Age Ranges */}
       <div>
-        <ColorPicker
-          selected={form.colors}
-          onChange={colors => setForm(f => ({ ...f, colors }))}
-          label="Colors — leave empty to accept all"
-        />
+        <label className={labelClass}>Age ranges <span className="normal-case font-normal tracking-normal text-[#5d6a64]/70">— leave empty to accept all ages</span></label>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {AGE_RANGES.map(({ value, label, sub }) => {
+            const selected = form.age_ranges.includes(value)
+            return (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setForm(f => ({ ...f, age_ranges: toggleItem(f.age_ranges, value) }))}
+                className={`flex flex-col items-center gap-0.5 border p-4 transition-all ${
+                  selected
+                    ? 'border-[#f4b942] bg-[#f4b942]/10 text-[#13241d]'
+                    : 'border-[#13241d]/10 bg-[#f5f0e8] text-[#5d6a64] hover:border-[#f4b942]/50'
+                }`}
+              >
+                <span className="text-sm font-black text-[#13241d]">{label}</span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#5d6a64]">{sub}</span>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Size Classes */}
+      <div>
+        <label className={labelClass}>Size classes <span className="normal-case font-normal tracking-normal text-[#5d6a64]/70">— leave empty to accept all sizes</span></label>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+          {SIZE_CLASSES.map(({ value, label, sub }) => {
+            const selected = form.size_classes.includes(value)
+            return (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setForm(f => ({ ...f, size_classes: toggleItem(f.size_classes, value) }))}
+                className={`flex flex-col items-center gap-0.5 border p-4 transition-all ${
+                  selected
+                    ? 'border-[#f4b942] bg-[#f4b942]/10 text-[#13241d]'
+                    : 'border-[#13241d]/10 bg-[#f5f0e8] text-[#5d6a64] hover:border-[#f4b942]/50'
+                }`}
+              >
+                <span className="text-sm font-black text-[#13241d]">{label}</span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#5d6a64]">{sub}</span>
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       {/* Location + Sex */}
@@ -187,30 +261,16 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
         </div>
       </div>
 
-      {/* Age + Weight */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <div>
-          <label className={labelClass}>Max age <span className="normal-case font-normal tracking-normal text-[#5d6a64]/70">(years)</span></label>
-          <input type="number" placeholder="Any" value={form.max_age_years} onChange={e => setForm({ ...form, max_age_years: e.target.value })} className={inputClass} />
-        </div>
-        <div>
-          <label className={labelClass}>Max weight <span className="normal-case font-normal tracking-normal text-[#5d6a64]/70">(lbs)</span></label>
-          <input type="number" placeholder="Any" value={form.max_weight_lbs} onChange={e => setForm({ ...form, max_weight_lbs: e.target.value })} className={inputClass} />
-        </div>
-      </div>
-
       {/* Accepts mixes */}
-      <div>
-        <label className="flex cursor-pointer items-center gap-3">
-          <input
-            type="checkbox"
-            checked={form.accepts_mixes}
-            onChange={e => setForm({ ...form, accepts_mixes: e.target.checked })}
-            className="h-4 w-4 border-[#13241d]/20 text-[#f4b942] focus:ring-[#f4b942]"
-          />
-          <span className="text-sm font-black text-[#13241d]">Accept mixed breeds</span>
-        </label>
-      </div>
+      <label className="flex cursor-pointer items-center gap-3">
+        <input
+          type="checkbox"
+          checked={form.accepts_mixes}
+          onChange={e => setForm({ ...form, accepts_mixes: e.target.checked })}
+          className="h-4 w-4 border-[#13241d]/20 text-[#f4b942] focus:ring-[#f4b942]"
+        />
+        <span className="text-sm font-black text-[#13241d]">Accept mixed breeds</span>
+      </label>
 
       {/* Special needs */}
       <div>

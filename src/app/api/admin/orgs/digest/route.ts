@@ -6,6 +6,21 @@ import { escapeHtml } from '@/lib/html'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
+function dogAgeRange(age: number): string {
+  if (age < 1) return 'puppy'
+  if (age < 2) return 'youth'
+  if (age < 8) return 'adult'
+  return 'senior'
+}
+
+function dogSizeClass(weight: number): string {
+  if (weight < 20) return 'xsmall'
+  if (weight < 30) return 'small'
+  if (weight < 50) return 'medium'
+  if (weight < 90) return 'large'
+  return 'xlarge'
+}
+
 interface Dog {
   id: string
   name: string | null
@@ -24,7 +39,6 @@ interface Dog {
 }
 
 export async function POST(req: NextRequest) {
-  // Auth + admin check
   const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -93,8 +107,10 @@ export async function POST(req: NextRequest) {
     const colorMatch = !criteria.colors || criteria.colors.length === 0 ||
       !dog.color || dog.color.length === 0 ||
       dog.color.some((c: string) => criteria.colors.some((cc: string) => cc.toLowerCase() === c.toLowerCase()))
-    const ageMatch = !criteria.max_age_years || !dog.age_years || dog.age_years <= criteria.max_age_years
-    const weightMatch = !criteria.max_weight_lbs || !dog.weight_lbs || dog.weight_lbs <= criteria.max_weight_lbs
+    const ageMatch = !criteria.age_ranges || criteria.age_ranges.length === 0 ||
+      !dog.age_years || criteria.age_ranges.includes(dogAgeRange(dog.age_years))
+    const weightMatch = !criteria.size_classes || criteria.size_classes.length === 0 ||
+      !dog.weight_lbs || criteria.size_classes.includes(dogSizeClass(dog.weight_lbs))
     const sexMatch = !criteria.sex_preference || criteria.sex_preference === 'any' || criteria.sex_preference === dog.sex
     const mixMatch = dog.mix ? criteria.accepts_mixes !== false : true
     const stateMatch = !criteria.states_served || criteria.states_served.length === 0 ||
@@ -109,7 +125,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: "No matching dogs found for this rescue's criteria", matches: 0 })
   }
 
-  // Upsert alert rows — skip already-alerted pairs
   for (const dog of matches) {
     await serviceClient.from('alerts').upsert({
       dog_id: dog.id,
