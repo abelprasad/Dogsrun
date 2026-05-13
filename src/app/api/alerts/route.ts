@@ -23,8 +23,8 @@ interface RescueCriteria {
   rescue_id: string;
   breeds: string[] | null;
   colors: string[] | null;
-  max_age_years: number | null;
-  max_weight_lbs: number | null;
+  age_ranges: string[] | null;
+  size_classes: string[] | null;
   sex_preference: string | null;
   accepts_mixes: boolean | null;
   states_served: string[] | null;
@@ -40,8 +40,25 @@ interface Match {
   org: RescueOrg;
 }
 
+// Maps a dog's age_years to which age range bucket it falls into
+function dogAgeRange(age: number): string {
+  if (age < 1) return 'puppy'
+  if (age < 2) return 'youth'
+  if (age < 8) return 'adult'
+  return 'senior'
+}
+
+// Maps a dog's weight_lbs to which size class bucket it falls into
+function dogSizeClass(weight: number): string {
+  if (weight < 20) return 'xsmall'
+  if (weight < 30) return 'small'
+  if (weight < 50) return 'medium'
+  if (weight < 90) return 'large'
+  return 'xlarge'
+}
+
 export async function POST(req: NextRequest) {
-  // Auth check — only logged-in shelter users can trigger alert matching
+  // Auth check — only logged-in shelter users or admins can trigger alert matching
   const supabaseAuth = await createSupabaseServerClient()
   const { data: { user } } = await supabaseAuth.auth.getUser()
   if (!user) {
@@ -118,7 +135,7 @@ export async function POST(req: NextRequest) {
 
     if (org.id === dog.shelter_id) continue
     if (org.approval_status !== 'approved') continue
-    if (alreadyAlerted.has(org.id)) continue  // skip already-alerted rescues
+    if (alreadyAlerted.has(org.id)) continue
 
     if (dog.parvo && !criteria.accepts_parvo) continue
     if (dog.tripod && !criteria.accepts_tripod) continue
@@ -136,13 +153,15 @@ export async function POST(req: NextRequest) {
         criteria.colors!.some(cc => cc.toLowerCase() === c.toLowerCase())
       )
 
-    const ageMatch = !criteria.max_age_years ||
+    // Age: if rescue has age_ranges set, check the dog's range; otherwise accept all ages
+    const ageMatch = !criteria.age_ranges || criteria.age_ranges.length === 0 ||
       !dog.age_years ||
-      dog.age_years <= criteria.max_age_years
+      criteria.age_ranges.includes(dogAgeRange(dog.age_years))
 
-    const weightMatch = !criteria.max_weight_lbs ||
+    // Weight: if rescue has size_classes set, check the dog's size; otherwise accept all sizes
+    const weightMatch = !criteria.size_classes || criteria.size_classes.length === 0 ||
       !dog.weight_lbs ||
-      dog.weight_lbs <= criteria.max_weight_lbs
+      criteria.size_classes.includes(dogSizeClass(dog.weight_lbs))
 
     const sexMatch = !criteria.sex_preference ||
       criteria.sex_preference === 'any' ||
@@ -188,6 +207,7 @@ export async function POST(req: NextRequest) {
           <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #111827; font-size: 16px;">${dog.color.map((color: string) => escapeHtml(color)).join(', ')}</td>
         </tr>
       ` : ''
+
       const safeDogName = escapeHtmlOrDash(dog.name)
       const safeBreed = escapeHtmlOrDash(dog.breed)
       const safeState = escapeHtmlOrDash(dog.state)

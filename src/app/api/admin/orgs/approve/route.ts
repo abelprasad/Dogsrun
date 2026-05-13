@@ -6,6 +6,21 @@ import { escapeHtml } from '@/lib/html'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
+function dogAgeRange(age: number): string {
+  if (age < 1) return 'puppy'
+  if (age < 2) return 'youth'
+  if (age < 8) return 'adult'
+  return 'senior'
+}
+
+function dogSizeClass(weight: number): string {
+  if (weight < 20) return 'xsmall'
+  if (weight < 30) return 'small'
+  if (weight < 50) return 'medium'
+  if (weight < 90) return 'large'
+  return 'xlarge'
+}
+
 interface Dog {
   id: string
   name: string | null
@@ -113,7 +128,6 @@ export async function POST(req: NextRequest) {
     try {
       await sendRescueApprovalDigest(serviceClient, org_id, org.name, org.email)
     } catch (e) {
-      // Non-fatal — approval already succeeded, just log
       console.error('Rescue approval digest failed:', e)
     }
   }
@@ -153,8 +167,10 @@ async function sendRescueApprovalDigest(serviceClient: any, rescueId: string, re
     const colorMatch = !criteria.colors || criteria.colors.length === 0 ||
       !dog.color || dog.color.length === 0 ||
       dog.color.some((c: string) => criteria.colors.some((cc: string) => cc.toLowerCase() === c.toLowerCase()))
-    const ageMatch = !criteria.max_age_years || !dog.age_years || dog.age_years <= criteria.max_age_years
-    const weightMatch = !criteria.max_weight_lbs || !dog.weight_lbs || dog.weight_lbs <= criteria.max_weight_lbs
+    const ageMatch = !criteria.age_ranges || criteria.age_ranges.length === 0 ||
+      !dog.age_years || criteria.age_ranges.includes(dogAgeRange(dog.age_years))
+    const weightMatch = !criteria.size_classes || criteria.size_classes.length === 0 ||
+      !dog.weight_lbs || criteria.size_classes.includes(dogSizeClass(dog.weight_lbs))
     const sexMatch = !criteria.sex_preference || criteria.sex_preference === 'any' || criteria.sex_preference === dog.sex
     const mixMatch = dog.mix ? criteria.accepts_mixes !== false : true
     const stateMatch = !criteria.states_served || criteria.states_served.length === 0 ||
@@ -167,7 +183,6 @@ async function sendRescueApprovalDigest(serviceClient: any, rescueId: string, re
 
   if (matches.length === 0) return
 
-  // Insert alert rows (skip duplicates)
   for (const dog of matches) {
     await serviceClient.from('alerts').upsert({
       dog_id: dog.id,
