@@ -42,21 +42,6 @@ export default function NewDogForm() {
   const inputCls = "w-full border border-[#13241d]/20 bg-[#fffaf2] px-4 py-3 focus:outline-none focus:border-[#f4b942] focus:ring-1 focus:ring-[#f4b942] text-[#13241d] placeholder-[#5d6a64]/40 text-sm"
   const labelCls = "block text-xs uppercase tracking-[0.24em] font-bold text-[#13241d] mb-2"
 
-  const field = (key: keyof DogForm, label: string, type = 'text', placeholder = '', min?: string, step?: string) => (
-    <div>
-      <label className={labelCls}>{label}</label>
-      <input
-        type={type}
-        placeholder={placeholder}
-        value={form[key] as string}
-        onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
-        min={min}
-        step={step}
-        className={inputCls}
-      />
-    </div>
-  )
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (form.age_years !== '' && parseFloat(form.age_years) < 0) { alert('Age cannot be negative'); return }
@@ -123,7 +108,16 @@ export default function NewDogForm() {
       <main className="max-w-3xl mx-auto py-10 px-8">
         <form onSubmit={handleSubmit} className="bg-[#fff9ef] outline outline-1 outline-[#13241d]/10 p-8 space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {field('name', 'Dog Name', 'text', 'Buddy')}
+            <div>
+              <label className={labelCls}>Dog Name</label>
+              <input
+                type="text"
+                placeholder="Buddy"
+                value={form.name}
+                onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                className={inputCls}
+              />
+            </div>
             <div>
               <label className={labelCls}>Primary Breed</label>
               <BreedSelect value={form.breed} onChange={val => setForm(f => ({ ...f, breed: val }))} placeholder="Search or type breed..." />
@@ -131,8 +125,33 @@ export default function NewDogForm() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {field('age_years', 'Age (years)', 'number', '2', '0', '0.1')}
-            {field('weight_lbs', 'Weight (lbs)', 'number', '45', '0', '1')}
+            <div>
+              <label className={labelCls}>Age (years)</label>
+              <input
+                type="number"
+                placeholder="2"
+                value={form.age_years}
+                onChange={e => setForm(f => ({ ...f, age_years: e.target.value }))}
+                min="0"
+                step="0.1"
+                className={inputCls}
+              />
+              <p className="mt-1.5 text-[10px] uppercase tracking-[0.15em] text-[#5d6a64]/60 font-bold">
+                Use decimals for puppies — e.g. 0.5 for 6 months, 1.5 for 18 months
+              </p>
+            </div>
+            <div>
+              <label className={labelCls}>Weight (lbs)</label>
+              <input
+                type="number"
+                placeholder="45"
+                value={form.weight_lbs}
+                onChange={e => setForm(f => ({ ...f, weight_lbs: e.target.value }))}
+                min="0"
+                step="1"
+                className={inputCls}
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
