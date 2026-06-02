@@ -28,7 +28,7 @@ export default function BrowseStateFilter({ tab, currentState }: BrowseStateFilt
     } else {
       params.delete('state')
     }
-    router.push(`/dogs?${params.toString()}`)
+    router.push(`/dogs?${params.toString()}`, { scroll: false })
   }
 
   return (
@@ -53,7 +53,7 @@ export default function BrowseStateFilter({ tab, currentState }: BrowseStateFilt
             params.set('tab', tab)
             params.delete('state')
             params.delete('page')
-            router.push(`/dogs?${params.toString()}`)
+            router.push(`/dogs?${params.toString()}`, { scroll: false })
           }}
           className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#d95f4b] hover:underline"
         >
