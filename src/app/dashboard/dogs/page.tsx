@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { redirect } from 'next/navigation'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { requireAuthContext } from '@/lib/auth-context'
 import StatusBadge, { DogStatus } from '@/components/status-badge'
 import DogRowActions from './dog-row-actions'
 
@@ -13,15 +13,7 @@ export default async function MyDogsPage({ searchParams }: { searchParams: Promi
   const from = (page - 1) * PAGE_SIZE
   const to = from + PAGE_SIZE - 1
 
-  const supabase = await createSupabaseServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
-
-  const { data: org } = await supabase
-    .from('organizations')
-    .select('*')
-    .eq('id', user.id)
-    .single()
+  const { supabase, org } = await requireAuthContext()
 
   if (!org || org.type !== 'shelter') redirect('/dashboard')
 

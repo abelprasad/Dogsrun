@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { requireAuthContext } from '@/lib/auth-context'
 import Link from 'next/link'
 import Image from 'next/image'
 import { notFound, redirect } from 'next/navigation'
@@ -32,9 +32,7 @@ interface Dog {
 
 export default async function DogProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const supabase = await createSupabaseServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
+  const { org, isAdmin } = await requireAuthContext()
 
   const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -50,13 +48,23 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
   if (!dogData) notFound()
   const dog = dogData as unknown as Dog
 
-  const { data: userOrg } = await supabaseAdmin
-    .from('organizations')
-    .select('id, type')
-    .eq('id', user.id)
-    .maybeSingle()
+  if (!org && !isAdmin) redirect('/dashboard')
 
-  const backLink = userOrg?.type === 'rescue' ? '/dashboard/rescue' : '/dashboard/dogs'
+  let canViewDog = isAdmin || (org?.type === 'shelter' && org.id === dog.shelter_id)
+
+  if (!canViewDog && org?.type === 'rescue') {
+    const { data: alert } = await supabaseAdmin
+      .from('alerts')
+      .select('id')
+      .eq('dog_id', dog.id)
+      .eq('rescue_id', org.id)
+      .maybeSingle()
+    canViewDog = Boolean(alert)
+  }
+
+  if (!canViewDog) notFound()
+
+  const backLink = org?.type === 'rescue' ? '/dashboard/rescue' : '/dashboard/dogs'
   const hasSpecialNeeds = dog.parvo || dog.tripod || dog.blind || dog.other_issues
 
   return (
@@ -65,7 +73,7 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex gap-6">
             <Link href={backLink} className="text-xs font-bold text-[#d8cfc2] hover:text-[#f8f1e8] uppercase tracking-widest transition-colors">
-              {userOrg?.type === 'rescue' ? 'Alerts' : 'My Dogs'}
+              {org?.type === 'rescue' ? 'Alerts' : 'My Dogs'}
             </Link>
             <span className="text-xs font-bold text-[#f4b942] uppercase tracking-widest">{dog.name}</span>
           </div>

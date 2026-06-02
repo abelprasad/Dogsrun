@@ -1,18 +1,10 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { requireAuthContext } from '@/lib/auth-context'
 import CriteriaForm from './criteria-form'
 
 export default async function CriteriaPage() {
-  const supabase = await createSupabaseServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
-
-  const { data: org } = await supabase
-    .from('organizations')
-    .select('*')
-    .eq('id', user.id)
-    .single()
+  const { supabase, org } = await requireAuthContext()
 
   if (!org || org.type !== 'rescue') redirect('/dashboard')
 

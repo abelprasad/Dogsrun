@@ -24,6 +24,7 @@ export default function AdminOrgTable({ orgs, alertsByOrg }: Props) {
   const [orgList, setOrgList] = useState(orgs)
   const [loading, setLoading] = useState<string | null>(null)
   const [filter, setFilter] = useState<'all' | 'shelter' | 'rescue'>('all')
+  const [digestStatus, setDigestStatus] = useState<Record<string, 'sending' | 'sent' | 'error'>>({})
 
   const filtered = orgList.filter(o => filter === 'all' || o.type === filter)
   const pendingOrgs = orgList.filter(o => o.approval_status === 'pending')
@@ -53,6 +54,26 @@ export default function AdminOrgTable({ orgs, alertsByOrg }: Props) {
       setOrgList(prev => prev.map(o => o.id === orgId ? { ...o, approval_status: newStatus } : o))
     }
     setLoading(null)
+  }
+
+  async function sendDigest(orgId: string) {
+    setDigestStatus(prev => ({ ...prev, [orgId]: 'sending' }))
+    const res = await fetch('/api/admin/orgs/digest', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ org_id: orgId }),
+    })
+    const data = await res.json()
+    if (res.ok) {
+      setDigestStatus(prev => ({ ...prev, [orgId]: 'sent' }))
+      setTimeout(() => setDigestStatus(prev => { const next = { ...prev }; delete next[orgId]; return next }), 3000)
+      if (data.matches === 0) alert("No matching dogs found for this rescue's criteria.")
+      else alert(`Digest sent! ${data.matches} matching dog${data.matches === 1 ? '' : 's'}.`)
+    } else {
+      setDigestStatus(prev => ({ ...prev, [orgId]: 'error' }))
+      alert(data.error || 'Failed to send digest')
+      setTimeout(() => setDigestStatus(prev => { const next = { ...prev }; delete next[orgId]; return next }), 3000)
+    }
   }
 
   async function viewDocument(filePath: string) {
@@ -152,6 +173,7 @@ export default function AdminOrgTable({ orgs, alertsByOrg }: Props) {
             <tbody>
               {filtered.length > 0 ? filtered.map((org, i) => {
                 const stats = alertsByOrg[org.id]
+                const dStatus = digestStatus[org.id]
                 return (
                   <tr key={org.id} className={i % 2 === 0 ? 'bg-[#fff9ef]' : 'bg-[#f5f0e8]/60'}>
                     <td className="px-4 py-3 font-semibold text-[#13241d] whitespace-nowrap">{org.name}</td>
@@ -202,6 +224,19 @@ export default function AdminOrgTable({ orgs, alertsByOrg }: Props) {
                             className="px-2 py-1 text-xs font-bold bg-[#f5f0e8] text-[#13241d] hover:bg-[#13241d] hover:text-[#f4b942] transition-colors uppercase tracking-[0.1em]"
                           >
                             Doc
+                          </button>
+                        )}
+                        {org.type === 'rescue' && org.approval_status === 'approved' && (
+                          <button
+                            onClick={() => sendDigest(org.id)}
+                            disabled={dStatus === 'sending'}
+                            className={`px-2 py-1 text-xs font-bold uppercase tracking-[0.1em] transition-colors disabled:opacity-50 ${
+                              dStatus === 'sent' ? 'bg-green-50 text-green-700' :
+                              dStatus === 'error' ? 'bg-red-50 text-red-600' :
+                              'bg-purple-50 text-purple-700 hover:bg-purple-100'
+                            }`}
+                          >
+                            {dStatus === 'sending' ? '...' : dStatus === 'sent' ? 'Sent!' : dStatus === 'error' ? 'Error' : 'Digest'}
                           </button>
                         )}
                         <button
