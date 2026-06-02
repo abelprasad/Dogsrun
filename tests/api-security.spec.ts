@@ -204,6 +204,20 @@ test.describe('API security', () => {
     expectJsonError(await response.json(), /invalid action/)
   })
 
+  test('public dog profiles hide closed dogs', async ({ request }) => {
+    const shelterId = await createOrgOnly('shelter')
+    const dogId = await createDog(shelterId)
+
+    await serviceClient
+      .from('dogs')
+      .update({ status: 'adopted' })
+      .eq('id', dogId)
+
+    const response = await request.get(`/dogs/${dogId}`)
+
+    expect(response.status()).toBe(404)
+  })
+
   test('registration rejects mismatched user id and email', async ({ request }) => {
     const response = await postRegistration(request, {
       user_id: '00000000-0000-0000-0000-000000000000',
@@ -244,7 +258,19 @@ test.describe('API security', () => {
     expectJsonError(await response.json(), /forbidden/)
   })
 
-  test('dog update endpoint ignores protected fields from shelter users', async ({ page }) => {
+  test('shelters cannot view another shelter dog in dashboard profile', async ({ page }) => {
+    const shelter = await createAuthOrg('shelter')
+    const otherShelterId = await createOrgOnly('shelter')
+    const dogId = await createDog(otherShelterId)
+
+    await login(page, shelter.email, shelter.password)
+
+    const response = await page.goto(`/dashboard/dogs/${dogId}`)
+
+    expect(response?.status()).toBe(404)
+  })
+
+  test('dog update endpoint ignores ownership fields from shelter users', async ({ page }) => {
     const shelter = await createAuthOrg('shelter')
     const otherShelterId = await createOrgOnly('shelter')
     const dogId = await createDog(shelter.id)
@@ -256,7 +282,6 @@ test.describe('API security', () => {
         dog_id: dogId,
         name: '[TEST] Updated safe dog name',
         shelter_id: otherShelterId,
-        status: 'adopted',
       },
     })
 
@@ -271,6 +296,30 @@ test.describe('API security', () => {
     expect(dog?.name).toBe('[TEST] Updated safe dog name')
     expect(dog?.shelter_id).toBe(shelter.id)
     expect(dog?.status).toBe('available')
+  })
+
+  test('shelters can update owned dog status through dog update endpoint', async ({ page }) => {
+    const shelter = await createAuthOrg('shelter')
+    const dogId = await createDog(shelter.id)
+
+    await login(page, shelter.email, shelter.password)
+
+    const response = await page.request.post('/api/dogs/update', {
+      data: {
+        dog_id: dogId,
+        status: 'adopted',
+      },
+    })
+
+    expect(response.status()).toBe(200)
+
+    const { data: dog } = await serviceClient
+      .from('dogs')
+      .select('status')
+      .eq('id', dogId)
+      .single()
+
+    expect(dog?.status).toBe('adopted')
   })
 
   test('notify-shelter rejects rescues that do not own the alert', async ({ page }) => {
