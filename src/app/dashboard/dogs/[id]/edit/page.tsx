@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { requireAuthContext } from '@/lib/auth-context'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import SignOutButton from '../../../sign-out-button'
@@ -10,15 +10,7 @@ import StatusBadge from '@/components/status-badge'
 
 export default async function EditDogPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const supabase = await createSupabaseServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
-
-  const { data: userOrg } = await supabase
-    .from('organizations')
-    .select('*')
-    .eq('id', user.id)
-    .single()
+  const { org } = await requireAuthContext()
 
   const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -32,7 +24,7 @@ export default async function EditDogPage({ params }: { params: Promise<{ id: st
     .single()
 
   if (!dog) notFound()
-  if (!userOrg || userOrg.id !== dog.shelter_id) redirect('/dashboard')
+  if (!org || org.type !== 'shelter' || org.id !== dog.shelter_id) redirect('/dashboard')
 
   const { data: alerts } = await supabaseAdmin
     .from('alerts')
@@ -50,7 +42,7 @@ export default async function EditDogPage({ params }: { params: Promise<{ id: st
             <span className="text-xs font-bold text-[#f4b942] uppercase tracking-widest">{dog.name}</span>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-xs font-bold text-[#d8cfc2] uppercase tracking-widest">{userOrg.name}</span>
+            <span className="text-xs font-bold text-[#d8cfc2] uppercase tracking-widest">{org.name}</span>
             <SignOutButton />
           </div>
         </div>

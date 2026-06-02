@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
 import StatusBadge from '@/components/status-badge'
+import BrowseStateFilter from '@/components/browse-state-filter'
 
 const serviceClient = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -84,9 +85,10 @@ function excludedEmailList(): string {
 export default async function BrowsePage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; page?: string }>
+  searchParams: Promise<{ tab?: string; page?: string; state?: string }>
 }) {
-  const { tab: tabParam, page: pageParam } = await searchParams
+  const { tab: tabParam, page: pageParam, state: stateParam } = await searchParams
+  const stateFilter = stateParam && stateParam.length === 2 ? stateParam.toUpperCase() : ''
   const tab: Tab = (tabParam === 'shelters' || tabParam === 'rescues') ? tabParam : 'dogs'
   const page = parsePageParam(pageParam)
   const from = (page - 1) * PAGE_SIZE
@@ -98,12 +100,14 @@ export default async function BrowsePage({
   let totalPages = 1
 
   if (tab === 'dogs') {
-    const { data, count } = await serviceClient
+    let query = serviceClient
       .from('dogs')
-      .select('*, organizations(name, city, state)', { count: 'exact' })
+      .select('*, organizations!inner(name, city, state)', { count: 'exact' })
       .in('status', ['available', 'urgent'])
       .order('created_at', { ascending: false })
       .range(from, to)
+    if (stateFilter) query = query.eq('organizations.state', stateFilter)
+    const { data, count } = await query
     dogs = (data || []) as DogCard[]
     dogCount = count || 0
     totalPages = Math.max(1, Math.ceil(dogCount / PAGE_SIZE))
@@ -113,13 +117,15 @@ export default async function BrowsePage({
   let shelters: ShelterCard[] = []
 
   if (tab === 'shelters') {
-    const { data } = await serviceClient
+    let shelterQuery = serviceClient
       .from('organizations')
       .select('id, name, city, state')
       .eq('type', 'shelter')
       .eq('approval_status', 'approved')
       .not('email', 'in', excludedEmailList())
       .order('name')
+    if (stateFilter) shelterQuery = shelterQuery.eq('state', stateFilter)
+    const { data } = await shelterQuery
     const shelterOrgs = (data || []) as OrganizationSummary[]
 
     // Attach dog counts
@@ -139,13 +145,15 @@ export default async function BrowsePage({
   let rescues: RescueCard[] = []
 
   if (tab === 'rescues') {
-    const { data } = await serviceClient
+    let rescueQuery = serviceClient
       .from('organizations')
       .select('id, name, city, state')
       .eq('type', 'rescue')
       .eq('approval_status', 'approved')
       .not('email', 'in', excludedEmailList())
       .order('name')
+    if (stateFilter) rescueQuery = rescueQuery.eq('state', stateFilter)
+    const { data } = await rescueQuery
     const orgs = (data || []) as OrganizationSummary[]
 
     const criteria = await Promise.all(
@@ -202,7 +210,9 @@ export default async function BrowsePage({
 
         {/* ── Dogs tab ── */}
         {tab === 'dogs' && (
-          dogs.length > 0 ? (
+          <>
+            <BrowseStateFilter tab={tab} currentState={stateFilter} />
+            {dogs.length > 0 ? (
             <>
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {dogs.map((dog) => (
@@ -287,13 +297,13 @@ export default async function BrowsePage({
                   </p>
                   <div className="flex gap-2">
                     {page > 1 && (
-                      <Link href={`/dogs?tab=dogs&page=${page - 1}`}
+                      <Link href={`/dogs?tab=dogs&page=${page - 1}${stateFilter ? `&state=${stateFilter}` : ''}`}
                         className="border border-[#13241d]/20 bg-[#fff9ef] px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-[#13241d] transition hover:bg-[#13241d] hover:text-[#f4b942]">
                         ← Prev
                       </Link>
                     )}
                     {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                      <Link key={p} href={`/dogs?tab=dogs&page=${p}`}
+                      <Link key={p} href={`/dogs?tab=dogs&page=${p}${stateFilter ? `&state=${stateFilter}` : ''}`}
                         className={`px-4 py-2 text-xs font-black uppercase tracking-[0.16em] transition ${
                           p === page
                             ? 'bg-[#f4b942] text-[#13241d]'
@@ -303,7 +313,7 @@ export default async function BrowsePage({
                       </Link>
                     ))}
                     {page < totalPages && (
-                      <Link href={`/dogs?tab=dogs&page=${page + 1}`}
+                      <Link href={`/dogs?tab=dogs&page=${page + 1}${stateFilter ? `&state=${stateFilter}` : ''}`}
                         className="border border-[#13241d]/20 bg-[#fff9ef] px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-[#13241d] transition hover:bg-[#13241d] hover:text-[#f4b942]">
                         Next →
                       </Link>
@@ -316,15 +326,18 @@ export default async function BrowsePage({
             <div className="border border-dashed border-[#13241d]/20 bg-[#fff9ef] px-6 py-20 text-center">
               <p className="text-sm font-bold uppercase tracking-[0.22em] text-[#436154]">No open cases</p>
               <p className="mx-auto mt-4 max-w-md text-base leading-7 text-[#617069]">
-                There are no dogs currently available for rescue. New shelter cases will appear here as soon as they are published.
+                {stateFilter ? `No available dogs in ${stateFilter} right now.` : 'There are no dogs currently available for rescue. New shelter cases will appear here as soon as they are published.'}
               </p>
             </div>
-          )
+            )}
+          </>
         )}
 
         {/* ── Shelters tab ── */}
         {tab === 'shelters' && (
-          shelters.length > 0 ? (
+          <>
+            <BrowseStateFilter tab={tab} currentState={stateFilter} />
+            {shelters.length > 0 ? (
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {shelters.map((shelter) => (
                 <Link
@@ -366,15 +379,18 @@ export default async function BrowsePage({
             <div className="border border-dashed border-[#13241d]/20 bg-[#fff9ef] px-6 py-20 text-center">
               <p className="text-sm font-bold uppercase tracking-[0.22em] text-[#436154]">No shelter partners yet</p>
               <p className="mx-auto mt-4 max-w-md text-base leading-7 text-[#617069]">
-                Shelters will appear here once they&apos;ve been approved by the DOGSRUN team.
+                {stateFilter ? `No approved shelters in ${stateFilter}.` : "Shelters will appear here once they've been approved by the DOGSRUN team."}
               </p>
             </div>
-          )
+            )}
+          </>
         )}
 
         {/* ── Rescues tab ── */}
         {tab === 'rescues' && (
-          rescues.length > 0 ? (
+          <>
+            <BrowseStateFilter tab={tab} currentState={stateFilter} />
+            {rescues.length > 0 ? (
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {rescues.map((rescue) => {
                 const breeds: string[] = rescue.criteria?.breeds || []
@@ -444,10 +460,11 @@ export default async function BrowsePage({
             <div className="border border-dashed border-[#13241d]/20 bg-[#fff9ef] px-6 py-20 text-center">
               <p className="text-sm font-bold uppercase tracking-[0.22em] text-[#436154]">No rescue partners yet</p>
               <p className="mx-auto mt-4 max-w-md text-base leading-7 text-[#617069]">
-                Rescue organizations will appear here once they&apos;ve been approved by the DOGSRUN team.
+                {stateFilter ? `No approved rescues in ${stateFilter}.` : "Rescue organizations will appear here once they've been approved by the DOGSRUN team."}
               </p>
             </div>
-          )
+            )}
+          </>
         )}
 
       </main>

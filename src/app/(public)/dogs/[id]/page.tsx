@@ -16,6 +16,7 @@ export default async function PublicDogProfilePage({ params }: { params: Promise
     .from('dogs')
     .select('*, organizations(*)')
     .eq('id', id)
+    .in('status', ['available', 'urgent'])
     .single()
 
   if (!dog) notFound()

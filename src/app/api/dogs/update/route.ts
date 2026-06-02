@@ -20,9 +20,20 @@ const EDITABLE_DOG_FIELDS = [
   'other_issues_notes',
   'euthanasia_date',
   'intake_date',
+  'status',
 ] as const
 
 const VALID_SEXES = new Set(['male', 'female', 'unknown'])
+const VALID_DOG_STATUSES = new Set([
+  'available',
+  'pending',
+  'adopted',
+  'deceased',
+  'transferred',
+  'urgent',
+  'rescue_requested',
+  'placed',
+])
 
 export async function POST(req: NextRequest) {
   try {
@@ -47,7 +58,7 @@ export async function POST(req: NextRequest) {
     const { data: org } = await supabase
       .from('organizations')
       .select('id')
-      .eq('email', user.email)
+      .eq('id', user.id)
       .single()
 
     if (!org) {
@@ -71,6 +82,11 @@ export async function POST(req: NextRequest) {
 
     if ('sex' in updates && typeof updates.sex === 'string' && !VALID_SEXES.has(updates.sex)) {
       return NextResponse.json({ error: 'Invalid sex value' }, { status: 400 })
+    }
+    if ('status' in updates) {
+      if (typeof updates.status !== 'string' || !VALID_DOG_STATUSES.has(updates.status)) {
+        return NextResponse.json({ error: 'Invalid status value' }, { status: 400 })
+      }
     }
     if ('age_years' in updates) {
       const age = updates.age_years ? Number(updates.age_years) : null
