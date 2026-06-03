@@ -13,22 +13,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 })
   }
 
-  let formData: FormData
+  let body: Record<string, unknown>
   try {
-    formData = await req.formData()
+    body = await req.json()
   } catch {
-    return NextResponse.json({ error: 'Invalid form data' }, { status: 400 })
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
   }
 
-  const user_id = formData.get('user_id') as string
-  const name = formData.get('name') as string
-  const email = formData.get('email') as string
-  const city = formData.get('city') as string
-  const state = formData.get('state') as string
-  const type = formData.get('type') as string
-  const taxDoc = formData.get('tax_doc') as File | null
+  const user_id = body.user_id as string | undefined
+  const name = body.name as string | undefined
+  const email = body.email as string | undefined
+  const city = body.city as string | undefined
+  const state = body.state as string | undefined
+  const type = body.type as string | undefined
+  const tax_doc_path = body.tax_doc_path as string | undefined
 
-  if (!user_id || !name || !email || !city || !state || !type) {
+  if (!user_id || !name || !email || !city || !state || !type || !tax_doc_path) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
   }
 
@@ -36,14 +36,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid org type' }, { status: 400 })
   }
 
-  if (!taxDoc) {
-    return NextResponse.json({ error: '501(c)(3) determination letter is required' }, { status: 400 })
-  }
-  if (taxDoc.type !== 'application/pdf') {
-    return NextResponse.json({ error: 'Tax document must be a PDF file' }, { status: 400 })
-  }
-  if (taxDoc.size > 10 * 1024 * 1024) {
-    return NextResponse.json({ error: 'PDF must be under 10MB' }, { status: 400 })
+  // Validate path ownership — must start with the user's own UUID
+  // Prevents one user from claiming another user's uploaded document
+  if (!tax_doc_path.startsWith(`${user_id}/`)) {
+    return NextResponse.json({ error: 'Invalid document path' }, { status: 403 })
   }
 
   const serviceClient = createClient(
@@ -51,9 +47,20 @@ export async function POST(req: NextRequest) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
+  // Verify the auth user actually exists and the email matches
   const { data: authUser, error: authUserError } = await serviceClient.auth.admin.getUserById(user_id)
   if (authUserError || !authUser.user || authUser.user.email?.toLowerCase() !== email.toLowerCase()) {
     return NextResponse.json({ error: 'Invalid registration user' }, { status: 403 })
+  }
+
+  // Check the file actually exists in storage (proves the client-side upload completed)
+  const { data: fileData, error: fileCheckError } = await serviceClient.storage
+    .from('tax-docs')
+    .list(user_id)
+
+  const fileExists = !fileCheckError && fileData?.some((f) => `${user_id}/${f.name}` === tax_doc_path)
+  if (!fileExists) {
+    return NextResponse.json({ error: 'Document upload not found. Please try again.' }, { status: 400 })
   }
 
   // Check for existing org
@@ -67,27 +74,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Organization already exists for this user' }, { status: 409 })
   }
 
-  // Upload tax doc
-  let tax_doc_url: string | null = null
-
-  const fileBuffer = await taxDoc.arrayBuffer()
-  const filePath = `${user_id}/501c3.pdf`
-
-  const { error: uploadError } = await serviceClient.storage
-    .from('tax-docs')
-    .upload(filePath, fileBuffer, {
-      contentType: 'application/pdf',
-      upsert: true,
-    })
-
-  if (uploadError) {
-    return NextResponse.json({ error: 'Failed to upload document. Please try again.' }, { status: 500 })
-  }
-
-  tax_doc_url = filePath
-
   // Insert org
-  const { error } = await serviceClient.from('organizations').insert({
+  const { error: insertError } = await serviceClient.from('organizations').insert({
     id: user_id,
     name,
     email,
@@ -95,11 +83,11 @@ export async function POST(req: NextRequest) {
     state,
     type,
     approval_status: 'pending',
-    tax_doc_url,
+    tax_doc_url: tax_doc_path,
   })
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  if (insertError) {
+    return NextResponse.json({ error: insertError.message }, { status: 500 })
   }
 
   // Notify all admins
@@ -112,6 +100,7 @@ export async function POST(req: NextRequest) {
     const safeName = escapeHtml(name)
     const safeEmail = escapeHtml(email)
     const safeCity = escapeHtml(city)
+    const safeState = escapeHtml(state)
     const safeType = type === 'shelter' ? 'Shelter' : 'Rescue'
 
     await resend.emails.send({
@@ -142,7 +131,7 @@ export async function POST(req: NextRequest) {
                 </tr>
                 <tr>
                   <td style="padding:10px 0;font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#5d6a64;">Location</td>
-                  <td style="padding:10px 0;font-size:15px;color:#13241d;">${safeCity}, ${escapeHtml(state)}</td>
+                  <td style="padding:10px 0;font-size:15px;color:#13241d;">${safeCity}, ${safeState}</td>
                 </tr>
               </table>
               <div style="text-align:center;">
