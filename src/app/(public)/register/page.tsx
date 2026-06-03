@@ -6,17 +6,29 @@ import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import StateSelect from '@/components/state-select'
 
+type Step = 'idle' | 'creating-account' | 'uploading-doc' | 'saving' | 'sending-email'
+
+const STEP_LABELS: Record<Step, string> = {
+  idle: '',
+  'creating-account': 'Creating account...',
+  'uploading-doc': 'Uploading document...',
+  saving: 'Saving organization...',
+  'sending-email': 'Almost done...',
+}
+
 function RegisterForm() {
   const searchParams = useSearchParams()
   const typeParam = searchParams.get('type')
   const [type, setType] = useState<'shelter' | 'rescue'>(typeParam === 'rescue' ? 'rescue' : 'shelter')
-  const [loading, setLoading] = useState(false)
+  const [step, setStep] = useState<Step>('idle')
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [email, setEmail] = useState('')
   const [state, setState] = useState('')
   const [taxDoc, setTaxDoc] = useState<File | null>(null)
   const [taxDocError, setTaxDocError] = useState<string | null>(null)
+
+  const loading = step !== 'idle'
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     setTaxDocError(null)
@@ -39,7 +51,6 @@ function RegisterForm() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    setLoading(true)
     setError(null)
 
     const formData = new FormData(e.currentTarget)
@@ -49,45 +60,81 @@ function RegisterForm() {
     const city = formData.get('city') as string
     setEmail(emailVal)
 
-    if (!state) { setError('Please select a state.'); setLoading(false); return }
-    if (!taxDoc) { setError('Please upload your 501(c)(3) determination letter.'); setLoading(false); return }
+    if (!state) { setError('Please select a state.'); return }
+    if (!taxDoc) { setError('Please upload your 501(c)(3) determination letter.'); return }
 
     const supabase = createClient()
+
+    // Step 1 — create auth account
+    setStep('creating-account')
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: emailVal,
       password,
       options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
     })
 
-    if (authError) { setError(authError.message); setLoading(false); return }
-
-    if (authData.user) {
-      const apiFormData = new FormData()
-      apiFormData.append('user_id', authData.user.id)
-      apiFormData.append('name', orgName)
-      apiFormData.append('email', emailVal)
-      apiFormData.append('city', city)
-      apiFormData.append('state', state)
-      apiFormData.append('type', type)
-      apiFormData.append('tax_doc', taxDoc)
-
-      const res = await fetch('/api/register', { method: 'POST', body: apiFormData })
-      const result = await res.json()
-
-      if (!res.ok) { setError(result.error ?? 'Failed to create organization'); setLoading(false); return }
-
-      await supabase.auth.signInWithOtp({
-        email: emailVal,
-        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
-      })
-
-      setSuccess(true)
+    if (authError || !authData.user) {
+      setError(authError?.message ?? 'Failed to create account')
+      setStep('idle')
+      return
     }
 
-    setLoading(false)
+    // Step 2 — upload PDF directly from browser to Supabase Storage.
+    // Doing this client-side avoids Vercel's 10s function timeout on slow mobile connections.
+    setStep('uploading-doc')
+    const filePath = `${authData.user.id}/501c3.pdf`
+    const { error: uploadError } = await supabase.storage
+      .from('tax-docs')
+      .upload(filePath, taxDoc, { contentType: 'application/pdf', upsert: true })
+
+    if (uploadError) {
+      setError('Failed to upload document. Check your connection and try again.')
+      setStep('idle')
+      return
+    }
+
+    // Step 3 — register org (JSON body, path only — no file)
+    setStep('saving')
+    let res: Response
+    try {
+      res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: authData.user.id,
+          name: orgName,
+          email: emailVal,
+          city,
+          state,
+          type,
+          tax_doc_path: filePath,
+        }),
+      })
+    } catch {
+      setError('Network error. Please check your connection and try again.')
+      setStep('idle')
+      return
+    }
+
+    const result = await res.json()
+    if (!res.ok) {
+      setError(result.error ?? 'Failed to create organization')
+      setStep('idle')
+      return
+    }
+
+    // Step 4 — send magic link
+    setStep('sending-email')
+    await supabase.auth.signInWithOtp({
+      email: emailVal,
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+    })
+
+    setSuccess(true)
+    setStep('idle')
   }
 
-  const inputClass = "w-full px-4 py-3 border border-[#13241d]/20 bg-white focus:border-[#f4b942] focus:ring-1 focus:ring-[#f4b942] outline-none transition-all text-[#13241d] placeholder-[#9ca3af] text-sm"
+  const inputClass = "w-full px-4 py-3 border border-[#13241d]/20 bg-white focus:border-[#f4b942] focus:ring-1 focus:ring-[#f4b942] outline-none transition-all text-[#13241d] placeholder-[#9ca3af] text-base sm:text-sm"
 
   if (success) {
     return (
@@ -116,18 +163,19 @@ function RegisterForm() {
               key={t}
               type="button"
               onClick={() => setType(t)}
-              className={`flex-1 py-3 text-sm font-black uppercase tracking-[0.16em] transition-colors ${
+              disabled={loading}
+              className={`flex-1 py-4 text-sm font-black uppercase tracking-[0.16em] transition-colors ${
                 type === t
                   ? 'bg-[#f4b942] text-[#13241d]'
                   : 'bg-[#fff9ef] text-[#7a877f] hover:text-[#13241d]'
-              }`}
+              } disabled:opacity-50`}
             >
               {t}
             </button>
           ))}
         </div>
 
-        <form onSubmit={handleSubmit} className="p-8 space-y-6">
+        <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-5">
           {error && (
             <div className="border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
           )}
@@ -144,18 +192,18 @@ function RegisterForm() {
             </div>
             <div>
               <label className="mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-[#5d6a64]">State</label>
-              <StateSelect value={state} onChange={setState} placeholder="Select state..." />
+              <StateSelect value={state} onChange={setState} placeholder="Select..." />
             </div>
           </div>
 
           <div>
             <label className="mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-[#5d6a64]">Work Email</label>
-            <input name="email" type="email" required placeholder="director@org.org" className={inputClass} />
+            <input name="email" type="email" required placeholder="director@org.org" autoComplete="email" inputMode="email" className={inputClass} />
           </div>
 
           <div>
             <label className="mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-[#5d6a64]">Password</label>
-            <input name="password" type="password" required minLength={6} className={inputClass} />
+            <input name="password" type="password" required minLength={6} autoComplete="new-password" className={inputClass} />
           </div>
 
           <div>
@@ -163,24 +211,35 @@ function RegisterForm() {
               501(c)(3) Determination Letter <span className="text-red-500">*</span>
             </label>
             <p className="text-xs text-[#9ca3af] mb-2">PDF only · Max 10MB</p>
-            <label className={`flex cursor-pointer items-center gap-3 border-2 border-dashed px-4 py-3 transition-colors ${taxDoc ? 'border-[#f4b942] bg-[#fffbeb]' : 'border-[#13241d]/20 hover:border-[#f4b942] bg-white'}`}>
+            <label className={`flex cursor-pointer items-center gap-3 border-2 border-dashed px-4 py-4 transition-colors ${taxDoc ? 'border-[#f4b942] bg-[#fffbeb]' : 'border-[#13241d]/20 hover:border-[#f4b942] bg-white'}`}>
               <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 shrink-0 ${taxDoc ? 'text-[#f4b942]' : 'text-[#9ca3af]'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
               <span className={`flex-1 truncate text-sm ${taxDoc ? 'font-black text-[#13241d]' : 'text-[#9ca3af]'}`}>
-                {taxDoc ? taxDoc.name : 'Click to upload PDF'}
+                {taxDoc ? taxDoc.name : 'Tap to upload PDF'}
               </span>
               <input type="file" accept="application/pdf" onChange={handleFileChange} className="hidden" />
             </label>
             {taxDocError && <p className="mt-1 text-xs text-red-600">{taxDocError}</p>}
           </div>
 
+          {/* Step progress indicator */}
+          {loading && (
+            <div className="flex items-center gap-3 py-1">
+              <svg className="h-4 w-4 shrink-0 animate-spin text-[#f4b942]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+              <span className="text-sm font-bold text-[#5d6a64]">{STEP_LABELS[step]}</span>
+            </div>
+          )}
+
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#f4b942] py-3 text-sm font-black uppercase tracking-[0.16em] text-[#1a2e1a] transition hover:bg-[#ffd86a] disabled:opacity-50"
+            className="w-full bg-[#f4b942] py-4 text-sm font-black uppercase tracking-[0.16em] text-[#1a2e1a] transition hover:bg-[#ffd86a] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Creating account...' : `Register as ${type === 'shelter' ? 'Shelter' : 'Rescue'}`}
+            {loading ? STEP_LABELS[step] : `Register as ${type === 'shelter' ? 'Shelter' : 'Rescue'}`}
           </button>
         </form>
       </div>
