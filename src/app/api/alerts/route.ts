@@ -17,6 +17,7 @@ interface RescueOrg {
   name: string;
   email: string;
   approval_status: string;
+  is_test: boolean;
 }
 
 interface RescueCriteria {
@@ -78,12 +79,18 @@ export async function POST(req: NextRequest) {
 
   const { data: dog, error: dogError } = await supabase
     .from('dogs')
-    .select('*, organizations(name, city, state)')
+    .select('*, organizations(name, city, state, is_test)')
     .eq('id', dog_id)
     .single()
 
   if (dogError || !dog) {
     return NextResponse.json({ error: 'Dog not found' }, { status: 404 })
+  }
+
+  // Don't fire real alerts for dogs belonging to test shelters
+  const shelterOrg = dog.organizations as unknown as { name: string; city: string; state: string; is_test: boolean } | null
+  if (shelterOrg?.is_test) {
+    return NextResponse.json({ message: 'Skipped: test shelter dog does not trigger alerts', matches: 0 })
   }
 
   const canTriggerAlerts = isAdmin ||
@@ -97,7 +104,7 @@ export async function POST(req: NextRequest) {
 
   const { data: criteriaList } = await supabase
     .from('rescue_criteria')
-    .select('*, organizations(id, name, email, approval_status)')
+    .select('*, organizations(id, name, email, approval_status, is_test)')
     .eq('is_active', true)
 
   if (!criteriaList || (criteriaList as unknown as RescueCriteria[]).length === 0) {
@@ -120,6 +127,7 @@ export async function POST(req: NextRequest) {
 
     if (org.id === dog.shelter_id) continue
     if (org.approval_status !== 'approved') continue
+    if (org.is_test) continue  // Don't send real alerts to test rescue orgs
     if (alreadyAlerted.has(org.id)) continue
 
     if (dogMatchesCriteria(dog, criteria)) {
@@ -133,7 +141,7 @@ export async function POST(req: NextRequest) {
 
   const results = await Promise.allSettled(
     matches.map(async ({ criteria, org }) => {
-      const shelter = dog.organizations as unknown as { name: string; city: string; state: string }
+      const shelter = dog.organizations as unknown as { name: string; city: string; state: string; is_test: boolean }
 
       const specialNeeds = []
       if (dog.parvo) specialNeeds.push('Parvo')
