@@ -11,9 +11,6 @@ const serviceClient = createClient(
 
 const PAGE_SIZE = 12
 
-// TODO: Remove once admin orgs are separated from shelter/rescue orgs
-const TEST_EMAILS = ['abelprasad5@gmail.com', 'amypitrra@gmail.com']
-
 type Tab = 'dogs' | 'shelters' | 'rescues'
 
 interface OrganizationSummary {
@@ -78,10 +75,6 @@ function parsePageParam(value: string | undefined): number {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 1
 }
 
-function excludedEmailList(): string {
-  return `(${TEST_EMAILS.map((email) => JSON.stringify(email)).join(',')})`
-}
-
 export default async function BrowsePage({
   searchParams,
 }: {
@@ -104,6 +97,7 @@ export default async function BrowsePage({
       .from('dogs')
       .select('*, organizations!inner(name, city, state)', { count: 'exact' })
       .in('status', ['available', 'urgent'])
+      .eq('organizations.is_test', false)
       .order('created_at', { ascending: false })
       .range(from, to)
     if (stateFilter) query = query.eq('organizations.state', stateFilter)
@@ -122,7 +116,7 @@ export default async function BrowsePage({
       .select('id, name, city, state')
       .eq('type', 'shelter')
       .eq('approval_status', 'approved')
-      .not('email', 'in', excludedEmailList())
+      .eq('is_test', false)
       .order('name')
     if (stateFilter) shelterQuery = shelterQuery.eq('state', stateFilter)
     const { data } = await shelterQuery
@@ -150,7 +144,7 @@ export default async function BrowsePage({
       .select('id, name, city, state')
       .eq('type', 'rescue')
       .eq('approval_status', 'approved')
-      .not('email', 'in', excludedEmailList())
+      .eq('is_test', false)
       .order('name')
     if (stateFilter) rescueQuery = rescueQuery.eq('state', stateFilter)
     const { data } = await rescueQuery
