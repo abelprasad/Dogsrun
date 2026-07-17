@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(grep -E '^/c/code/dogsrun/[^/]+$')",
-      "Bash(wc -l src/app/api/*/route.ts src/lib/*.ts)"
-    ]
-  }
-}
