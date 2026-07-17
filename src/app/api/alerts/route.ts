@@ -3,6 +3,7 @@ import { Resend } from 'resend'
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { escapeHtml, escapeHtmlOrDash } from '@/lib/html'
+import { dogMatchesCriteria } from '@/lib/matching'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -40,22 +41,6 @@ interface Match {
   org: RescueOrg;
 }
 
-// Maps a dog's age_years to which age range bucket it falls into
-function dogAgeRange(age: number): string {
-  if (age < 1) return 'puppy'
-  if (age < 2) return 'youth'
-  if (age < 8) return 'adult'
-  return 'senior'
-}
-
-// Maps a dog's weight_lbs to which size class bucket it falls into
-function dogSizeClass(weight: number): string {
-  if (weight < 20) return 'xsmall'
-  if (weight < 30) return 'small'
-  if (weight < 50) return 'medium'
-  if (weight < 90) return 'large'
-  return 'xlarge'
-}
 
 export async function POST(req: NextRequest) {
   // Auth check — only logged-in shelter users or admins can trigger alert matching
@@ -137,45 +122,7 @@ export async function POST(req: NextRequest) {
     if (org.approval_status !== 'approved') continue
     if (alreadyAlerted.has(org.id)) continue
 
-    if (dog.parvo && !criteria.accepts_parvo) continue
-    if (dog.tripod && !criteria.accepts_tripod) continue
-    if (dog.blind && !criteria.accepts_blind) continue
-    if (dog.other_issues && !criteria.accepts_other) continue
-
-    const breedMatch = !criteria.breeds || criteria.breeds.length === 0 ||
-      criteria.breeds.some((b: string) =>
-        dog.breed?.toLowerCase().includes(b.toLowerCase())
-      )
-
-    const colorMatch = !criteria.colors || criteria.colors.length === 0 ||
-      !dog.color || dog.color.length === 0 ||
-      dog.color.some((c: string) =>
-        criteria.colors!.some(cc => cc.toLowerCase() === c.toLowerCase())
-      )
-
-    // Age: if rescue has age_ranges set, check the dog's range; otherwise accept all ages
-    const ageMatch = !criteria.age_ranges || criteria.age_ranges.length === 0 ||
-      !dog.age_years ||
-      criteria.age_ranges.includes(dogAgeRange(dog.age_years))
-
-    // Weight: if rescue has size_classes set, check the dog's size; otherwise accept all sizes
-    const weightMatch = !criteria.size_classes || criteria.size_classes.length === 0 ||
-      !dog.weight_lbs ||
-      criteria.size_classes.includes(dogSizeClass(dog.weight_lbs))
-
-    const sexMatch = !criteria.sex_preference ||
-      criteria.sex_preference === 'any' ||
-      criteria.sex_preference === dog.sex
-
-    const mixMatch = dog.mix ? criteria.accepts_mixes !== false : true
-
-    const stateMatch = !criteria.states_served || criteria.states_served.length === 0 ||
-      !dog.state ||
-      criteria.states_served.some((s: string) =>
-        s.toUpperCase() === dog.state?.toUpperCase()
-      )
-
-    if (breedMatch && colorMatch && ageMatch && weightMatch && sexMatch && mixMatch && stateMatch) {
+    if (dogMatchesCriteria(dog, criteria)) {
       matches.push({ criteria, org })
     }
   }
