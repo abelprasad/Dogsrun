@@ -41,4 +41,4 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-prompt.txt
+prompt.txt.claude/settings.local.json
