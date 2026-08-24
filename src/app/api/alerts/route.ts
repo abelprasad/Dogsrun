@@ -1,9 +1,9 @@
-import { createClient } from '"'"'@supabase/supabase-js'"'"'
-import { Resend } from '"'"'resend'"'"'
-import { NextRequest, NextResponse } from '"'"'next/server'"'"'
-import { createSupabaseServerClient } from '"'"'@/lib/supabase-server'"'"'
-import { escapeHtml, escapeHtmlOrDash } from '"'"'@/lib/html'"'"'
-import { dogMatchesCriteria } from '"'"'@/lib/matching'"'"'
+import { createClient } from '@supabase/supabase-js'
+import { Resend } from 'resend'
+import { NextRequest, NextResponse } from 'next/server'
+import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { escapeHtml, escapeHtmlOrDash } from '@/lib/html'
+import { dogMatchesCriteria } from '@/lib/matching'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
   const supabaseAuth = await createSupabaseServerClient()
   const { data: { user } } = await supabaseAuth.auth.getUser()
   if (!user) {
-    return NextResponse.json({ error: '"'"'Unauthorized'"'"' }, { status: 401 })
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   const [{ data: requesterOrg }, { data: adminRow }] = await Promise.all([
@@ -70,11 +70,11 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     dog_id = body.dog_id
   } catch {
-    return NextResponse.json({ error: '"'"'Invalid JSON'"'"' }, { status: 400 })
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
   if (!dog_id) {
-    return NextResponse.json({ error: '"'"'dog_id required'"'"' }, { status: 400 })
+    return NextResponse.json({ error: 'dog_id required' }, { status: 400 })
   }
 
   const { data: dog, error: dogError } = await supabase
@@ -84,22 +84,22 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (dogError || !dog) {
-    return NextResponse.json({ error: '"'"'Dog not found'"'"' }, { status: 404 })
+    return NextResponse.json({ error: 'Dog not found' }, { status: 404 })
   }
 
-  // Don'"'"'t fire real alerts for dogs belonging to test shelters
+  // Don't fire real alerts for dogs belonging to test shelters
   const shelterOrg = dog.organizations as unknown as { name: string; city: string; state: string; is_test: boolean } | null
   if (shelterOrg?.is_test) {
-    return NextResponse.json({ message: '"'"'Skipped: test shelter dog does not trigger alerts'"'"', matches: 0 })
+    return NextResponse.json({ message: 'Skipped: test shelter dog does not trigger alerts', matches: 0 })
   }
 
   const canTriggerAlerts = isAdmin ||
-    (requesterOrg?.type === '"'"'shelter'"'"' &&
-      requesterOrg.approval_status === '"'"'approved'"'"' &&
+    (requesterOrg?.type === 'shelter' &&
+      requesterOrg.approval_status === 'approved' &&
       dog.shelter_id === requesterOrg.id)
 
   if (!canTriggerAlerts) {
-    return NextResponse.json({ error: '"'"'Forbidden'"'"' }, { status: 403 })
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
   const { data: criteriaList } = await supabase
@@ -108,7 +108,7 @@ export async function POST(req: NextRequest) {
     .eq('is_active', true)
 
   if (!criteriaList || (criteriaList as unknown as RescueCriteria[]).length === 0) {
-    return NextResponse.json({ message: '"'"'No active rescue criteria found'"'"' })
+    return NextResponse.json({ message: 'No active rescue criteria found' })
   }
 
   // Fetch existing alerts for this dog to prevent duplicates
@@ -126,8 +126,8 @@ export async function POST(req: NextRequest) {
     if (!org) continue
 
     if (org.id === dog.shelter_id) continue
-    if (org.approval_status !== '"'"'approved'"'"') continue
-    if (org.is_test) continue  // Don'"'"'t send real alerts to test rescue orgs
+    if (org.approval_status !== 'approved') continue
+    if (org.is_test) continue  // Don't send real alerts to test rescue orgs
     if (alreadyAlerted.has(org.id)) continue
 
     if (dogMatchesCriteria(dog, criteria)) {
@@ -136,32 +136,32 @@ export async function POST(req: NextRequest) {
   }
 
   if (matches.length === 0) {
-    return NextResponse.json({ message: '"'"'No matches found'"'"', dog: dog.name })
+    return NextResponse.json({ message: 'No matches found', dog: dog.name })
   }
 
   const results = await Promise.allSettled(
     matches.map(async ({ criteria, org }) => {
-      const shelter = dog.organizations as unknown as { name: string; city: string; state: string; is_test: boolean }
+      const shelter = dog.organizations as unknown as { name: string; city: string; state: string }
 
       const specialNeeds = []
-      if (dog.parvo) specialNeeds.push('"'"'Parvo'"'"')
-      if (dog.tripod) specialNeeds.push('"'"'Tripod / Amputee'"'"')
-      if (dog.blind) specialNeeds.push('"'"'Blind / Vision Impaired'"'"')
-      if (dog.other_issues) specialNeeds.push(`Other &mdash; "${escapeHtml(dog.other_issues_notes)}"`)
+      if (dog.parvo) specialNeeds.push('Parvo')
+      if (dog.tripod) specialNeeds.push('Tripod / Amputee')
+      if (dog.blind) specialNeeds.push('Blind / Vision Impaired')
+      if (dog.other_issues) specialNeeds.push(`Other &mdash; &quot;${escapeHtml(dog.other_issues_notes)}&quot;`)
 
       const specialNeedsRow = specialNeeds.length > 0 ? `
         <tr>
           <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #6b7280; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Special Needs</td>
-          <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #dc2626; font-size: 16px; font-weight: 700;">${specialNeeds.join('"'"', '"'"')}</td>
+          <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #dc2626; font-size: 16px; font-weight: 700;">${specialNeeds.join(', ')}</td>
         </tr>
-      ` : '"'"'"'"
+      ` : ''
 
       const colorRow = dog.color && dog.color.length > 0 ? `
         <tr>
           <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #6b7280; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Color</td>
-          <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #111827; font-size: 16px;">${dog.color.map((color: string) => escapeHtml(color)).join('"'"', '"'"')}</td>
+          <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #111827; font-size: 16px;">${dog.color.map((color: string) => escapeHtml(color)).join(', ')}</td>
         </tr>
-      ` : '"'"'"'"
+      ` : ''
 
       const safeDogName = escapeHtmlOrDash(dog.name)
       const safeBreed = escapeHtmlOrDash(dog.breed)
@@ -175,18 +175,18 @@ export async function POST(req: NextRequest) {
         dog_id: dog.id,
         rescue_id: org.id,
         criteria_id: criteria.id,
-        status: '"'"'sent'"'"',
+        status: 'sent',
         sent_at: new Date().toISOString(),
       }).select().single()
 
       if (alertError || !alertData) throw alertError
 
       await resend.emails.send({
-        from: '"'"'DOGSRUN Alerts <alerts@dogsrun.org>'"'"',
+        from: 'DOGSRUN Alerts <alerts@dogsrun.org>',
         to: org.email,
-        subject: `New dog match: ${dog.name ?? '"'"'Unnamed'"'"'} (${dog.breed ?? '"'"'Unknown breed'"'"'})`,
+        subject: `New dog match: ${dog.name ?? 'Unnamed'} (${dog.breed ?? 'Unknown breed'})`,
         html: `
-          <div style="background-color: #f9fafb; padding: 32px 0; font-family: -apple-system, BlinkMacSystemFont, '"'"'Segoe UI'"'"', Arial, sans-serif;">
+          <div style="background-color: #f9fafb; padding: 32px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;">
             <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
               <div style="background-color: #f59e0b; padding: 24px; text-align: center;">
                 <span style="color: #ffffff; font-size: 24px; font-weight: 800; letter-spacing: -0.025em;">DOGSRUN</span>
@@ -205,17 +205,17 @@ export async function POST(req: NextRequest) {
                   </tr>
                   <tr>
                     <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #6b7280; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Breed</td>
-                    <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #111827; font-size: 16px;">${safeBreed}${dog.mix ? '"'"' mix'"'"' : '"'"'"'"'}</td>
+                    <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #111827; font-size: 16px;">${safeBreed}${dog.mix ? ' mix' : ''}</td>
                   </tr>
                   ${colorRow}
                   ${specialNeedsRow}
                   <tr>
                     <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #6b7280; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Age</td>
-                    <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #111827; font-size: 16px;">${dog.age_years ? `${dog.age_years} years` : '"'"'—'"'"'}</td>
+                    <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #111827; font-size: 16px;">${dog.age_years ? `${dog.age_years} years` : '—'}</td>
                   </tr>
                   <tr>
                     <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #6b7280; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Weight</td>
-                    <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #111827; font-size: 16px;">${dog.weight_lbs ? `${dog.weight_lbs} lbs` : '"'"'—'"'"'}</td>
+                    <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #111827; font-size: 16px;">${dog.weight_lbs ? `${dog.weight_lbs} lbs` : '—'}</td>
                   </tr>
                   <tr>
                     <td style="padding: 12px 16px; border-bottom: 1px solid #f973161a; color: #6b7280; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Sex</td>
@@ -231,7 +231,7 @@ export async function POST(req: NextRequest) {
                   </tr>
                 </table>
                 <div style="text-align: center; margin-bottom: 32px;">
-                  <a href="https://dogsrun.org/api/respond?alert_id=${encodeURIComponent(alertData.id)}&action=interested"
+                  <a href="https://dogsrun.org/api/respond?alert_id=${encodeURIComponent(alertData.id)}&amp;action=interested"
                      style="background-color: #f59e0b; color: #ffffff; padding: 16px 32px; border-radius: 12px; text-decoration: none; display: inline-block; font-weight: 700; font-size: 16px;">
                     Interested
                   </a>
@@ -255,12 +255,12 @@ export async function POST(req: NextRequest) {
     })
   )
 
-  const sent = results.filter(r => r.status === '"'"'fulfilled'"'"').length
-  const failed = results.filter(r => r.status === '"'"'rejected'"'"').length
+  const sent = results.filter(r => r.status === 'fulfilled').length
+  const failed = results.filter(r => r.status === 'rejected').length
   const skipped = alreadyAlerted.size
 
   return NextResponse.json({
-    message: `Alerts sent: ${sent}, failed: ${failed}${skipped > 0 ? `, skipped (already alerted): ${skipped}` : '"'"'"'"'}`,
+    message: `Alerts sent: ${sent}, failed: ${failed}${skipped > 0 ? `, skipped (already alerted): ${skipped}` : ''}`,
     matches: matches.length,
   })
 }
