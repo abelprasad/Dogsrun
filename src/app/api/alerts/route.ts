@@ -141,7 +141,7 @@ export async function POST(req: NextRequest) {
 
   const results = await Promise.allSettled(
     matches.map(async ({ criteria, org }) => {
-      const shelter = dog.organizations as unknown as { name: string; city: string; state: string }
+      const shelter = dog.organizations as unknown as { name: string; city: string; state: string; is_test: boolean }
 
       const specialNeeds = []
       if (dog.parvo) specialNeeds.push('Parvo')

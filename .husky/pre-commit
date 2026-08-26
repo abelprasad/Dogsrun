@@ -1,0 +1,47 @@
+#!/bin/bash
+# .husky/pre-commit — Lazy ladder enforcement for Dogsrun
+
+set -e
+
+echo "🔍 Lazy pre-commit check..."
+
+# Check 1: No new production dependencies without justification
+if git diff --cached package.json | grep -q '"dependencies"'; then
+  echo "⚠️  Dependencies changed. Climbing the ladder?"
+  echo "   Did you:"
+  echo "   1. Check if this already exists in the codebase?"
+  echo "   2. Check if Node stdlib handles it?"
+  echo "   3. Check if it's already a dependency?"
+  echo "   If yes to any, remove the new dep."
+  exit 1
+fi
+
+# Check 2: No console.logs in staged code
+if git diff --cached -- '*.ts' '*.tsx' '*.js' '*.jsx' | grep -E '^\+.*console\.(log|error|warn|debug)' | grep -v '// TODO' | grep -v '//' > /dev/null; then
+  echo "❌ console.log detected in staged code. Remove it."
+  git diff --cached -- '*.ts' '*.tsx' '*.js' '*.jsx' | grep -E '^\+.*console\.(log|error|warn|debug)' | grep -v '//'
+  exit 1
+fi
+
+# Check 3: No debugger statements
+if git diff --cached -- '*.ts' '*.tsx' '*.js' '*.jsx' | grep -E '^\+.*debugger' > /dev/null; then
+  echo "❌ debugger statement found. Remove it."
+  exit 1
+fi
+
+# Check 4: No commented-out code blocks
+if git diff --cached -- '*.ts' '*.tsx' '*.js' '*.jsx' | grep -E '^\+\s*(//|/\*)' | wc -l | grep -qv '^0'; then
+  echo "⚠️  Commented-out code detected. If it's needed, uncomment it. If not, delete it."
+fi
+
+# Check 5: ESLint (if project uses it)
+if [ -f "eslint.config.js" ] || [ -f ".eslintrc" ] || [ -f ".eslintrc.json" ]; then
+  echo "🔧 Running ESLint..."
+  if ! npx eslint --staged 2>/dev/null; then
+    echo "❌ ESLint failed. Fix the errors above."
+    exit 1
+  fi
+fi
+
+echo "✅ Lazy check passed. Ship it."
+exit 0
