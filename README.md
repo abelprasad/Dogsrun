@@ -23,7 +23,7 @@ npm run dev
 # → http://localhost:3000
 ```
 
-Requires `.env.local` — see handoff doc for keys.
+Requires `.env.local` — copy `.env.example` and fill in real values. See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for the full workflow.
 
 ## Production Monitoring
 Sentry is wired for client, server, edge, App Router render errors, source maps, and error-session replay.

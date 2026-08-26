@@ -10,7 +10,8 @@
     "test": "playwright test",
     "test:ui": "playwright test --ui",
     "seed": "tsx scripts/seed-test.ts",
-    "seed:cleanup": "tsx scripts/seed-test.ts --cleanup"
+    "seed:cleanup": "tsx scripts/seed-test.ts --cleanup",
+    "prepare": "husky"
   },
   "dependencies": {
     "@sentry/nextjs": "^10.51.0",
@@ -33,6 +34,7 @@
     "dotenv": "^16.6.1",
     "eslint": "^9",
     "eslint-config-next": "16.2.3",
+    "husky": "^9.1.7",
     "tailwindcss": "^4",
     "tsx": "^4",
     "typescript": "^5"
