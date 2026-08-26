@@ -21,7 +21,7 @@ Root `layout.tsx` is a minimal shell only (metadata, fonts, body).
 
 Centralized in `src/lib/auth-context.ts`. Always use `getAuthContext()` (no redirect) or `requireAuthContext()` (redirects to `/auth/login`). Never roll a custom session fetch in a page file.
 
-Admin auth is separate from org auth: checks the `admins` table by email, no org row needed or expected. Don't create admin accounts via `/register`, that creates an org row and breaks their routing. See vault DOGSRUN/CONTEXT.md for the full add-new-admin SQL steps.
+Admin auth is separate from org auth: checks the `admins` table by email, no org row needed or expected. Don't create admin accounts via `/register`, that creates an org row and breaks their routing. To add a new admin: insert their email into the `admins` table, then invite them via Supabase Auth so they get a login.
 
 ## Critical patterns (do not violate)
 
@@ -45,6 +45,6 @@ Two-tier aesthetic, don't mix them:
 
 Playwright e2e + API security specs in `tests/`. Run before any PR that touches auth, routing, or API routes.
 
-## Where deeper context lives
+## Deeper context
 
-Full project history, known bugs/gotchas, digest system internals, data source integration plan, and DB state snapshots live in the Obsidian vault at `100 - Projects/DOGSRUN/` (CONTEXT.md, HANDOFF.md, LEARNINGS.md, TODO.md). This file stays intentionally short — pull from the vault notes when a task needs that depth, don't duplicate it here.
+This file stays intentionally short. Deeper project history, known bugs/gotchas, and the data source integration plan aren't tracked in-repo yet — ask the project owner if you need that context.
