@@ -1,5 +1,5 @@
 ---
-name:lazy
+name: lazy
 description: Lazy dev philosophy. The CodeGraph index exists but the CLI isn't installed. Climb the YAGNI ladder before writing anything.
 ---
 

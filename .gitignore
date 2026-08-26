@@ -45,3 +45,6 @@ next-env.d.ts
 prompt.txt
 .claude/settings.local.json*
 .codegraph/
+
+# generated docs (regenerate with: npx md-to-pdf docs/SOP.md)
+docs/*.pdf
