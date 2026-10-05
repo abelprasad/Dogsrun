@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { useToast } from '@/components/toaster'
+import { reportError } from '@/lib/friendly-error'
 
 interface Org {
   id: string
@@ -24,7 +26,8 @@ export default function AdminOrgTable({ orgs, alertsByOrg }: Props) {
   const [orgList, setOrgList] = useState(orgs)
   const [loading, setLoading] = useState<string | null>(null)
   const [filter, setFilter] = useState<'all' | 'shelter' | 'rescue'>('all')
-  const [digestStatus, setDigestStatus] = useState<Record<string, 'sending' | 'sent' | 'error'>>({})
+  const [sendingDigest, setSendingDigest] = useState<string | null>(null)
+  const toast = useToast()
 
   const filtered = orgList.filter(o => filter === 'all' || o.type === filter)
   const pendingOrgs = orgList.filter(o => o.approval_status === 'pending')
@@ -56,24 +59,25 @@ export default function AdminOrgTable({ orgs, alertsByOrg }: Props) {
     setLoading(null)
   }
 
-  // REVIEW: digestStatus state and the setTimeouts duplicate the alert() result; drop them.
   async function sendDigest(orgId: string) {
-    setDigestStatus(prev => ({ ...prev, [orgId]: 'sending' }))
-    const res = await fetch('/api/admin/orgs/digest', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ org_id: orgId }),
-    })
-    const data = await res.json()
-    if (res.ok) {
-      setDigestStatus(prev => ({ ...prev, [orgId]: 'sent' }))
-      setTimeout(() => setDigestStatus(prev => { const next = { ...prev }; delete next[orgId]; return next }), 3000)
-      if (data.matches === 0) alert("No matching dogs found for this rescue's criteria.")
-      else alert(`Digest sent! ${data.matches} matching dog${data.matches === 1 ? '' : 's'}.`)
-    } else {
-      setDigestStatus(prev => ({ ...prev, [orgId]: 'error' }))
-      alert(data.error || 'Failed to send digest')
-      setTimeout(() => setDigestStatus(prev => { const next = { ...prev }; delete next[orgId]; return next }), 3000)
+    setSendingDigest(orgId)
+    try {
+      const res = await fetch('/api/admin/orgs/digest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ org_id: orgId }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        if (data.matches === 0) toast.success("No matching dogs found for this rescue's criteria.")
+        else toast.success(`Digest sent! ${data.matches} matching dog${data.matches === 1 ? '' : 's'}.`)
+      } else {
+        toast.error(reportError(data.error ?? `digest ${res.status}`, "Couldn't send digest — try again."))
+      }
+    } catch (err) {
+      toast.error(reportError(err, "Couldn't send digest — try again."))
+    } finally {
+      setSendingDigest(null)
     }
   }
 
@@ -174,7 +178,6 @@ export default function AdminOrgTable({ orgs, alertsByOrg }: Props) {
             <tbody>
               {filtered.length > 0 ? filtered.map((org, i) => {
                 const stats = alertsByOrg[org.id]
-                const dStatus = digestStatus[org.id]
                 return (
                   <tr key={org.id} className={i % 2 === 0 ? 'bg-[#fff9ef]' : 'bg-[#f5f0e8]/60'}>
                     <td className="px-4 py-3 font-semibold text-[#13241d] whitespace-nowrap">{org.name}</td>
@@ -230,14 +233,10 @@ export default function AdminOrgTable({ orgs, alertsByOrg }: Props) {
                         {org.type === 'rescue' && org.approval_status === 'approved' && (
                           <button
                             onClick={() => sendDigest(org.id)}
-                            disabled={dStatus === 'sending'}
-                            className={`px-2 py-1 text-xs font-bold uppercase tracking-[0.1em] transition-colors disabled:opacity-50 ${
-                              dStatus === 'sent' ? 'bg-green-50 text-green-700' :
-                              dStatus === 'error' ? 'bg-red-50 text-red-600' :
-                              'bg-purple-50 text-purple-700 hover:bg-purple-100'
-                            }`}
+                            disabled={sendingDigest === org.id}
+                            className="px-2 py-1 text-xs font-bold uppercase tracking-[0.1em] transition-colors disabled:opacity-50 bg-purple-50 text-purple-700 hover:bg-purple-100"
                           >
-                            {dStatus === 'sending' ? '...' : dStatus === 'sent' ? 'Sent!' : dStatus === 'error' ? 'Error' : 'Digest'}
+                            {sendingDigest === org.id ? '...' : 'Digest'}
                           </button>
                         )}
                         <button

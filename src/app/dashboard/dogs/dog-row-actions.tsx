@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { DOG_STATUSES, DOG_STATUS_LABELS } from '@/lib/dog-status';
 import Button from '@/components/ui/button';
+import { useToast } from '@/components/toaster';
 
 // REVIEW: pending status + Apply button; save on change like the admin dogs-table.
 export default function DogRowActions({ dogId, currentStatus }: { dogId: string; currentStatus: string }) {
@@ -11,6 +12,7 @@ export default function DogRowActions({ dogId, currentStatus }: { dogId: string;
   const [pendingStatus, setPendingStatus] = useState(currentStatus);
   const [statusLoading, setStatusLoading] = useState(false);
   const router = useRouter();
+  const toast = useToast();
 
   async function handleApplyStatus() {
     if (pendingStatus === status) return;
@@ -24,7 +26,7 @@ export default function DogRowActions({ dogId, currentStatus }: { dogId: string;
       setStatus(pendingStatus);
       router.refresh();
     } else {
-      alert('Failed to update status');
+      toast.error('Failed to update status. Please try again.');
       setPendingStatus(status);
     }
     setStatusLoading(false);

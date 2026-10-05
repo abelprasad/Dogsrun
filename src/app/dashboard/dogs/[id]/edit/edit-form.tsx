@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase';
+import { useToast } from '@/components/toaster';
+import { reportError } from '@/lib/friendly-error';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import imageCompression from 'browser-image-compression';
@@ -40,6 +42,8 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [photo, setPhoto] = useState<File | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{ age_years?: string; weight_lbs?: string }>({});
+  const toast = useToast();
   const [form, setForm] = useState({
     name: dog.name || '',
     breed: dog.breed || '',
@@ -66,13 +70,14 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
     e.preventDefault();
 
     if (form.age_years && parseFloat(form.age_years) < 0) {
-      alert('Age cannot be negative');
+      setFieldErrors({ age_years: 'Age cannot be negative' });
       return;
     }
     if (form.weight_lbs && parseFloat(form.weight_lbs) < 0) {
-      alert('Weight cannot be negative');
+      setFieldErrors({ weight_lbs: 'Weight cannot be negative' });
       return;
     }
+    setFieldErrors({});
 
     setLoading(true);
 
@@ -91,7 +96,7 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
         .from('dog-photos')
         .upload(fileName, compressedPhoto);
       if (uploadError) {
-        alert('Error uploading photo: ' + uploadError.message);
+        toast.error(reportError(uploadError, "Couldn't upload photo — try again."));
         setLoading(false);
         return;
       }
@@ -117,7 +122,7 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
 
     if (!response.ok) {
       const data = await response.json();
-      alert(data.error || 'Failed to update dog');
+      toast.error(reportError(data.error ?? `update ${response.status}`, "Couldn't update dog — try again."));
     } else {
       router.push('/dashboard/dogs');
       router.refresh();
@@ -143,7 +148,8 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
         <div>
           <label className={labelCls}>Age (years)</label>
           <input type="number" placeholder="2" value={form.age_years} min="0" step="0.1"
-            onChange={e => setForm(f => ({ ...f, age_years: e.target.value }))} className={inputCls} />
+            onChange={e => { setForm(f => ({ ...f, age_years: e.target.value })); setFieldErrors(f => ({ ...f, age_years: undefined })) }} className={inputCls} />
+          {fieldErrors.age_years && <p className="mt-1.5 text-xs font-bold text-red-600">{fieldErrors.age_years}</p>}
           <p className="mt-1.5 text-[10px] text-[#5d6a64]/60 font-semibold">
             Use decimals for puppies — e.g. 0.5 for 6 months, 1.5 for 18 months
           </p>
@@ -151,7 +157,8 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
         <div>
           <label className={labelCls}>Weight (lbs)</label>
           <input type="number" placeholder="45" value={form.weight_lbs} min="0" step="1"
-            onChange={e => setForm(f => ({ ...f, weight_lbs: e.target.value }))} className={inputCls} />
+            onChange={e => { setForm(f => ({ ...f, weight_lbs: e.target.value })); setFieldErrors(f => ({ ...f, weight_lbs: undefined })) }} className={inputCls} />
+          {fieldErrors.weight_lbs && <p className="mt-1.5 text-xs font-bold text-red-600">{fieldErrors.weight_lbs}</p>}
         </div>
       </div>
 

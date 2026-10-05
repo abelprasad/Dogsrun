@@ -7,6 +7,8 @@ import imageCompression from 'browser-image-compression'
 import BreedSelect from '@/components/breed-select'
 import ColorPicker from '@/components/color-picker'
 import StateSelect from '@/components/state-select'
+import { useToast } from '@/components/toaster'
+import { reportError } from '@/lib/friendly-error'
 
 interface DogForm {
   name: string;
@@ -29,8 +31,10 @@ interface DogForm {
 
 export default function NewDogForm() {
   const router = useRouter()
+  const toast = useToast()
   const [loading, setLoading] = useState(false)
   const [photo, setPhoto] = useState<File | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<{ age_years?: string; weight_lbs?: string }>({})
   const [showSpecialNeeds, setShowSpecialNeeds] = useState(false)
   const [form, setForm] = useState<DogForm>({
     name: '', breed: '', mix: false, age_years: '', weight_lbs: '',
@@ -44,8 +48,9 @@ export default function NewDogForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (form.age_years !== '' && parseFloat(form.age_years) < 0) { alert('Age cannot be negative'); return }
-    if (form.weight_lbs !== '' && parseFloat(form.weight_lbs) < 0) { alert('Weight cannot be negative'); return }
+    if (form.age_years !== '' && parseFloat(form.age_years) < 0) { setFieldErrors({ age_years: 'Age cannot be negative' }); return }
+    if (form.weight_lbs !== '' && parseFloat(form.weight_lbs) < 0) { setFieldErrors({ weight_lbs: 'Weight cannot be negative' }); return }
+    setFieldErrors({})
     setLoading(true)
 
     const supabase = createClient()
@@ -53,7 +58,7 @@ export default function NewDogForm() {
     if (!user) return router.push('/auth/login')
 
     const { data: org } = await supabase.from('organizations').select('id, name').eq('id', user.id).single()
-    if (!org) { alert('No organization found. Contact support.'); setLoading(false); return }
+    if (!org) { toast.error('No organization found. Contact support.'); setLoading(false); return }
 
     let photo_url = null
     if (photo) {
@@ -61,7 +66,7 @@ export default function NewDogForm() {
       const fileName = `${folderId}/${photo.name}`
       const compressedPhoto = await imageCompression(photo, { maxSizeMB: 0.3, maxWidthOrHeight: 1200, useWebWorker: true })
       const { error: uploadError } = await supabase.storage.from('dog-photos').upload(fileName, compressedPhoto)
-      if (uploadError) { alert('Error uploading photo: ' + uploadError.message); setLoading(false); return }
+      if (uploadError) { toast.error(reportError(uploadError, "Couldn't upload photo — try again.")); setLoading(false); return }
       const { data: { publicUrl } } = supabase.storage.from('dog-photos').getPublicUrl(fileName)
       photo_url = publicUrl
     }
@@ -80,7 +85,7 @@ export default function NewDogForm() {
     }).select().single()
 
     if (error) {
-      alert(error.message)
+      toast.error(reportError(error, "Couldn't add dog — try again."))
     } else {
       if (data) {
         await fetch('/api/alerts', {
@@ -131,11 +136,12 @@ export default function NewDogForm() {
                 type="number"
                 placeholder="2"
                 value={form.age_years}
-                onChange={e => setForm(f => ({ ...f, age_years: e.target.value }))}
+                onChange={e => { setForm(f => ({ ...f, age_years: e.target.value })); setFieldErrors(f => ({ ...f, age_years: undefined })) }}
                 min="0"
                 step="0.1"
                 className={inputCls}
               />
+              {fieldErrors.age_years && <p className="mt-1.5 text-xs font-bold text-red-600">{fieldErrors.age_years}</p>}
               <p className="mt-1.5 text-[10px] uppercase tracking-[0.15em] text-[#5d6a64]/60 font-bold">
                 Use decimals for puppies — e.g. 0.5 for 6 months, 1.5 for 18 months
               </p>
@@ -146,11 +152,12 @@ export default function NewDogForm() {
                 type="number"
                 placeholder="45"
                 value={form.weight_lbs}
-                onChange={e => setForm(f => ({ ...f, weight_lbs: e.target.value }))}
+                onChange={e => { setForm(f => ({ ...f, weight_lbs: e.target.value })); setFieldErrors(f => ({ ...f, weight_lbs: undefined })) }}
                 min="0"
                 step="1"
                 className={inputCls}
               />
+              {fieldErrors.weight_lbs && <p className="mt-1.5 text-xs font-bold text-red-600">{fieldErrors.weight_lbs}</p>}
             </div>
           </div>
 

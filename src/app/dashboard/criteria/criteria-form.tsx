@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 import { createClient } from '@/lib/supabase';
+import { useToast } from '@/components/toaster';
+import { reportError } from '@/lib/friendly-error';
 import { useRouter } from 'next/navigation';
 import BreedSelect from '@/components/breed-select';
 import ColorPicker from '@/components/color-picker';
@@ -57,6 +59,7 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(!initialCriteria);
   const [loading, setLoading] = useState(false);
+  const toast = useToast();
   const [breedInput, setBreedInput] = useState('');
   const [form, setForm] = useState({
     breeds: initialCriteria?.breeds || [] as string[],
@@ -104,7 +107,7 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
       accepts_other: form.accepts_other,
     }, { onConflict: 'rescue_id' });
 
-    if (error) { alert('Error saving criteria: ' + error.message); }
+    if (error) { toast.error(reportError(error, "Couldn't save criteria — try again.")); }
     else { setIsEditing(false); router.refresh(); }
     setLoading(false);
   }
