@@ -93,7 +93,7 @@ export default async function RescuePortalPage() {
                     <span className="text-[10px] font-bold text-[#5d6a64] uppercase tracking-[0.24em]">
                       Received {alert.sent_at ? new Date(alert.sent_at).toLocaleDateString() : 'Unknown date'}
                     </span>
-                    <Link href={`/dogs/${alert.dog_id}`} className="text-xs font-bold text-[#13241d] hover:text-[#f4b942] transition-colors uppercase tracking-[0.24em]">View Profile</Link>
+                    <Link href={`/dashboard/dogs/${alert.dog_id}`} className="text-xs font-bold text-[#13241d] hover:text-[#f4b942] transition-colors uppercase tracking-[0.24em]">View Profile</Link>
                   </div>
                 </div>
               )

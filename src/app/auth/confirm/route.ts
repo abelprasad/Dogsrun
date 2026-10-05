@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
       const { data: org } = await supabase
         .from('organizations')
         .select('type')
-        .eq('email', user.email)
+        .eq('id', user.id)
         .maybeSingle()
 
       if (org?.type === 'rescue') {

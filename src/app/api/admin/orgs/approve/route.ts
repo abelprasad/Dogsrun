@@ -60,6 +60,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Failed to update organization' }, { status: 500 })
   }
 
+  // REVIEW: the email header/footer chrome is pasted into 5 templates; extract emailShell(title, body) into lib/email.ts.
   const subject = action === 'approve' ? `You're approved on DOGSRUN!` : `DOGSRUN — Application Update`
   const safeOrgName = escapeHtml(org.name)
 
@@ -121,6 +122,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ success: true, approval_status: newStatus })
 }
 
+// REVIEW: this digest is duplicated almost line for line in admin/orgs/digest/route.ts; move it to lib/digest.ts and call it from both.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function sendRescueApprovalDigest(serviceClient: any, rescueId: string, rescueName: string, rescueEmail: string) {
   const { data: criteria } = await serviceClient
@@ -143,6 +145,7 @@ async function sendRescueApprovalDigest(serviceClient: any, rescueId: string, re
   const matches: Dog[] = []
 
   for (const dog of dogs as Dog[]) {
+    // REVIEW: dogMatchesCriteria already checks special needs; delete these 4 lines.
     if (dog.parvo && !criteria.accepts_parvo) continue
     if (dog.tripod && !criteria.accepts_tripod) continue
     if (dog.blind && !criteria.accepts_blind) continue
@@ -171,8 +174,8 @@ async function sendRescueApprovalDigest(serviceClient: any, rescueId: string, re
       dog.breed ? `${escapeHtml(dog.breed)}${dog.mix ? ' mix' : ''}` : null,
       dog.age_years ? `${dog.age_years} yr` : null,
       dog.weight_lbs ? `${dog.weight_lbs} lbs` : null,
-      dog.sex ?? null,
-      dog.state ?? null,
+      dog.sex ? escapeHtml(dog.sex) : null,
+      dog.state ? escapeHtml(dog.state) : null,
     ].filter(Boolean).join(' · ')
 
     return `

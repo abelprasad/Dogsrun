@@ -27,6 +27,7 @@ interface DogForm {
   euthanasia_date: string;
 }
 
+// REVIEW: same form as dogs/[id]/edit/edit-form.tsx; merge into one <DogForm dog?> that submits via /api/dogs/update (also removes this browser-client insert).
 export default function NewDogForm() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)

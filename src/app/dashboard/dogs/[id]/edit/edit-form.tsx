@@ -36,6 +36,7 @@ interface EditDogFormProps {
   dog: Dog;
 }
 
+// REVIEW: duplicate of new-dog-form.tsx; see the note there.
 export default function EditDogForm({ dog }: EditDogFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);

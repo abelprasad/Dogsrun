@@ -61,6 +61,7 @@ export async function POST(req: NextRequest) {
   if (org.type !== 'rescue') return NextResponse.json({ error: 'Only rescues can receive a digest' }, { status: 400 })
   if (org.approval_status !== 'approved') return NextResponse.json({ error: 'Org is not approved' }, { status: 400 })
 
+  // REVIEW: from here to the email send is the same as sendRescueApprovalDigest in approve/route.ts; move it to lib/digest.ts.
   const { data: criteria } = await serviceClient
     .from('rescue_criteria')
     .select('*')
@@ -83,6 +84,7 @@ export async function POST(req: NextRequest) {
   const matches: Dog[] = []
 
   for (const dog of dogs as Dog[]) {
+    // REVIEW: dogMatchesCriteria already checks special needs; delete these 4 lines.
     if (dog.parvo && !criteria.accepts_parvo) continue
     if (dog.tripod && !criteria.accepts_tripod) continue
     if (dog.blind && !criteria.accepts_blind) continue
@@ -113,8 +115,8 @@ export async function POST(req: NextRequest) {
       dog.breed ? `${escapeHtml(dog.breed)}${dog.mix ? ' mix' : ''}` : null,
       dog.age_years ? `${dog.age_years} yr` : null,
       dog.weight_lbs ? `${dog.weight_lbs} lbs` : null,
-      dog.sex ?? null,
-      dog.state ?? null,
+      dog.sex ? escapeHtml(dog.sex) : null,
+      dog.state ? escapeHtml(dog.state) : null,
     ].filter(Boolean).join(' · ')
 
     return `
