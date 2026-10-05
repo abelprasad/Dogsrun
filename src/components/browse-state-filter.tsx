@@ -40,20 +40,6 @@ export default function BrowseStateFilter({ tab, currentState }: BrowseStateFilt
           <option key={s} value={s}>{s}</option>
         ))}
       </select>
-      {currentState && (
-        <button
-          onClick={() => {
-            const params = new URLSearchParams(searchParams.toString())
-            params.set('tab', tab)
-            params.delete('state')
-            params.delete('page')
-            router.push(`/dogs?${params.toString()}`, { scroll: false })
-          }}
-          className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#d95f4b] hover:underline"
-        >
-          Clear
-        </button>
-      )}
     </div>
   )
 }

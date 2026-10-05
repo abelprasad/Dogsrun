@@ -4,7 +4,7 @@ Shelter-to-rescue dog placement platform. Live at dogsrun.org.
 
 ## Stack
 
-Next.js 15 (App Router), TypeScript, Supabase (Postgres + Storage + Auth), Resend (email), Upstash Redis (rate limiting), Sentry, Playwright.
+Next.js 16 (App Router), TypeScript, Supabase (Postgres + Storage + Auth), Resend (email), Upstash Redis (rate limiting), Sentry, Playwright.
 
 ## Route architecture
 
@@ -29,7 +29,7 @@ Admin auth is separate from org auth: checks the `admins` table by email, no org
 - All writes go through API routes using the service role key — RLS blocks browser client writes
 - Public Server Components that join `organizations` must use the service role client — anon client returns null due to RLS
 - `setAll` in the server Supabase client must be wrapped in try/catch
-- `next/headers cookies()` and `searchParams` must both be awaited (Next.js 15)
+- `next/headers cookies()` and `searchParams` must both be awaited (since Next.js 15)
 - Email templates always go through `escapeHtml`/`escapeHtmlOrDash` from `src/lib/html.ts`, never raw string interpolation
 - Dog update API (`/api/dogs/update`) only ever passes fields in `EDITABLE_DOG_FIELDS` — never spread the full request body
 - `DashboardNav` is a client component (`usePathname`) — no server-only imports in it
