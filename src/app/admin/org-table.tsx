@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import PaginationControls from './pagination-controls'
 
 interface Org {
   id: string
@@ -15,19 +16,61 @@ interface Org {
   created_at: string
 }
 
-interface Props {
-  orgs: Org[]
-  alertsByOrg: Record<string, { sent: number; responded: number }>
+interface AlertStats {
+  sent: number
+  responded: number
 }
 
-export default function AdminOrgTable({ orgs, alertsByOrg }: Props) {
-  const [orgList, setOrgList] = useState(orgs)
+type TypeFilter = 'all' | 'shelter' | 'rescue'
+
+const PAGE_SIZE = 25
+
+export default function AdminOrgTable() {
+  const [orgs, setOrgs] = useState<Org[]>([])
+  const [alertStats, setAlertStats] = useState<Record<string, AlertStats>>({})
+  const [pendingOrgs, setPendingOrgs] = useState<Org[]>([])
+  const [page, setPage] = useState(1)
+  const [total, setTotal] = useState(0)
+  const [filter, setFilter] = useState<TypeFilter>('all')
+  const [counts, setCounts] = useState({ all: 0, shelter: 0, rescue: 0 })
+  const [tableLoading, setTableLoading] = useState(true)
   const [loading, setLoading] = useState<string | null>(null)
-  const [filter, setFilter] = useState<'all' | 'shelter' | 'rescue'>('all')
   const [digestStatus, setDigestStatus] = useState<Record<string, 'sending' | 'sent' | 'error'>>({})
 
-  const filtered = orgList.filter(o => filter === 'all' || o.type === filter)
-  const pendingOrgs = orgList.filter(o => o.approval_status === 'pending')
+  const fetchPage = useCallback(async (p: number, f: TypeFilter) => {
+    setTableLoading(true)
+    try {
+      const params = new URLSearchParams({ page: String(p), pageSize: String(PAGE_SIZE) })
+      if (f !== 'all') params.set('type', f)
+      const res = await fetch(`/api/admin/orgs?${params.toString()}`)
+      if (res.ok) {
+        const data = await res.json()
+        setOrgs(data.orgs)
+        setTotal(data.total)
+        setAlertStats(data.alertStats ?? {})
+        setCounts(data.counts ?? { all: 0, shelter: 0, rescue: 0 })
+      }
+    } finally {
+      setTableLoading(false)
+    }
+  }, [])
+
+  const fetchPending = useCallback(async () => {
+    const res = await fetch('/api/admin/orgs?page=1&pageSize=100&approval_status=pending')
+    if (res.ok) setPendingOrgs((await res.json()).orgs)
+  }, [])
+
+  useEffect(() => { fetchPage(page, filter) }, [page, filter, fetchPage])
+  useEffect(() => { fetchPending() }, [fetchPending])
+
+  function changeFilter(f: TypeFilter) {
+    setFilter(f)
+    setPage(1)
+  }
+
+  async function refresh() {
+    await Promise.all([fetchPage(page, filter), fetchPending()])
+  }
 
   async function toggleActive(orgId: string, currentState: boolean) {
     setLoading(orgId + '-active')
@@ -36,9 +79,7 @@ export default function AdminOrgTable({ orgs, alertsByOrg }: Props) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ org_id: orgId, is_active: !currentState }),
     })
-    if (res.ok) {
-      setOrgList(prev => prev.map(o => o.id === orgId ? { ...o, is_active: !currentState } : o))
-    }
+    if (res.ok) await refresh()
     setLoading(null)
   }
 
@@ -49,10 +90,7 @@ export default function AdminOrgTable({ orgs, alertsByOrg }: Props) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ org_id: orgId, action }),
     })
-    if (res.ok) {
-      const newStatus = action === 'approve' ? 'approved' : 'rejected'
-      setOrgList(prev => prev.map(o => o.id === orgId ? { ...o, approval_status: newStatus } : o))
-    }
+    if (res.ok) await refresh()
     setLoading(null)
   }
 
@@ -88,6 +126,8 @@ export default function AdminOrgTable({ orgs, alertsByOrg }: Props) {
       window.open(url, '_blank')
     }
   }
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
   return (
     <div className="space-y-10">
@@ -150,14 +190,14 @@ export default function AdminOrgTable({ orgs, alertsByOrg }: Props) {
           {(['all', 'shelter', 'rescue'] as const).map(f => (
             <button
               key={f}
-              onClick={() => setFilter(f)}
+              onClick={() => changeFilter(f)}
               className={`px-4 py-1.5 text-xs font-bold uppercase tracking-[0.24em] transition-colors ${
                 filter === f
                   ? 'bg-[#13241d] text-[#f4b942]'
                   : 'bg-[#f5f0e8] text-[#5d6a64] hover:bg-[#13241d]/10'
               }`}
             >
-              {f === 'all' ? `All (${orgList.length})` : f === 'shelter' ? `Shelters (${orgList.filter(o => o.type === 'shelter').length})` : `Rescues (${orgList.filter(o => o.type === 'rescue').length})`}
+              {f === 'all' ? `All (${counts.all})` : f === 'shelter' ? `Shelters (${counts.shelter})` : `Rescues (${counts.rescue})`}
             </button>
           ))}
         </div>
@@ -172,8 +212,10 @@ export default function AdminOrgTable({ orgs, alertsByOrg }: Props) {
               </tr>
             </thead>
             <tbody>
-              {filtered.length > 0 ? filtered.map((org, i) => {
-                const stats = alertsByOrg[org.id]
+              {tableLoading ? (
+                <tr><td colSpan={9} className="px-4 py-12 text-center text-[#5d6a64]">Loading organizations…</td></tr>
+              ) : orgs.length > 0 ? orgs.map((org, i) => {
+                const stats = alertStats[org.id]
                 const dStatus = digestStatus[org.id]
                 return (
                   <tr key={org.id} className={i % 2 === 0 ? 'bg-[#fff9ef]' : 'bg-[#f5f0e8]/60'}>
@@ -263,6 +305,14 @@ export default function AdminOrgTable({ orgs, alertsByOrg }: Props) {
             </tbody>
           </table>
         </div>
+
+        <PaginationControls
+          page={page}
+          totalPages={totalPages}
+          total={total}
+          pageSize={PAGE_SIZE}
+          onPageChange={setPage}
+        />
       </div>
     </div>
   )

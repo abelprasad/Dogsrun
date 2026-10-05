@@ -61,3 +61,57 @@ export async function DELETE(req: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ success: true })
 }
+
+const DEFAULT_PAGE_SIZE = 25
+const MAX_PAGE_SIZE = 100
+
+function parsePageParam(value: string | null): number {
+  const parsed = Number.parseInt(value || '1', 10)
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1
+}
+
+function parsePageSizeParam(value: string | null): number {
+  const parsed = Number.parseInt(value || String(DEFAULT_PAGE_SIZE), 10)
+  if (!Number.isFinite(parsed) || parsed < 1) return DEFAULT_PAGE_SIZE
+  return Math.min(parsed, MAX_PAGE_SIZE)
+}
+
+export async function GET(req: NextRequest) {
+  const user = await verifyAdmin()
+  if (!user) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
+  const params = req.nextUrl.searchParams
+  const page = parsePageParam(params.get('page'))
+  const pageSize = parsePageSizeParam(params.get('pageSize'))
+  const filter = params.get('filter') // 'all' | 'urgent' | 'at_risk'
+  const nowIso = new Date().toISOString()
+
+  let query = serviceClient
+    .from('dogs')
+    .select('*, organizations(name)', { count: 'exact' })
+    .order('created_at', { ascending: false })
+
+  if (filter === 'urgent') {
+    query = query.eq('status', 'urgent')
+  } else if (filter === 'at_risk') {
+    query = query.not('euthanasia_date', 'is', null).gt('euthanasia_date', nowIso)
+  }
+
+  const from = (page - 1) * pageSize
+  const { data: dogs, count } = await query.range(from, from + pageSize - 1)
+
+  // Filter-tab counts (head-only, dashboard style)
+  const [{ count: all }, { count: urgent }, { count: atRisk }] = await Promise.all([
+    serviceClient.from('dogs').select('*', { count: 'exact', head: true }),
+    serviceClient.from('dogs').select('*', { count: 'exact', head: true }).eq('status', 'urgent'),
+    serviceClient.from('dogs').select('*', { count: 'exact', head: true }).not('euthanasia_date', 'is', null).gt('euthanasia_date', nowIso),
+  ])
+
+  return NextResponse.json({
+    dogs: dogs ?? [],
+    total: count ?? 0,
+    page,
+    pageSize,
+    counts: { all: all ?? 0, urgent: urgent ?? 0, atRisk: atRisk ?? 0 },
+  })
+}
