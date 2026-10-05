@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { escapeHtml } from '@/lib/html'
 import { createSupabaseServerClient, supabaseAdmin } from '@/lib/supabase-server'
+import { respondRatelimit, getClientIp } from '@/lib/ratelimit'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
@@ -9,6 +10,10 @@ const resend = new Resend(process.env.RESEND_API_KEY!)
 // with no login; email link scanners or prefetch could mark a rescue as
 // interested. Responses now go through POST with the rescue's session.
 export async function POST(req: NextRequest) {
+  const respondRatelimit_result = await respondRatelimit.limit(getClientIp(req))
+  if (!respondRatelimit_result.success) {
+    return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 })
+  }
   const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

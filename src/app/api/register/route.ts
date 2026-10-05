@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
-import { registerRatelimit } from '@/lib/ratelimit'
+import { registerRatelimit, getClientIp } from '@/lib/ratelimit'
 import { escapeHtml } from '@/lib/html'
-import { supabaseAdmin } from '@/lib/supabase-server'
+import { createSupabaseServerClient, supabaseAdmin } from '@/lib/supabase-server'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
 export async function POST(req: NextRequest) {
-  const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'anonymous'
+  const ip = getClientIp(req)
   const { success } = await registerRatelimit.limit(ip)
   if (!success) {
     return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 })
@@ -34,6 +34,14 @@ export async function POST(req: NextRequest) {
 
   if (!['shelter', 'rescue'].includes(type)) {
     return NextResponse.json({ error: 'Invalid org type' }, { status: 400 })
+  }
+
+  // M-S1: verify the caller is the user they're registering — prevents
+  // squatting another user's org registration with a known user_id + email.
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user || user.id !== user_id) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   // Validate path ownership — must start with the user's own UUID
@@ -83,7 +91,12 @@ export async function POST(req: NextRequest) {
   })
 
   if (insertError) {
-    return NextResponse.json({ error: insertError.message }, { status: 500 })
+    // M-D8: concurrent double-submit race — return 409, not raw DB error (L-1)
+    if (insertError.code === '23505') {
+      return NextResponse.json({ error: 'Organization already exists for this user' }, { status: 409 })
+    }
+    console.error('Org insert failed:', insertError)
+    return NextResponse.json({ error: 'Registration failed. Please try again.' }, { status: 500 })
   }
 
   // REVIEW: email chrome and <tr> rows duplicate the other templates; use lib/email.ts helpers.
@@ -92,6 +105,7 @@ export async function POST(req: NextRequest) {
     .from('admins')
     .select('email')
 
+  let adminNotified = true
   if (admins && admins.length > 0) {
     const adminEmails = admins.map((a: { email: string }) => a.email)
     const safeName = escapeHtml(name)
@@ -100,6 +114,7 @@ export async function POST(req: NextRequest) {
     const safeState = escapeHtml(state)
     const safeType = type === 'shelter' ? 'Shelter' : 'Rescue'
 
+    try {
     await resend.emails.send({
       from: 'DOGSRUN <alerts@dogsrun.org>',
       to: adminEmails,
@@ -143,7 +158,12 @@ export async function POST(req: NextRequest) {
         </div>
       `,
     })
+    } catch (emailError) {
+      // M-D6: org is already inserted — don't 500, just flag for retry
+      console.error('Admin notification email failed:', emailError)
+      adminNotified = false
+    }
   }
 
-  return NextResponse.json({ success: true })
+  return NextResponse.json({ success: true, adminNotified })
 }

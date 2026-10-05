@@ -4,6 +4,7 @@ import { Resend } from 'resend'
 import { escapeHtml } from '@/lib/html'
 import { dogMatchesCriteria } from '@/lib/matching'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { adminEmailRatelimit, getClientIp } from '@/lib/ratelimit'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
@@ -25,6 +26,10 @@ interface Dog {
 }
 
 export async function POST(req: NextRequest) {
+  const adminEmailRatelimit_result = await adminEmailRatelimit.limit(getClientIp(req))
+  if (!adminEmailRatelimit_result.success) {
+    return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 })
+  }
   const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

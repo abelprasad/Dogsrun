@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient, supabaseAdmin } from '@/lib/supabase-server'
 import { escapeHtml, escapeHtmlOrDash } from '@/lib/html'
 import { dogMatchesCriteria } from '@/lib/matching'
+import { alertsRatelimit, getClientIp } from '@/lib/ratelimit'
 
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
@@ -40,6 +41,10 @@ interface Match {
 
 
 export async function POST(req: NextRequest) {
+  const alertsRatelimit_result = await alertsRatelimit.limit(getClientIp(req))
+  if (!alertsRatelimit_result.success) {
+    return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 })
+  }
   // Auth check — only logged-in shelter users or admins can trigger alert matching
   const supabaseAuth = await createSupabaseServerClient()
   const { data: { user } } = await supabaseAuth.auth.getUser()
