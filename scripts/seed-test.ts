@@ -1,7 +1,7 @@
 /**
  * DOGSRUN - authenticated integration smoke test
  *
- * Creates real Supabase Auth users, approved shelter/rescue orgs, rescue criteria,
+ * Creates real Supabase Auth users, approved is_test shelter/rescue orgs, rescue criteria,
  * and dogs. It signs in through the app before calling protected endpoints, so the
  * script matches the current auth model.
  *
@@ -121,6 +121,7 @@ async function seedData() {
       type: 'shelter',
       approval_status: 'approved',
       is_active: true,
+      is_test: true,
     },
     {
       id: rescueId,
@@ -131,6 +132,7 @@ async function seedData() {
       type: 'rescue',
       approval_status: 'approved',
       is_active: true,
+      is_test: true,
     },
   ])
   if (orgError) fail(`Failed to insert orgs: ${orgError.message}`)
@@ -138,8 +140,8 @@ async function seedData() {
   const { error: criteriaError } = await supabase.from('rescue_criteria').insert({
     rescue_id: rescueId,
     breeds: ['Labrador', 'Golden Retriever'],
-    max_age_years: 10,
-    max_weight_lbs: 100,
+    age_ranges: ['puppy', 'youth', 'adult'],
+    size_classes: ['xsmall', 'small', 'medium', 'large'],
     sex_preference: 'any',
     accepts_mixes: true,
     states_served: ['PA', 'NJ', 'DE'],

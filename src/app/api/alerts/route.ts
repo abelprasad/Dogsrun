@@ -87,12 +87,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Dog not found' }, { status: 404 })
   }
 
-  // Don't fire real alerts for dogs belonging to test shelters
-  const shelterOrg = dog.organizations as unknown as { name: string; city: string; state: string; is_test: boolean } | null
-  if (shelterOrg?.is_test) {
-    return NextResponse.json({ message: 'Skipped: test shelter dog does not trigger alerts', matches: 0 })
-  }
-
   const canTriggerAlerts = isAdmin ||
     (requesterOrg?.type === 'shelter' &&
       requesterOrg.approval_status === 'approved' &&
@@ -101,6 +95,10 @@ export async function POST(req: NextRequest) {
   if (!canTriggerAlerts) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
+
+  // Test shelter dogs only match test rescues (and send no email); real dogs only match real rescues
+  const shelterOrg = dog.organizations as unknown as { name: string; city: string; state: string; is_test: boolean } | null
+  const isTestRun = Boolean(shelterOrg?.is_test)
 
   const { data: criteriaList } = await supabase
     .from('rescue_criteria')
@@ -127,7 +125,7 @@ export async function POST(req: NextRequest) {
 
     if (org.id === dog.shelter_id) continue
     if (org.approval_status !== 'approved') continue
-    if (org.is_test) continue  // Don't send real alerts to test rescue orgs
+    if (Boolean(org.is_test) !== isTestRun) continue
     if (alreadyAlerted.has(org.id)) continue
 
     if (dogMatchesCriteria(dog, criteria)) {
@@ -139,6 +137,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: 'No matches found', dog: dog.name })
   }
 
+  // REVIEW: the label/value <tr> below is repeated 6x and the email chrome is shared with 4 other templates; extract row()/emailShell() into lib/email.ts.
   const results = await Promise.allSettled(
     matches.map(async ({ criteria, org }) => {
       const shelter = dog.organizations as unknown as { name: string; city: string; state: string; is_test: boolean }
@@ -180,6 +179,8 @@ export async function POST(req: NextRequest) {
       }).select().single()
 
       if (alertError || !alertData) throw alertError
+
+      if (isTestRun) return  // test rescue emails are undeliverable; the alert row is enough
 
       await resend.emails.send({
         from: 'DOGSRUN Alerts <alerts@dogsrun.org>',

@@ -1,9 +1,14 @@
 import { createClient } from '@supabase/supabase-js'
+import { redirect } from 'next/navigation'
+import { requireAuthContext } from '@/lib/auth-context'
 import AdminOrgTable from './org-table'
 import AdminDogsTable from './dogs-table'
 import AdminTabs from './admin-tabs'
 
 export default async function AdminPage() {
+  const { isAdmin } = await requireAuthContext()
+  if (!isAdmin) redirect('/')
+
   const serviceClient = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!

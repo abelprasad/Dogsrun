@@ -39,6 +39,7 @@ async function createAuthOrg(type: OrgType, approvalStatus = 'approved') {
     type,
     approval_status: approvalStatus,
     is_active: true,
+    is_test: true,
   }
 
   const { error: orgError } = await serviceClient.from('organizations').insert(org)
@@ -60,6 +61,7 @@ async function createOrgOnly(type: OrgType, approvalStatus = 'approved') {
     type,
     approval_status: approvalStatus,
     is_active: true,
+    is_test: true,
   })
 
   if (error) throw new Error(`Failed to create ${type} org: ${error.message}`)
@@ -322,6 +324,7 @@ test.describe('API security', () => {
     expect(dog?.status).toBe('adopted')
   })
 
+  // REVIEW: delete along with /api/notify-shelter (no callers).
   test('notify-shelter rejects rescues that do not own the alert', async ({ page }) => {
     const alertOwner = await createAuthOrg('rescue')
     const otherRescue = await createAuthOrg('rescue')
