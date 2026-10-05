@@ -10,6 +10,7 @@ const supabase = createClient(
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
+// REVIEW(bug): state-changing GET with no login; email link scanners or prefetch can mark a rescue as interested.
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const alert_id = searchParams.get('alert_id')
@@ -41,6 +42,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Alert not found or update failed' }, { status: 404 })
   }
 
+  // REVIEW: same shelter email as api/alerts/respond/route.ts; extract one notifyShelter(alert).
   // If interested, notify shelter
   if (action === 'interested') {
     const dog = alert.dogs

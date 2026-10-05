@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
+// REVIEW: dog status list lives in 4 places; one DOG_STATUSES in lib.
 const STATUSES = ['available', 'urgent', 'pending', 'rescue_requested', 'placed', 'adopted', 'deceased', 'transferred']
 
 interface Dog {

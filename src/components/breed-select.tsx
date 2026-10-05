@@ -66,6 +66,7 @@ interface BreedSelectProps {
   className?: string
 }
 
+// REVIEW: custom combobox; native <input list> + <datalist> does this. The "X mix" entries above are redundant with the mix checkbox and substring matching.
 export default function BreedSelect({ value, onChange, placeholder = 'Search breed...', className = '' }: BreedSelectProps) {
   const [query, setQuery] = useState(value)
   const [open, setOpen] = useState(false)

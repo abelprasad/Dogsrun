@@ -24,6 +24,7 @@ const EDITABLE_DOG_FIELDS = [
 ] as const
 
 const VALID_SEXES = new Set(['male', 'female', 'unknown'])
+// REVIEW: dog status list lives in 4 places plus status-badge labels; one DOG_STATUSES in lib (or a Postgres enum/CHECK).
 const VALID_DOG_STATUSES = new Set([
   'available',
   'pending',

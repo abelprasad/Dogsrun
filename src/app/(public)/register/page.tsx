@@ -123,6 +123,7 @@ function RegisterForm() {
       return
     }
 
+    // REVIEW: signUp already sends a confirmation email, so this sends a second one; product call whether to drop it.
     // Step 4 — send magic link
     setStep('sending-email')
     await supabase.auth.signInWithOtp({

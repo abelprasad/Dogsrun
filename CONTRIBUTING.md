@@ -23,6 +23,7 @@ git push -u origin feat/short-description
 
 Vercel auto-deploys `main` to https://dogsrun.org within about a minute of merge.
 
+# REVIEW: test instructions also live in CLAUDE.md; keep one copy and link to it.
 ## Before opening a PR
 
 - `npm run lint`

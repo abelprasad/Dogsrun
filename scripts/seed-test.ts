@@ -270,6 +270,7 @@ async function testPassResponse(alertId: string) {
   ok('Alert status updated to declined')
 }
 
+// REVIEW: testNonMatchingDog/testSpecialNeedsBlocking duplicate src/lib/matching.test.ts; testSecurityRejections duplicates tests/api-security.spec.ts.
 async function testNonMatchingDog(ctx: SeedContext) {
   section('Test 3: non-matching dog produces no alert')
   const before = await countAlerts(ctx.rescueId)

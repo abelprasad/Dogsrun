@@ -28,6 +28,7 @@ export default async function DashboardPage() {
     serviceClient.from('dogs').select('*', { count: 'exact', head: true }).eq('shelter_id', org.id).in('status', ['placed', 'adopted']),
   ])
 
+  // REVIEW: the 4 count queries above could be one select('status') counted in JS. The green header below repeats in ~9 pages; extract a <PageHeader eyebrow title sub>.
   const { data: recentDogs } = await serviceClient
     .from('dogs')
     .select('*, alerts(status)')

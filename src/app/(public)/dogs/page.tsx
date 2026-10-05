@@ -87,6 +87,7 @@ export default async function BrowsePage({
   const from = (page - 1) * PAGE_SIZE
   const to = from + PAGE_SIZE - 1
 
+  // REVIEW: shelter and rescue queries are identical except type, each with N+1 per-org queries; use one select with embedded dogs(count) / rescue_criteria(...). In the JSX, render the empty state and BrowseStateFilter once; Prev/Next duplicate the page-number links.
   // ── Dogs ──────────────────────────────────────────────────────────────────
   let dogs: DogCard[] = []
   let dogCount = 0

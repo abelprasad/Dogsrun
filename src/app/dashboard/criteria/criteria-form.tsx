@@ -32,6 +32,7 @@ interface CriteriaFormProps {
 const inputClass = "w-full border border-[#13241d]/20 bg-[#fffaf2] px-4 py-3 text-sm text-[#13241d] placeholder-[#5d6a64]/50 transition-all focus:border-[#f4b942] focus:outline-none focus:ring-1 focus:ring-[#f4b942]"
 const labelClass = "mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-[#5d6a64]"
 
+// REVIEW: the age and size picker blocks in the form are the same markup twice; map over both option lists.
 const AGE_RANGES = [
   { value: 'puppy', label: 'Puppy', sub: '0–1 yr' },
   { value: 'youth', label: 'Youth', sub: '1–2 yrs' },

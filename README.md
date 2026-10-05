@@ -1,4 +1,5 @@
 # DOGSRUN
+<!-- REVIEW: Stack table and Local Dev repeat CLAUDE.md/CONTRIBUTING; Features list is stale (the alert email has no Pass link). Cut to pitch + links. -->
 
 Shelter-to-rescue dog matching platform. Shelters add dogs on intake, DOGSRUN automatically matches them against rescue organizations' criteria and sends instant email alerts.
 

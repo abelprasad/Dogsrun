@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+// REVIEW: dog status list lives in 4 places; one DOG_STATUSES in lib.
 const STATUSES = [
   { value: 'available', label: 'Available' },
   { value: 'urgent', label: 'Urgent' },
@@ -14,6 +15,7 @@ const STATUSES = [
   { value: 'transferred', label: 'Transferred' },
 ];
 
+// REVIEW: pending status + Apply button; save on change like the admin dogs-table.
 export default function DogRowActions({ dogId, currentStatus }: { dogId: string; currentStatus: string }) {
   const [status, setStatus] = useState(currentStatus);
   const [pendingStatus, setPendingStatus] = useState(currentStatus);

@@ -90,6 +90,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: insertError.message }, { status: 500 })
   }
 
+  // REVIEW: email chrome and <tr> rows duplicate the other templates; use lib/email.ts helpers.
   // Notify all admins
   const { data: admins } = await serviceClient
     .from('admins')

@@ -1,3 +1,4 @@
+// REVIEW: the prop already accepts string; drop this type and the `as DogStatus` casts.
 export type DogStatus = 'available' | 'pending' | 'adopted' | 'deceased' | 'transferred' | 'urgent' | 'rescue_requested' | 'placed';
 
 interface StatusBadgeProps {

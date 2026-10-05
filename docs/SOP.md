@@ -1,4 +1,5 @@
 # DOGSRUN — Standard Operating Procedures
+<!-- REVIEW: docs/SOP.pdf duplicates this file and will drift; delete the PDF. -->
 
 This doc covers two things: how to run the platform day-to-day (approving orgs, adding admins), and what to do when something breaks. It's written for both non-technical admins (Steven, Amy) and developers — sections marked **For developers** need a GitHub/Vercel/Supabase login and code knowledge; everything else just needs the admin portal at [dogsrun.org/admin](https://dogsrun.org/admin).
 

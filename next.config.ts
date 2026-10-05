@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
+  // REVIEW: every <Image> passes unoptimized, so remotePatterns is never used; delete it.
   images: {
     remotePatterns: [
       {

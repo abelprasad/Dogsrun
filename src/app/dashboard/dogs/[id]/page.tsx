@@ -7,6 +7,7 @@ import StatusBadge, { DogStatus } from '@/components/status-badge'
 import SignOutButton from '../../sign-out-button'
 import EuthanasiaCountdown from '@/components/euthanasia-countdown'
 
+// REVIEW(bug): color is string[] in the DB but typed string here; renders as "BlackWhite".
 interface Dog {
   id: string
   dogsrun_id: string | null
@@ -64,6 +65,7 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
 
   if (!canViewDog) notFound()
 
+  // REVIEW: the second nav bar with SignOutButton below duplicates DashboardNav from the layout; delete it.
   const backLink = org?.type === 'rescue' ? '/dashboard/rescue' : '/dashboard/dogs'
   const hasSpecialNeeds = dog.parvo || dog.tripod || dog.blind || dog.other_issues
 
