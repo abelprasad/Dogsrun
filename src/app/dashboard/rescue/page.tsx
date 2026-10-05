@@ -92,7 +92,7 @@ export default async function RescuePortalPage() {
       <main className="mx-auto max-w-7xl px-5 py-10 sm:px-10 lg:px-16">
         {/* ── HERO: newest match gets the spotlight ── */}
         {hero && hero.dogs && (
-          <section className="relative mb-12 overflow-hidden border-2 border-[#c08a3e]">
+          <section className="card-craft relative mb-16 overflow-hidden">
             <div className="relative min-h-[46svh]">
               {hero.dogs.photo_url ? (
                 <Image src={hero.dogs.photo_url} alt={hero.dogs.name} fill className="object-cover object-center" unoptimized priority />
@@ -101,7 +101,7 @@ export default async function RescuePortalPage() {
                   {hero.dogs.name?.[0] || 'D'}
                 </div>
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-black/20" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
               <div className="absolute left-5 top-5 flex items-center gap-2 bg-[#c08a3e] px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-[#140a08] sm:left-8 sm:top-8">
                 <span className="animate-pulse-dot h-2 w-2 rounded-full bg-[#140a08]" />
                 New match
@@ -140,11 +140,11 @@ export default async function RescuePortalPage() {
 
         {/* ── NEEDS YOUR ANSWER ── */}
         {rest.length > 0 && (
-          <section className="mb-14">
+          <section className="mb-20">
             <p className="mb-6 border-b border-white/10 pb-4 text-xs font-black uppercase tracking-[0.28em] text-[#c98a7a]">
               Needs your answer
             </p>
-            <div className="space-y-5">
+            <div className="space-y-8">
               {rest.map((alert) => {
                 const dog = alert.dogs
                 return (
