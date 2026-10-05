@@ -127,7 +127,7 @@ export default async function AboutPage() {
               key={i}
               className="flex shrink-0 items-center gap-10 whitespace-nowrap text-sm font-black uppercase tracking-[0.18em] text-[#140a08]"
             >
-              {p} <span className="text-[#140a08]/40">///</span>
+              {p} <span className="text-[#140a08]/40">{'///'}</span>
             </span>
           ))}
         </div>
