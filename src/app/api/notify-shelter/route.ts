@@ -1,13 +1,8 @@
-import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { createSupabaseServerClient, supabaseAdmin } from '@/lib/supabase-server'
 import { escapeHtml } from '@/lib/html'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
@@ -22,7 +17,7 @@ export async function POST(req: NextRequest) {
   const { alert_id } = await req.json()
   if (!alert_id) return NextResponse.json({ error: 'alert_id required' }, { status: 400 })
 
-  const { data: alert } = await supabase
+  const { data: alert } = await supabaseAdmin
     .from('alerts')
     .select('*, dogs(*), organizations!alerts_rescue_id_fkey(*)')
     .eq('id', alert_id)
@@ -43,7 +38,7 @@ export async function POST(req: NextRequest) {
   const dog = alert.dogs
   const rescue = alert.organizations
 
-  const { data: shelter } = await supabase
+  const { data: shelter } = await supabaseAdmin
     .from('organizations')
     .select('name, email')
     .eq('id', dog.shelter_id)

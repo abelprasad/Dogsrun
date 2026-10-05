@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { getRiskLevel } from '@/lib/dog-status';
 
 function getCountdown(euthanasiaDate: string) {
   const now = new Date();
@@ -14,15 +15,6 @@ function getCountdown(euthanasiaDate: string) {
   return { diffMs, diffHours, diffDays, diffHoursRemainder, diffMins };
 }
 
-// REVIEW: unused; risk thresholds are also duplicated in status-badge.tsx and admin dogs-table getRiskLabel; keep one helper.
-export function getRiskLevel(euthanasiaDate: string | null | undefined): 'critical' | 'at-risk' | 'safe' {
-  if (!euthanasiaDate) return 'safe';
-  const { diffMs, diffHours } = getCountdown(euthanasiaDate);
-  if (diffMs <= 0) return 'critical';
-  if (diffHours <= 24) return 'critical';
-  return 'at-risk';
-}
-
 export default function EuthanasiaCountdown({ euthanasiaDate }: { euthanasiaDate: string }) {
   const [countdown, setCountdown] = useState(() => getCountdown(euthanasiaDate));
 
@@ -34,7 +26,8 @@ export default function EuthanasiaCountdown({ euthanasiaDate }: { euthanasiaDate
   }, [euthanasiaDate]);
 
   const { diffMs, diffDays, diffHoursRemainder, diffMins } = countdown;
-  const isCritical = diffMs <= 0 || countdown.diffHours <= 24;
+  const risk = getRiskLevel(euthanasiaDate);
+  const isCritical = risk === 'past-due' || risk === 'critical';
 
   if (diffMs <= 0) {
     return (

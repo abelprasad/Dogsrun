@@ -3,17 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-// REVIEW: dog status list lives in 4 places; one DOG_STATUSES in lib.
-const STATUSES = [
-  { value: 'available', label: 'Available' },
-  { value: 'urgent', label: 'Urgent' },
-  { value: 'pending', label: 'Pending' },
-  { value: 'rescue_requested', label: 'Rescue Requested' },
-  { value: 'placed', label: 'Placed' },
-  { value: 'adopted', label: 'Adopted' },
-  { value: 'deceased', label: 'Deceased' },
-  { value: 'transferred', label: 'Transferred' },
-];
+import { DOG_STATUSES, DOG_STATUS_LABELS } from '@/lib/dog-status';
 
 // REVIEW: pending status + Apply button; save on change like the admin dogs-table.
 export default function DogRowActions({ dogId, currentStatus }: { dogId: string; currentStatus: string }) {
@@ -53,8 +43,8 @@ export default function DogRowActions({ dogId, currentStatus }: { dogId: string;
           isDirty ? 'border-[#f4b942] ring-1 ring-[#f4b942]' : 'border-[#13241d]/20'
         }`}
       >
-        {STATUSES.map((s) => (
-          <option key={s.value} value={s.value}>{s.label}</option>
+        {DOG_STATUSES.map((value) => (
+          <option key={value} value={value}>{DOG_STATUS_LABELS[value]}</option>
         ))}
       </select>
 

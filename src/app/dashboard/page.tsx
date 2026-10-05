@@ -1,10 +1,10 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { redirect } from 'next/navigation'
-import { createClient } from '@supabase/supabase-js'
 import { requireAuthContext } from '@/lib/auth-context'
 import StatusBadge from '@/components/status-badge'
 import ApprovalWall from '@/components/approval-wall'
+import { supabaseAdmin } from '@/lib/supabase-server'
 
 export default async function DashboardPage() {
   const { org, isAdmin } = await requireAuthContext()
@@ -16,20 +16,16 @@ export default async function DashboardPage() {
   if (org.type === 'rescue') redirect('/dashboard/rescue')
   if (org.approval_status !== 'approved') return <ApprovalWall org={org} />
 
-  const serviceClient = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
 
   const [{ count: total }, { count: available }, { count: urgent }, { count: placed }] = await Promise.all([
-    serviceClient.from('dogs').select('*', { count: 'exact', head: true }).eq('shelter_id', org.id),
-    serviceClient.from('dogs').select('*', { count: 'exact', head: true }).eq('shelter_id', org.id).in('status', ['available', null as unknown as string]),
-    serviceClient.from('dogs').select('*', { count: 'exact', head: true }).eq('shelter_id', org.id).eq('status', 'urgent'),
-    serviceClient.from('dogs').select('*', { count: 'exact', head: true }).eq('shelter_id', org.id).in('status', ['placed', 'adopted']),
+    supabaseAdmin.from('dogs').select('*', { count: 'exact', head: true }).eq('shelter_id', org.id),
+    supabaseAdmin.from('dogs').select('*', { count: 'exact', head: true }).eq('shelter_id', org.id).in('status', ['available', null as unknown as string]),
+    supabaseAdmin.from('dogs').select('*', { count: 'exact', head: true }).eq('shelter_id', org.id).eq('status', 'urgent'),
+    supabaseAdmin.from('dogs').select('*', { count: 'exact', head: true }).eq('shelter_id', org.id).in('status', ['placed', 'adopted']),
   ])
 
   // REVIEW: the 4 count queries above could be one select('status') counted in JS. The green header below repeats in ~9 pages; extract a <PageHeader eyebrow title sub>.
-  const { data: recentDogs } = await serviceClient
+  const { data: recentDogs } = await supabaseAdmin
     .from('dogs')
     .select('*, alerts(status)')
     .eq('shelter_id', org.id)

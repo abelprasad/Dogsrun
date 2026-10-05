@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
-// REVIEW: dog status list lives in 4 places; one DOG_STATUSES in lib.
-const STATUSES = ['available', 'urgent', 'pending', 'rescue_requested', 'placed', 'adopted', 'deceased', 'transferred']
+import { DOG_STATUSES, getRiskLevel } from '@/lib/dog-status'
 
 interface Dog {
   id: string
@@ -81,11 +80,11 @@ export default function AdminDogsTable({ dogs: initialDogs }: { dogs: Dog[] }) {
   }
 
   function getRiskLabel(dog: Dog) {
-    if (!dog.euthanasia_date) return null
-    const diff = new Date(dog.euthanasia_date).getTime() - now
-    if (diff <= 0) return { label: 'Past Due', cls: 'bg-red-600 text-white' }
-    if (diff <= 24 * 60 * 60 * 1000) return { label: 'Critical', cls: 'bg-red-100 text-red-700' }
-    return { label: 'At Risk', cls: 'bg-[#f4b942]/20 text-[#13241d]' }
+    const level = getRiskLevel(dog.euthanasia_date)
+    if (level === 'past-due') return { label: 'Past Due', cls: 'bg-red-600 text-white' }
+    if (level === 'critical') return { label: 'Critical', cls: 'bg-red-100 text-red-700' }
+    if (level === 'at-risk') return { label: 'At Risk', cls: 'bg-[#f4b942]/20 text-[#13241d]' }
+    return null
   }
 
   const atRiskCount = dogs.filter(d => d.euthanasia_date && new Date(d.euthanasia_date).getTime() > now).length
@@ -141,7 +140,7 @@ export default function AdminDogsTable({ dogs: initialDogs }: { dogs: Dog[] }) {
                         onChange={e => updateDog(dog.id, { status: e.target.value })}
                         className="text-xs font-semibold border border-[#13241d]/20 px-2 py-1.5 bg-[#fffaf2] text-[#13241d] outline-none disabled:opacity-50"
                       >
-                        {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                        {DOG_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
                       </select>
                     </div>
                   </td>

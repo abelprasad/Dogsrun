@@ -1,7 +1,7 @@
-import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
+import { supabaseAdmin } from '@/lib/supabase-server'
 
 export async function POST(req: NextRequest) {
   // REVIEW: hand-rolled createSupabaseServerClient(); use the lib helper.
@@ -36,12 +36,8 @@ export async function POST(req: NextRequest) {
   const { file_path } = await req.json()
   if (!file_path) return NextResponse.json({ error: 'file_path required' }, { status: 400 })
 
-  const serviceClient = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
 
-  const { data, error } = await serviceClient.storage
+  const { data, error } = await supabaseAdmin.storage
     .from('tax-docs')
     .createSignedUrl(file_path, 120)
 

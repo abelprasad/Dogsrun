@@ -2,7 +2,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { dashboardPathFor, getAuthContext } from "@/lib/auth-context";
 
-// REVIEW: same 5 links as the footer in app/layout.tsx; share one NAV_LINKS array.
+import { NAV_LINKS } from "@/lib/navigation";
+
 export default async function Navbar() {
   const { user, org, isAdmin } = await getAuthContext();
   const signedInHref = dashboardPathFor(org, isAdmin);
@@ -26,11 +27,9 @@ export default async function Navbar() {
             </div>
           </Link>
           <div className="hidden md:flex items-center gap-6">
-            <Link href="/dogs" className="text-sm font-medium text-[#9ca3af] hover:text-[#f59e0b] transition-colors">Browse</Link>
-            <Link href="/about" className="text-sm font-medium text-[#9ca3af] hover:text-[#f59e0b] transition-colors">About</Link>
-            <Link href="/faq" className="text-sm font-medium text-[#9ca3af] hover:text-[#f59e0b] transition-colors">FAQ</Link>
-            <Link href="/contact" className="text-sm font-medium text-[#9ca3af] hover:text-[#f59e0b] transition-colors">Contact</Link>
-            <Link href="/merch" className="text-sm font-medium text-[#9ca3af] hover:text-[#f59e0b] transition-colors">Shop</Link>
+            {NAV_LINKS.map((link) => (
+              <Link key={link.href} href={link.href} className="text-sm font-medium text-[#9ca3af] hover:text-[#f59e0b] transition-colors">{link.label}</Link>
+            ))}
           </div>
         </div>
         <div className="flex items-center gap-6">

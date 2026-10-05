@@ -1,6 +1,6 @@
-import { createClient } from '@supabase/supabase-js'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
+import { supabaseAdmin } from '@/lib/supabase-server'
 
 export async function PATCH(req: NextRequest) {
   const supabase = await createSupabaseServerClient()
@@ -20,12 +20,8 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: 'org_id and is_active required' }, { status: 400 })
   }
 
-  const serviceClient = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
 
-  const { error } = await serviceClient
+  const { error } = await supabaseAdmin
     .from('organizations')
     .update({ is_active })
     .eq('id', org_id)

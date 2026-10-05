@@ -1,5 +1,5 @@
-import { createClient } from '@supabase/supabase-js'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { createSupabaseServerClient, supabaseAdmin } from '@/lib/supabase-server'
+import { VALID_DOG_STATUSES } from '@/lib/dog-status'
 import { NextRequest, NextResponse } from 'next/server'
 
 // REVIEW: the same admin check is hand-rolled in admin/orgs, approve, digest and signed-url; move this to lib/auth-context.ts and reuse it.
@@ -11,22 +11,7 @@ async function verifyAdmin() {
   return admin ? user : null
 }
 
-const serviceClient = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
 
-// REVIEW: dog status list lives in 4 places; one DOG_STATUSES in lib.
-const VALID_DOG_STATUSES = new Set([
-  'available',
-  'pending',
-  'adopted',
-  'deceased',
-  'transferred',
-  'urgent',
-  'rescue_requested',
-  'placed',
-])
 
 export async function PATCH(req: NextRequest) {
   const user = await verifyAdmin()
@@ -44,7 +29,7 @@ export async function PATCH(req: NextRequest) {
   }
   if ('euthanasia_date' in fields) update.euthanasia_date = fields.euthanasia_date || null
 
-  const { error } = await serviceClient.from('dogs').update(update).eq('id', dog_id)
+  const { error } = await supabaseAdmin.from('dogs').update(update).eq('id', dog_id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ success: true })
 }
@@ -56,8 +41,8 @@ export async function DELETE(req: NextRequest) {
   const { dog_id } = await req.json()
   if (!dog_id) return NextResponse.json({ error: 'dog_id required' }, { status: 400 })
 
-  await serviceClient.from('alerts').delete().eq('dog_id', dog_id)
-  const { error } = await serviceClient.from('dogs').delete().eq('id', dog_id)
+  await supabaseAdmin.from('alerts').delete().eq('dog_id', dog_id)
+  const { error } = await supabaseAdmin.from('dogs').delete().eq('id', dog_id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ success: true })
 }

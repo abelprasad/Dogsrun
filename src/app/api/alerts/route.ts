@@ -1,14 +1,9 @@
-import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { createSupabaseServerClient, supabaseAdmin } from '@/lib/supabase-server'
 import { escapeHtml, escapeHtmlOrDash } from '@/lib/html'
 import { dogMatchesCriteria } from '@/lib/matching'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
@@ -52,12 +47,12 @@ export async function POST(req: NextRequest) {
   }
 
   const [{ data: requesterOrg }, { data: adminRow }] = await Promise.all([
-    supabase
+    supabaseAdmin
       .from('organizations')
       .select('id, type, approval_status')
       .eq('id', user.id)
       .maybeSingle(),
-    supabase
+    supabaseAdmin
       .from('admins')
       .select('id')
       .eq('email', user.email)
@@ -77,7 +72,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'dog_id required' }, { status: 400 })
   }
 
-  const { data: dog, error: dogError } = await supabase
+  const { data: dog, error: dogError } = await supabaseAdmin
     .from('dogs')
     .select('*, organizations(name, city, state, is_test)')
     .eq('id', dog_id)
@@ -102,7 +97,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  const { data: criteriaList } = await supabase
+  const { data: criteriaList } = await supabaseAdmin
     .from('rescue_criteria')
     .select('*, organizations(id, name, email, approval_status, is_test)')
     .eq('is_active', true)
@@ -112,7 +107,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Fetch existing alerts for this dog to prevent duplicates
-  const { data: existingAlerts } = await supabase
+  const { data: existingAlerts } = await supabaseAdmin
     .from('alerts')
     .select('rescue_id')
     .eq('dog_id', dog_id)
@@ -171,7 +166,7 @@ export async function POST(req: NextRequest) {
       const safeShelterCity = escapeHtml(shelter?.city)
       const safeShelterState = escapeHtml(shelter?.state)
 
-      const { data: alertData, error: alertError } = await supabase.from('alerts').insert({
+      const { data: alertData, error: alertError } = await supabaseAdmin.from('alerts').insert({
         dog_id: dog.id,
         rescue_id: org.id,
         criteria_id: criteria.id,
