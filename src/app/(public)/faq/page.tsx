@@ -8,6 +8,7 @@ interface FAQItemProps {
   answer: string;
 }
 
+// REVIEW: <details>/<summary> replaces this useState accordion; the page can then drop 'use client'.
 function FAQItem({ question, answer }: FAQItemProps) {
   const [isOpen, setIsOpen] = useState(false);
 

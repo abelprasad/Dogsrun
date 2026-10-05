@@ -56,6 +56,7 @@ export default function AdminOrgTable({ orgs, alertsByOrg }: Props) {
     setLoading(null)
   }
 
+  // REVIEW: digestStatus state and the setTimeouts duplicate the alert() result; drop them.
   async function sendDigest(orgId: string) {
     setDigestStatus(prev => ({ ...prev, [orgId]: 'sending' }))
     const res = await fetch('/api/admin/orgs/digest', {

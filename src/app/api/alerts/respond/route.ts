@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
 
   await serviceClient.from('alerts').update({ status }).eq('id', alert_id)
 
+  // REVIEW: same shelter email as api/respond/route.ts; extract one notifyShelter(alert).
   // Notify shelter when rescue is interested
   if (status === 'responded') {
     const dog = alert.dogs

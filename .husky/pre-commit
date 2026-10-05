@@ -34,6 +34,7 @@ if git diff --cached -- '*.ts' '*.tsx' '*.js' '*.jsx' | grep -E '^\+\s*(//|/\*)'
   echo "⚠️  Commented-out code detected. If it's needed, uncomment it. If not, delete it."
 fi
 
+# REVIEW: never runs: eslint.config.mjs isn't matched and --staged isn't an ESLint flag. Check 4 above warns on every comment line.
 # Check 5: ESLint (if project uses it)
 if [ -f "eslint.config.js" ] || [ -f ".eslintrc" ] || [ -f ".eslintrc.json" ]; then
   echo "🔧 Running ESLint..."

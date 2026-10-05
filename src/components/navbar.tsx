@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { dashboardPathFor, getAuthContext } from "@/lib/auth-context";
 
+// REVIEW: same 5 links as the footer in app/layout.tsx; share one NAV_LINKS array.
 export default async function Navbar() {
   const { user, org, isAdmin } = await getAuthContext();
   const signedInHref = dashboardPathFor(org, isAdmin);

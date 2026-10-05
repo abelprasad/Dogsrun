@@ -28,6 +28,7 @@ export default async function WelcomePage() {
     hasCriteria = (count ?? 0) > 0
   }
 
+  // REVIEW: dashboardPathFor(org, isAdmin) already does this.
   const dashboardHref = org.type === 'rescue' ? '/dashboard/rescue' : '/dashboard'
 
   if ((org.type === 'shelter' && hasDogs) || (org.type === 'rescue' && hasCriteria)) {

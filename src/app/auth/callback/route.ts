@@ -10,6 +10,7 @@ export async function GET(request: NextRequest) {
   const next = rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/dashboard/welcome'
 
   if (code) {
+    // REVIEW: hand-rolled createSupabaseServerClient(); use the lib helper.
     const cookieStore = await cookies()
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,

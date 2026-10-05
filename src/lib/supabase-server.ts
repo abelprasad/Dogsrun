@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
+// REVIEW: 16 files hand-roll createClient(URL, SERVICE_ROLE_KEY); export one supabaseAdmin client from here.
 export async function createSupabaseServerClient() {
   const cookieStore = await cookies()
   return createServerClient(

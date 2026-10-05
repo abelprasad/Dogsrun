@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
 
+// REVIEW: the same admin check is hand-rolled in admin/orgs, approve, digest and signed-url; move this to lib/auth-context.ts and reuse it.
 async function verifyAdmin() {
   const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -15,6 +16,7 @@ const serviceClient = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
+// REVIEW: dog status list lives in 4 places; one DOG_STATUSES in lib.
 const VALID_DOG_STATUSES = new Set([
   'available',
   'pending',

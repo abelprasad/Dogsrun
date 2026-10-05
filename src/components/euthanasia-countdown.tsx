@@ -14,6 +14,7 @@ function getCountdown(euthanasiaDate: string) {
   return { diffMs, diffHours, diffDays, diffHoursRemainder, diffMins };
 }
 
+// REVIEW: unused; risk thresholds are also duplicated in status-badge.tsx and admin dogs-table getRiskLabel; keep one helper.
 export function getRiskLevel(euthanasiaDate: string | null | undefined): 'critical' | 'at-risk' | 'safe' {
   if (!euthanasiaDate) return 'safe';
   const { diffMs, diffHours } = getCountdown(euthanasiaDate);

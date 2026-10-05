@@ -26,6 +26,7 @@ export default async function EditDogPage({ params }: { params: Promise<{ id: st
   if (!dog) notFound()
   if (!org || org.type !== 'shelter' || org.id !== dog.shelter_id) redirect('/dashboard')
 
+  // REVIEW: the second nav bar with SignOutButton below duplicates DashboardNav from the layout; delete it.
   const { data: alerts } = await supabaseAdmin
     .from('alerts')
     .select('*, organizations(name, email, city, state)')
