@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Button from '@/components/ui/button'
+import PaginationControls from './pagination-controls'
 import { useToast } from '@/components/toaster'
 import { reportError } from '@/lib/friendly-error'
 
@@ -19,12 +20,20 @@ interface Dog {
   organizations: { name: string } | null
 }
 
-export default function AdminDogsTable({ dogs: initialDogs }: { dogs: Dog[] }) {
-  const [dogs, setDogs] = useState(initialDogs)
+type DogFilter = 'all' | 'at_risk' | 'urgent'
+
+const PAGE_SIZE = 25
+
+export default function AdminDogsTable() {
+  const [dogs, setDogs] = useState<Dog[]>([])
+  const [page, setPage] = useState(1)
+  const [total, setTotal] = useState(0)
+  const [filter, setFilter] = useState<DogFilter>('all')
+  const [counts, setCounts] = useState({ all: 0, atRisk: 0, urgent: 0 })
+  const [tableLoading, setTableLoading] = useState(true)
   const [loading, setLoading] = useState<string | null>(null)
   const [editingDate, setEditingDate] = useState<string | null>(null)
   const [dateValue, setDateValue] = useState('')
-  const [filter, setFilter] = useState<'all' | 'at_risk' | 'urgent'>('all')
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
   const [now, setNow] = useState(() => Date.now())
   const toast = useToast()
@@ -34,11 +43,28 @@ export default function AdminDogsTable({ dogs: initialDogs }: { dogs: Dog[] }) {
     return () => clearInterval(id)
   }, [])
 
-  const filtered = dogs.filter(d => {
-    if (filter === 'urgent') return d.status === 'urgent'
-    if (filter === 'at_risk') return !!d.euthanasia_date && new Date(d.euthanasia_date).getTime() > now
-    return true
-  })
+  const fetchPage = useCallback(async (p: number, f: DogFilter) => {
+    setTableLoading(true)
+    try {
+      const params = new URLSearchParams({ page: String(p), pageSize: String(PAGE_SIZE), filter: f })
+      const res = await fetch(`/api/admin/dogs?${params.toString()}`)
+      if (res.ok) {
+        const data = await res.json()
+        setDogs(data.dogs)
+        setTotal(data.total)
+        setCounts(data.counts ?? { all: 0, atRisk: 0, urgent: 0 })
+      }
+    } finally {
+      setTableLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { fetchPage(page, filter) }, [page, filter, fetchPage])
+
+  function changeFilter(f: DogFilter) {
+    setFilter(f)
+    setPage(1)
+  }
 
   async function updateDog(dogId: string, fields: Record<string, unknown>) {
     setLoading(dogId)
@@ -63,7 +89,9 @@ export default function AdminDogsTable({ dogs: initialDogs }: { dogs: Dog[] }) {
       body: JSON.stringify({ dog_id: dogId }),
     })
     if (res.ok) {
-      setDogs(prev => prev.filter(d => d.id !== dogId))
+      // Refetch so the page stays full; step back if the page is now empty
+      if (dogs.length <= 1 && page > 1) setPage(page - 1)
+      else fetchPage(page, filter)
     } else {
       toast.error(reportError({ endpoint: '/api/admin/dogs', status: res.status }, "Couldn't delete dog — try again."))
     }
@@ -92,18 +120,17 @@ export default function AdminDogsTable({ dogs: initialDogs }: { dogs: Dog[] }) {
     return null
   }
 
-  const atRiskCount = dogs.filter(d => d.euthanasia_date && new Date(d.euthanasia_date).getTime() > now).length
-  const urgentCount = dogs.filter(d => d.status === 'urgent').length
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
   return (
     <div className="space-y-4">
       <div className="flex gap-2">
         {[
-          { key: 'all', label: `All (${dogs.length})` },
-          { key: 'at_risk', label: `At Risk (${atRiskCount})` },
-          { key: 'urgent', label: `Urgent (${urgentCount})` },
+          { key: 'all', label: `All (${counts.all})` },
+          { key: 'at_risk', label: `At Risk (${counts.atRisk})` },
+          { key: 'urgent', label: `Urgent (${counts.urgent})` },
         ].map(({ key, label }) => (
-          <button key={key} onClick={() => setFilter(key as typeof filter)}
+          <button key={key} onClick={() => changeFilter(key as DogFilter)}
             className={`px-4 py-1.5 text-xs font-bold uppercase tracking-[0.24em] transition-colors ${
               filter === key
                 ? 'bg-[#13241d] text-[#f4b942]'
@@ -124,7 +151,9 @@ export default function AdminDogsTable({ dogs: initialDogs }: { dogs: Dog[] }) {
             </tr>
           </thead>
           <tbody>
-            {filtered.length > 0 ? filtered.map((dog, i) => {
+            {tableLoading ? (
+              <tr><td colSpan={6} className="px-4 py-12 text-center text-[#5d6a64]">Loading dogs…</td></tr>
+            ) : dogs.length > 0 ? dogs.map((dog, i) => {
               const risk = getRiskLabel(dog)
               const isDeleting = confirmDelete === dog.id
               return (
@@ -228,6 +257,14 @@ export default function AdminDogsTable({ dogs: initialDogs }: { dogs: Dog[] }) {
           </tbody>
         </table>
       </div>
+
+      <PaginationControls
+        page={page}
+        totalPages={totalPages}
+        total={total}
+        pageSize={PAGE_SIZE}
+        onPageChange={setPage}
+      />
     </div>
   )
 }

@@ -5,36 +5,38 @@ import { supabaseAdmin } from '@/lib/supabase-server'
 import PageHeader from '@/components/ui/page-header'
 
 export default async function AdminPage() {
-
-  const [{ data: orgs }, { data: dogs }, { data: alerts }, { data: recentAlerts }] = await Promise.all([
-    supabaseAdmin.from('organizations').select('*').order('created_at', { ascending: false }),
-    supabaseAdmin.from('dogs').select('*, organizations(name)').order('created_at', { ascending: false }),
-    supabaseAdmin.from('alerts').select('rescue_id, status'),
+  // Head-only counts for the stats cards (dashboard style); tables paginate their own data.
+  const [
+    { count: totalOrgs },
+    { count: pendingOrgs },
+    { count: totalDogs },
+    { count: totalAlerts },
+    { count: totalInterested },
+    { data: recentAlerts },
+  ] = await Promise.all([
+    supabaseAdmin.from('organizations').select('*', { count: 'exact', head: true }),
+    supabaseAdmin.from('organizations').select('*', { count: 'exact', head: true }).eq('approval_status', 'pending'),
+    supabaseAdmin.from('dogs').select('*', { count: 'exact', head: true }),
+    supabaseAdmin.from('alerts').select('*', { count: 'exact', head: true }),
+    supabaseAdmin.from('alerts').select('*', { count: 'exact', head: true }).eq('status', 'responded'),
     supabaseAdmin.from('alerts')
       .select('*, dogs(name, breed), organizations!alerts_rescue_id_fkey(name)')
       .order('sent_at', { ascending: false })
       .limit(20),
   ])
 
-  const totalOrgs = orgs?.length ?? 0
-  const totalDogs = dogs?.length ?? 0
-  const totalAlerts = alerts?.length ?? 0
-  const totalInterested = alerts?.filter(a => a.status === 'responded').length ?? 0
-  const responseRate = totalAlerts > 0 ? Math.round((totalInterested / totalAlerts) * 100) : 0
-  const pendingOrgs = orgs?.filter(o => o.approval_status === 'pending').length ?? 0
-
-  const alertsByOrg: Record<string, { sent: number; responded: number }> = {}
-  for (const alert of alerts ?? []) {
-    if (!alertsByOrg[alert.rescue_id]) alertsByOrg[alert.rescue_id] = { sent: 0, responded: 0 }
-    alertsByOrg[alert.rescue_id].sent++
-    if (alert.status === 'responded') alertsByOrg[alert.rescue_id].responded++
-  }
+  const orgCount = totalOrgs ?? 0
+  const pendingCount = pendingOrgs ?? 0
+  const dogCount = totalDogs ?? 0
+  const alertCount = totalAlerts ?? 0
+  const interestedCount = totalInterested ?? 0
+  const responseRate = alertCount > 0 ? Math.round((interestedCount / alertCount) * 100) : 0
 
   const stats = [
-    { label: 'Pending', value: pendingOrgs, warn: pendingOrgs > 0 },
-    { label: 'Organizations', value: totalOrgs },
-    { label: 'Dogs Listed', value: totalDogs },
-    { label: 'Response Rate', value: `${responseRate}%`, accent: totalInterested > 0 },
+    { label: 'Pending', value: pendingCount, warn: pendingCount > 0 },
+    { label: 'Organizations', value: orgCount },
+    { label: 'Dogs Listed', value: dogCount },
+    { label: 'Response Rate', value: `${responseRate}%`, accent: interestedCount > 0 },
   ]
 
   return (
@@ -66,14 +68,14 @@ export default async function AdminPage() {
             {
               id: 'organizations',
               label: 'Organizations',
-              count: totalOrgs,
-              content: <AdminOrgTable orgs={orgs ?? []} alertsByOrg={alertsByOrg} />,
+              count: orgCount,
+              content: <AdminOrgTable />,
             },
             {
               id: 'dogs',
               label: 'Dogs',
-              count: totalDogs,
-              content: <AdminDogsTable dogs={dogs ?? []} />,
+              count: dogCount,
+              content: <AdminDogsTable />,
             },
             {
               id: 'activity',
