@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/toaster';
 // REVIEW: dog status list lives in 4 places; one DOG_STATUSES in lib.
 const STATUSES = [
   { value: 'available', label: 'Available' },
@@ -21,6 +22,7 @@ export default function DogRowActions({ dogId, currentStatus }: { dogId: string;
   const [pendingStatus, setPendingStatus] = useState(currentStatus);
   const [statusLoading, setStatusLoading] = useState(false);
   const router = useRouter();
+  const toast = useToast();
 
   async function handleApplyStatus() {
     if (pendingStatus === status) return;
@@ -34,7 +36,7 @@ export default function DogRowActions({ dogId, currentStatus }: { dogId: string;
       setStatus(pendingStatus);
       router.refresh();
     } else {
-      alert('Failed to update status');
+      toast.error('Failed to update status. Please try again.');
       setPendingStatus(status);
     }
     setStatusLoading(false);

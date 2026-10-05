@@ -2,11 +2,13 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useToast } from '@/components/toaster'
 
 export default function AlertActions({ alertId, currentStatus }: { alertId: string; currentStatus: string }) {
   const [status, setStatus] = useState(currentStatus)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const toast = useToast()
 
   async function updateStatus(newStatus: string) {
     setLoading(true)
@@ -19,7 +21,7 @@ export default function AlertActions({ alertId, currentStatus }: { alertId: stri
       setStatus(newStatus)
       router.refresh()
     } else {
-      alert('Failed to update. Please try again.')
+      toast.error('Failed to update. Please try again.')
     }
     setLoading(false)
   }

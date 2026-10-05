@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useToast } from '@/components/toaster'
+import { reportError } from '@/lib/friendly-error'
 
 // REVIEW: dog status list lives in 4 places; one DOG_STATUSES in lib.
 const STATUSES = ['available', 'urgent', 'pending', 'rescue_requested', 'placed', 'adopted', 'deceased', 'transferred']
@@ -25,6 +27,7 @@ export default function AdminDogsTable({ dogs: initialDogs }: { dogs: Dog[] }) {
   const [filter, setFilter] = useState<'all' | 'at_risk' | 'urgent'>('all')
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
   const [now, setNow] = useState(() => Date.now())
+  const toast = useToast()
 
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 60_000)
@@ -47,7 +50,7 @@ export default function AdminDogsTable({ dogs: initialDogs }: { dogs: Dog[] }) {
     if (res.ok) {
       setDogs(prev => prev.map(d => d.id === dogId ? { ...d, ...fields } : d))
     } else {
-      alert('Failed to update dog')
+      toast.error(reportError({ endpoint: '/api/admin/dogs', status: res.status }, "Couldn't update dog — try again."))
     }
     setLoading(null)
   }
@@ -62,7 +65,7 @@ export default function AdminDogsTable({ dogs: initialDogs }: { dogs: Dog[] }) {
     if (res.ok) {
       setDogs(prev => prev.filter(d => d.id !== dogId))
     } else {
-      alert('Failed to delete dog')
+      toast.error(reportError({ endpoint: '/api/admin/dogs', status: res.status }, "Couldn't delete dog — try again."))
     }
     setLoading(null)
     setConfirmDelete(null)
@@ -76,7 +79,8 @@ export default function AdminDogsTable({ dogs: initialDogs }: { dogs: Dog[] }) {
       body: JSON.stringify({ dog_id: dogId }),
     })
     const data = await res.json()
-    alert(res.ok ? `${data.message}` : 'Failed to send alerts')
+    if (res.ok) toast.success(`${data.message}`)
+    else toast.error(reportError({ endpoint: '/api/alerts', status: res.status }, "Couldn't send alerts — try again."))
     setLoading(null)
   }
 
