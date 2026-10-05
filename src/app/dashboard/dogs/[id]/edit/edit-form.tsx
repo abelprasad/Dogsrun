@@ -11,6 +11,7 @@ import Image from 'next/image';
 import BreedSelect from '@/components/breed-select';
 import ColorPicker from '@/components/color-picker';
 import StateSelect from '@/components/state-select';
+import { uploadDogPhoto } from '@/lib/upload-photo';
 
 interface Dog {
   id: string;
@@ -85,25 +86,13 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
     let photo_url = dog.photo_url;
 
     if (photo) {
-      const folderId = crypto.randomUUID();
-      const fileName = `${folderId}/${photo.name}`;
-      const compressedPhoto = await imageCompression(photo, {
-        maxSizeMB: 0.3,
-        maxWidthOrHeight: 1200,
-        useWebWorker: true,
-      });
-      const { error: uploadError } = await supabase.storage
-        .from('dog-photos')
-        .upload(fileName, compressedPhoto);
+      const { url, error: uploadError } = await uploadDogPhoto(supabase, photo);
       if (uploadError) {
         toast.error(reportError(uploadError, "Couldn't upload photo — try again."));
         setLoading(false);
         return;
       }
-      const { data: { publicUrl } } = supabase.storage
-        .from('dog-photos')
-        .getPublicUrl(fileName);
-      photo_url = publicUrl;
+      photo_url = url;
     }
 
     const response = await fetch('/api/dogs/update', {

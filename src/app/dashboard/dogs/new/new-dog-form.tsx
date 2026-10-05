@@ -9,6 +9,7 @@ import ColorPicker from '@/components/color-picker'
 import StateSelect from '@/components/state-select'
 import { useToast } from '@/components/toaster'
 import { reportError } from '@/lib/friendly-error'
+import { uploadDogPhoto } from '@/lib/upload-photo'
 
 interface DogForm {
   name: string;
@@ -62,13 +63,9 @@ export default function NewDogForm() {
 
     let photo_url = null
     if (photo) {
-      const folderId = crypto.randomUUID()
-      const fileName = `${folderId}/${photo.name}`
-      const compressedPhoto = await imageCompression(photo, { maxSizeMB: 0.3, maxWidthOrHeight: 1200, useWebWorker: true })
-      const { error: uploadError } = await supabase.storage.from('dog-photos').upload(fileName, compressedPhoto)
+      const { url, error: uploadError } = await uploadDogPhoto(supabase, photo)
       if (uploadError) { toast.error(reportError(uploadError, "Couldn't upload photo — try again.")); setLoading(false); return }
-      const { data: { publicUrl } } = supabase.storage.from('dog-photos').getPublicUrl(fileName)
-      photo_url = publicUrl
+      photo_url = url
     }
 
     const { data, error } = await supabase.from('dogs').insert({
