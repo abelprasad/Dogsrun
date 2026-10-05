@@ -30,11 +30,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-white">
         <Navbar />
-        <main className="flex-1">
+        <div className="flex-1">
           <ToastProvider>
             {children}
           </ToastProvider>
-        </main>
+        </div>
         <footer className="bg-[#111] border-t border-white/5 py-8 px-8">
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row justify-between items-center gap-8 text-gray-400 text-sm">
