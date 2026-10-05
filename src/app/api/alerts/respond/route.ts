@@ -1,7 +1,7 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
-import { escapeHtml } from '@/lib/html'
+import { escapeHtml, sanitizeSubject } from '@/lib/html'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { respondRatelimit, getClientIp } from '@/lib/ratelimit'
 
@@ -16,7 +16,14 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { alert_id, status } = await req.json()
+  let alert_id: string, status: string
+  try {
+    const body = await req.json()
+    alert_id = body.alert_id
+    status = body.status
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
+  }
   if (!alert_id || !['responded', 'declined', 'sent'].includes(status)) {
     return NextResponse.json({ error: 'alert_id and valid status required' }, { status: 400 })
   }
@@ -54,7 +61,7 @@ export async function POST(req: NextRequest) {
       await resend.emails.send({
         from: 'DOGSRUN <alerts@dogsrun.org>',
         to: shelter.email,
-        subject: `${rescue.name} is interested in ${dog.name}`,
+        subject: `${sanitizeSubject(rescue.name)} is interested in ${sanitizeSubject(dog.name)}`,
         html: `
           <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px;border:1px solid #eee;border-radius:10px;">
             <h2 style="color:#f59e0b;">Great news!</h2>

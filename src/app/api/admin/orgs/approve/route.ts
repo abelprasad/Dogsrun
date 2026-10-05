@@ -139,8 +139,12 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ success: true, approval_status: newStatus })
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function sendRescueApprovalDigest(supabaseAdmin: any, rescueId: string, rescueName: string, rescueEmail: string) {
+async function sendRescueApprovalDigest(
+  supabaseAdmin: typeof import('@/lib/supabase-server').supabaseAdmin,
+  rescueId: string,
+  rescueName: string,
+  rescueEmail: string
+) {
   const { data: criteria } = await supabaseAdmin
     .from('rescue_criteria')
     .select('*')

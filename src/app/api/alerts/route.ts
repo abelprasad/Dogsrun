@@ -1,7 +1,7 @@
 import { Resend } from 'resend'
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient, supabaseAdmin } from '@/lib/supabase-server'
-import { escapeHtml, escapeHtmlOrDash } from '@/lib/html'
+import { escapeHtml, escapeHtmlOrDash, sanitizeSubject } from '@/lib/html'
 import { dogMatchesCriteria } from '@/lib/matching'
 import { alertsRatelimit, getClientIp } from '@/lib/ratelimit'
 
@@ -193,7 +193,7 @@ export async function POST(req: NextRequest) {
         await resend.emails.send({
         from: 'DOGSRUN Alerts <alerts@dogsrun.org>',
         to: org.email,
-        subject: `New dog match: ${dog.name ?? 'Unnamed'} (${dog.breed ?? 'Unknown breed'})`,
+        subject: `New dog match: ${sanitizeSubject(dog.name ?? 'Unnamed')} (${sanitizeSubject(dog.breed ?? 'Unknown breed')})`,
         html: `
           <div style="background-color: #f9fafb; padding: 32px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;">
             <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">

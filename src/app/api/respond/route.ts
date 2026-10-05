@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
-import { escapeHtml } from '@/lib/html'
+import { escapeHtml, sanitizeSubject } from '@/lib/html'
 import { createSupabaseServerClient, supabaseAdmin } from '@/lib/supabase-server'
 import { respondRatelimit, getClientIp } from '@/lib/ratelimit'
 
@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
       await resend.emails.send({
         from: 'DOGSRUN <alerts@dogsrun.org>',
         to: shelter.email,
-        subject: `${rescue.name} is interested in ${dog.name}`,
+        subject: `${sanitizeSubject(rescue.name)} is interested in ${sanitizeSubject(dog.name)}`,
         html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
         <h2 style="color: #f59e0b;">Great news!</h2>

@@ -88,11 +88,19 @@ export default function NewDogForm() {
       toast.error(reportError(error, "Couldn't add dog — try again."))
     } else {
       if (data) {
-        await fetch('/api/alerts', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ dog_id: data.id }),
-        })
+        // M-F2: check alert response — don't silently fail to notify rescues
+        try {
+          const alertRes = await fetch('/api/alerts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ dog_id: data.id }),
+          })
+          if (!alertRes.ok) {
+            toast.error('Dog posted, but rescue alerts failed to send — please retry from the dog page.')
+          }
+        } catch {
+          toast.error('Dog posted, but rescue alerts failed to send — please retry from the dog page.')
+        }
       }
       router.push('/dashboard/dogs')
     }
