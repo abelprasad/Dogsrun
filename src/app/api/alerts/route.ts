@@ -1,3 +1,4 @@
+import { CONTACT_EMAIL, SITE_URL } from '@/lib/constants'
 import { Resend } from 'resend'
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient, supabaseAdmin } from '@/lib/supabase-server'
@@ -191,7 +192,7 @@ export async function POST(req: NextRequest) {
 
       try {
         await resend.emails.send({
-        from: 'DOGSRUN Alerts <alerts@dogsrun.org>',
+        from: `DOGSRUN Alerts <${CONTACT_EMAIL}>`,
         to: org.email,
         subject: `New dog match: ${sanitizeSubject(dog.name ?? 'Unnamed')} (${sanitizeSubject(dog.breed ?? 'Unknown breed')})`,
         html: `

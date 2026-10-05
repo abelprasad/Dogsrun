@@ -1,3 +1,4 @@
+import { CONTACT_EMAIL, SITE_URL } from '@/lib/constants'
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { registerRatelimit, getClientIp } from '@/lib/ratelimit'
@@ -116,7 +117,7 @@ export async function POST(req: NextRequest) {
 
     try {
     await resend.emails.send({
-      from: 'DOGSRUN <alerts@dogsrun.org>',
+      from: `DOGSRUN <${CONTACT_EMAIL}>`,
       to: adminEmails,
       subject: `New ${safeType} Registration — ${safeName}`,
       html: `

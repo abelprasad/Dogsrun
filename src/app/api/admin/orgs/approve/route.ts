@@ -1,3 +1,4 @@
+import { CONTACT_EMAIL, SITE_URL } from '@/lib/constants'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
@@ -121,7 +122,7 @@ export async function POST(req: NextRequest) {
   `
 
   await resend.emails.send({
-    from: 'DOGSRUN <alerts@dogsrun.org>',
+    from: `DOGSRUN <${CONTACT_EMAIL}>`,
     to: org.email,
     subject,
     html,
@@ -245,7 +246,7 @@ async function sendRescueApprovalDigest(
   `
 
   await resend.emails.send({
-    from: 'DOGSRUN Alerts <alerts@dogsrun.org>',
+    from: `DOGSRUN Alerts <${CONTACT_EMAIL}>`,
     to: rescueEmail,
     subject: `${matches.length} dog${matches.length === 1 ? '' : 's'} matching your criteria on DOGSRUN`,
     html: digestHtml,

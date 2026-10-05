@@ -1,3 +1,4 @@
+import { CONTACT_EMAIL, SITE_URL } from '@/lib/constants'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
@@ -59,7 +60,7 @@ export async function POST(req: NextRequest) {
       const safeDogName = escapeHtml(dog.name)
 
       await resend.emails.send({
-        from: 'DOGSRUN <alerts@dogsrun.org>',
+        from: `DOGSRUN <${CONTACT_EMAIL}>`,
         to: shelter.email,
         subject: `${sanitizeSubject(rescue.name)} is interested in ${sanitizeSubject(dog.name)}`,
         html: `

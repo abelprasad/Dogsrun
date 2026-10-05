@@ -69,7 +69,7 @@ export async function GET(req: NextRequest) {
   const page = parsePageParam(params.get('page'))
   const pageSize = parsePageSizeParam(params.get('pageSize'))
   const filter = params.get('filter') // 'all' | 'urgent' | 'at_risk'
-  const nowIso = new Date().toISOString()
+  const todayStr = new Date().toISOString().split('T')[0] // YYYY-MM-DD for date-only column comparison (L-7)
 
   let query = supabaseAdmin
     .from('dogs')
@@ -79,7 +79,7 @@ export async function GET(req: NextRequest) {
   if (filter === 'urgent') {
     query = query.eq('status', 'urgent')
   } else if (filter === 'at_risk') {
-    query = query.not('euthanasia_date', 'is', null).gt('euthanasia_date', nowIso)
+    query = query.not('euthanasia_date', 'is', null).gte('euthanasia_date', todayStr)
   }
 
   const from = (page - 1) * pageSize
@@ -89,7 +89,7 @@ export async function GET(req: NextRequest) {
   const [{ count: all }, { count: urgent }, { count: atRisk }] = await Promise.all([
     supabaseAdmin.from('dogs').select('*', { count: 'exact', head: true }),
     supabaseAdmin.from('dogs').select('*', { count: 'exact', head: true }).eq('status', 'urgent'),
-    supabaseAdmin.from('dogs').select('*', { count: 'exact', head: true }).not('euthanasia_date', 'is', null).gt('euthanasia_date', nowIso),
+    supabaseAdmin.from('dogs').select('*', { count: 'exact', head: true }).not('euthanasia_date', 'is', null).gte('euthanasia_date', todayStr),
   ])
 
   return NextResponse.json({

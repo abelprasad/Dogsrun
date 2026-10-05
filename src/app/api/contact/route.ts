@@ -2,6 +2,7 @@ import { Resend } from 'resend'
 import { NextRequest, NextResponse } from 'next/server'
 import { contactRatelimit, getClientIp } from '@/lib/ratelimit'
 import { escapeHtml } from '@/lib/html'
+import { CONTACT_EMAIL } from '@/lib/constants'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
