@@ -212,7 +212,7 @@ export default async function Home() {
                 <Link
                   key={dog.id}
                   href={`/dogs/${dog.id}`}
-                  className="group relative block overflow-hidden border-2 border-[#a8583f] bg-[#122016]"
+                  className="card-craft group relative block overflow-hidden"
                 >
                   <div className="cine relative aspect-[4/5] overflow-hidden">
                     {dog.photo_url ? (
@@ -246,42 +246,53 @@ export default async function Home() {
         </section>
       )}
 
-      {/* ── SHELTER / RESCUE: bold split panels ── */}
-      <section className="grid lg:grid-cols-2">
-        <div className="group relative overflow-hidden border-t border-white/10 px-8 py-16 sm:px-12 sm:py-24">
-          <span aria-hidden className="pointer-events-none absolute -bottom-10 right-0 select-none text-[10rem] font-black leading-none text-white/5">
-            →
-          </span>
-          <p className="text-[11px] font-black uppercase tracking-[0.3em] text-[#c08a3e]">For shelters</p>
-          <h2 className="mt-5 text-[clamp(2rem,4.5vw,3.75rem)] font-black uppercase leading-[0.92] tracking-tight">
-            Publish the case once. Reach the rescues that fit.
+      {/* ── SHELTER / RESCUE: two cards, breathing room ── */}
+      <section className="px-5 py-20 sm:px-10 sm:py-28 lg:px-16">
+        <div className="mx-auto max-w-7xl">
+          <p className="type-quiet"><span className="tick-diamond mr-3" />Pick your side</p>
+          <h2 className="mt-4 max-w-3xl text-[clamp(2rem,4.5vw,3.5rem)] font-black uppercase leading-[0.92] tracking-tight text-[#f8f1e8]">
+            Two doors. <span className="text-[#c08a3e]">Same mission.</span>
           </h2>
-          <p className="mt-6 max-w-md text-base leading-8 text-[#f8f1e8]/65">
-            List urgent dogs, capture the details rescues need, and see who has
-            responded — without managing another spreadsheet.
-          </p>
-          <Link
-            href="/register?type=shelter"
-            className="mt-9 inline-flex bg-[#c08a3e] px-8 py-4 text-sm font-black uppercase tracking-[0.18em] text-[#140a08] transition hover:bg-[#d4a050]"
-          >
-            Register shelter
-          </Link>
-        </div>
-        <div className="card-craft group relative overflow-hidden border-t-2 border-t-[#a8583f] px-8 py-16 sm:px-12 sm:py-24">
-          <p className="text-[11px] font-black uppercase tracking-[0.3em] text-[#a8583f]">For rescues</p>
-          <h2 className="mt-5 text-[clamp(2rem,4.5vw,3.75rem)] font-black uppercase leading-[0.92] tracking-tight text-[#f8f1e8]">
-            Set your criteria. Get the dogs you can actually pull.
-          </h2>
-          <p className="mt-6 max-w-md text-base leading-8 text-[#f8f1e8]/70">
-            Define geography, breed focus, weight, age, and capacity once.
-            Receive urgent alerts that respect your mission and your limits.
-          </p>
-          <Link
-            href="/register?type=rescue"
-            className="mt-9 inline-flex border-2 border-[#a8583f] px-8 py-4 text-sm font-black uppercase tracking-[0.18em] text-[#c98a7a] transition hover:bg-[#a8583f] hover:text-white"
-          >
-            Register rescue
-          </Link>
+          <div className="mt-12 grid gap-6 lg:grid-cols-2 lg:gap-8">
+            <div className="card-craft hover-lift group relative overflow-hidden p-8 sm:p-12">
+              <span aria-hidden className="pointer-events-none absolute -bottom-8 -right-2 select-none text-[8rem] font-black leading-none text-white/5">
+                →
+              </span>
+              <p className="text-[11px] font-black uppercase tracking-[0.3em] text-[#c08a3e]">For shelters</p>
+              <h3 className="mt-5 text-[clamp(1.5rem,3vw,2.5rem)] font-black uppercase leading-[0.95] tracking-tight text-[#f8f1e8]">
+                Publish the case once. Reach the rescues that fit.
+              </h3>
+              <p className="mt-5 max-w-md text-base leading-7 text-[#f8f1e8]/65">
+                List urgent dogs, capture the details rescues need, and see who has
+                responded — without managing another spreadsheet.
+              </p>
+              <Link
+                href="/register?type=shelter"
+                className="mt-8 inline-flex bg-[#c08a3e] px-7 py-3.5 text-sm font-black uppercase tracking-[0.18em] text-[#140a08] transition hover:bg-[#d4a050]"
+              >
+                Register shelter
+              </Link>
+            </div>
+            <div className="card-craft hover-lift group relative overflow-hidden p-8 sm:p-12">
+              <span aria-hidden className="ghost-num pointer-events-none absolute -bottom-8 -right-2 select-none text-[8rem] font-black leading-none">
+                ♥
+              </span>
+              <p className="text-[11px] font-black uppercase tracking-[0.3em] text-[#a8583f]">For rescues</p>
+              <h3 className="mt-5 text-[clamp(1.5rem,3vw,2.5rem)] font-black uppercase leading-[0.95] tracking-tight text-[#f8f1e8]">
+                Set your criteria. Get the dogs you can actually pull.
+              </h3>
+              <p className="mt-5 max-w-md text-base leading-7 text-[#f8f1e8]/65">
+                Define geography, breed focus, weight, age, and capacity once.
+                Receive urgent alerts that respect your mission and your limits.
+              </p>
+              <Link
+                href="/register?type=rescue"
+                className="mt-8 inline-flex border-2 border-[#a8583f] px-7 py-3.5 text-sm font-black uppercase tracking-[0.18em] text-[#c98a7a] transition hover:bg-[#a8583f] hover:text-white"
+              >
+                Register rescue
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 

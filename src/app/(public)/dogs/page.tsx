@@ -253,7 +253,7 @@ export default async function BrowsePage({
                     <Link
                       key={dog.id}
                       href={`/dogs/${dog.id}`}
-                      className="card-craft-deep hover-lift hover-press group relative block overflow-hidden border-2 border-[#a8583f] sm:col-span-2"
+                      className="card-craft-deep hover-lift hover-press group relative block overflow-hidden border border-[#a8583f]/50 sm:col-span-2"
                     >
                       <div className="grid sm:grid-cols-2">
                         <div className="cine relative aspect-[4/3] overflow-hidden sm:aspect-auto sm:min-h-[320px]">

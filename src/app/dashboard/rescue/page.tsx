@@ -151,7 +151,7 @@ export default async function RescuePortalPage() {
                   <div
                     key={alert.id}
                     className={`grid overflow-hidden border card-craft sm:grid-cols-[240px_1fr] ${
-                      alert._urgent ? 'border-2 border-[#a8583f]' : 'border-white/10'
+                      alert._urgent ? 'border border-[#a8583f]/60' : 'border-white/10'
                     }`}
                   >
                     <Link href={`/dogs/${alert.dog_id}`} className="relative block min-h-[200px] overflow-hidden sm:min-h-[240px]">

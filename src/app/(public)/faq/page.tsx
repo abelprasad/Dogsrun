@@ -103,7 +103,7 @@ export default function FAQPage() {
 
           {/* Sticky help rail */}
           <aside className="lg:col-span-1">
-            <div className="border-2 border-[#a8583f] bg-[#122016] p-8 lg:sticky lg:top-24">
+            <div className="card-craft p-8 lg:sticky lg:top-24">
               <p className="flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.3em] text-[#a8583f]">
                 <span className="animate-pulse-dot h-2 w-2 rounded-full bg-[#a8583f]" />
                 Still stuck?

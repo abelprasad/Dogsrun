@@ -114,7 +114,7 @@ export default async function DashboardPage() {
                   key={dog.id}
                   href={`/dashboard/dogs/${dog.id}`}
                   className={`group relative block overflow-hidden border bg-[#122016] transition hover:-translate-y-1 ${
-                    dogUrgent ? 'border-2 border-[#a8583f]' : 'border-white/10 hover:border-[#c08a3e]/60'
+                    dogUrgent ? 'border border-[#a8583f]/60' : 'border-white/10 hover:border-[#c08a3e]/60'
                   }`}
                 >
                   <div className="relative aspect-[16/10] overflow-hidden">
