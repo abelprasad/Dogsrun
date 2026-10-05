@@ -11,7 +11,8 @@
     "test:ui": "playwright test --ui",
     "seed": "tsx scripts/seed-test.ts",
     "seed:cleanup": "tsx scripts/seed-test.ts --cleanup",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test:unit": "vitest run"
   },
   "dependencies": {
     "@sentry/nextjs": "^10.51.0",
@@ -28,7 +29,7 @@
   "devDependencies": {
     "@playwright/test": "^1.59.1",
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^24.19.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "dotenv": "^16.6.1",
@@ -37,7 +38,8 @@
     "husky": "^9.1.7",
     "tailwindcss": "^4",
     "tsx": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^5.0.3"
   },
   "overrides": {
     "postcss": "^8.5.13",
