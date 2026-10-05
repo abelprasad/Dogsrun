@@ -34,10 +34,14 @@ export default function WelcomeChecklist({
 }: Props) {
   const router = useRouter()
   const [dismissed, setDismissed] = useState(false)
+  // L-15: gate render until localStorage check completes to avoid checklist flash
+  const [checked, setChecked] = useState(false)
 
   useEffect(() => {
     if (localStorage.getItem(DISMISS_KEY(orgId)) === 'true') {
       router.replace(dashboardHref)
+    } else {
+      setChecked(true)
     }
   }, [orgId, dashboardHref, router])
 
@@ -46,6 +50,8 @@ export default function WelcomeChecklist({
     setDismissed(true)
     router.replace(dashboardHref)
   }
+
+  if (!checked && !dismissed) return null
 
   const shelterSteps: Step[] = [
     {

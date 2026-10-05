@@ -96,7 +96,7 @@ export default function FAQPage() {
           <div className="lg:col-span-2">
             <div className="border-t-2 border-[#c08a3e]">
               {faqs.map((faq, i) => (
-                <FAQItem key={i} index={i} question={faq.question} answer={faq.answer} />
+                <FAQItem key={faq.question} index={i} question={faq.question} answer={faq.answer} />
               ))}
             </div>
           </div>

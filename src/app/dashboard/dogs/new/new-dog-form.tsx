@@ -264,7 +264,7 @@ export default function NewDogForm() {
             <div className="relative group">
               <input id="new-dog-photo" type="file" accept="image/*" onChange={e => setPhoto(e.target.files?.[0] || null)}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-              <div className="border-2 border-dashed border-[#13241d]/20 bg-[#f5f0e8] p-8 text-center group-hover:border-[#13241d]/40 transition-colors">
+              <div className="border-2 border-dashed border-[#13241d]/20 bg-[#f5f0e8] p-8 text-center group-hover:border-[#13241d]/40 group-focus-within:border-[#c08a3e] group-focus-within:ring-2 group-focus-within:ring-[#c08a3e]/50 transition-colors">
                 {photo ? (
                   <p className="text-[#13241d] font-bold text-sm">{photo.name}</p>
                 ) : (
