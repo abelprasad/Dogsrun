@@ -1,6 +1,3 @@
-'use client';
-
-import React, { useState } from 'react';
 import Link from 'next/link';
 
 interface FAQItemProps {
@@ -8,29 +5,20 @@ interface FAQItemProps {
   answer: string;
 }
 
-// REVIEW: <details>/<summary> replaces this useState accordion; the page can then drop 'use client'.
 function FAQItem({ question, answer }: FAQItemProps) {
-  const [isOpen, setIsOpen] = useState(false);
-
   return (
-    <div className="border-b border-[#13241d]/10 last:border-0">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="group flex w-full items-center justify-between py-5 text-left focus:outline-none"
-      >
+    <details className="group border-b border-[#13241d]/10 last:border-0">
+      <summary className="flex w-full cursor-pointer list-none items-center justify-between py-5 focus:outline-none [&::-webkit-details-marker]:hidden">
         <span className="font-black text-[#13241d] text-base group-hover:text-[#d95f4b] transition-colors">
           {question}
         </span>
-        <span className="ml-4 text-[#f4b942] text-lg font-black shrink-0">
-          {isOpen ? '−' : '+'}
-        </span>
-      </button>
-      {isOpen && (
-        <div className="pb-5">
-          <p className="text-sm leading-7 text-[#5d6a64]">{answer}</p>
-        </div>
-      )}
-    </div>
+        <span className="ml-4 shrink-0 text-lg font-black text-[#f4b942] group-open:hidden">+</span>
+        <span className="ml-4 hidden shrink-0 text-lg font-black text-[#f4b942] group-open:block">−</span>
+      </summary>
+      <div className="pb-5">
+        <p className="text-sm leading-7 text-[#5d6a64]">{answer}</p>
+      </div>
+    </details>
   );
 }
 

@@ -6,14 +6,13 @@ import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import StateSelect from '@/components/state-select'
 
-type Step = 'idle' | 'creating-account' | 'uploading-doc' | 'saving' | 'sending-email'
+type Step = 'idle' | 'creating-account' | 'uploading-doc' | 'saving'
 
 const STEP_LABELS: Record<Step, string> = {
   idle: '',
   'creating-account': 'Creating account...',
   'uploading-doc': 'Uploading document...',
   saving: 'Saving organization...',
-  'sending-email': 'Almost done...',
 }
 
 function RegisterForm() {
@@ -123,14 +122,6 @@ function RegisterForm() {
       return
     }
 
-    // REVIEW: signUp already sends a confirmation email, so this sends a second one; product call whether to drop it.
-    // Step 4 — send magic link
-    setStep('sending-email')
-    await supabase.auth.signInWithOtp({
-      email: emailVal,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
-    })
-
     setSuccess(true)
     setStep('idle')
   }
@@ -147,7 +138,7 @@ function RegisterForm() {
         </div>
         <h2 className="text-2xl font-black text-[#13241d] mb-2">Check your email</h2>
         <p className="text-[#5d6a64] mb-6">
-          We&apos;ve sent a login link to <strong>{email}</strong>. Once you confirm your email, your application will be reviewed by our team. We&apos;ll notify you when you&apos;re approved.
+          We&apos;ve sent a confirmation email to <strong>{email}</strong>. Click the link in it to confirm your email. Once confirmed, your application will be reviewed by our team. We&apos;ll notify you when you&apos;re approved.
         </p>
         <Link href="/auth/login" className="text-[#d95f4b] font-black hover:underline text-sm uppercase tracking-widest">Back to login</Link>
       </div>

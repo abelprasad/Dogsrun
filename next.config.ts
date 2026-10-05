@@ -2,27 +2,15 @@ import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
-  // REVIEW: every <Image> passes unoptimized, so remotePatterns is never used; delete it.
-  images: {
-    remotePatterns: [
+  async redirects() {
+    return [
       {
-        protocol: 'https',
-        hostname: 'images.pexels.com',
+        source: "/dashboard/admin",
+        destination: "/admin",
+        permanent: true,
       },
-      {
-        protocol: 'https',
-        hostname: 'tnaddnxudfegrsbpgfwq.supabase.co',
-      },
-      {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'm.media-amazon.com',
-      }
-    ]
-  }
+    ];
+  },
 };
 
 export default withSentryConfig(nextConfig, {

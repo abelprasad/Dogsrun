@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation'
 
-// REVIEW: copy of lib/us-states.ts; import it (or use StateSelect). "Clear" does the same as choosing "All States".
+// REVIEW: copy of lib/us-states.ts; import it (or use StateSelect).
 const US_STATES = [
   'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
   'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
@@ -47,20 +47,6 @@ export default function BrowseStateFilter({ tab, currentState }: BrowseStateFilt
           <option key={s} value={s}>{s}</option>
         ))}
       </select>
-      {currentState && (
-        <button
-          onClick={() => {
-            const params = new URLSearchParams(searchParams.toString())
-            params.set('tab', tab)
-            params.delete('state')
-            params.delete('page')
-            router.push(`/dogs?${params.toString()}`, { scroll: false })
-          }}
-          className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#d95f4b] hover:underline"
-        >
-          Clear
-        </button>
-      )}
     </div>
   )
 }
