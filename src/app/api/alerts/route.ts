@@ -13,6 +13,7 @@ interface RescueOrg {
   email: string;
   approval_status: string;
   is_test: boolean;
+  is_active: boolean;
 }
 
 interface RescueCriteria {
@@ -99,8 +100,9 @@ export async function POST(req: NextRequest) {
 
   const { data: criteriaList } = await supabaseAdmin
     .from('rescue_criteria')
-    .select('*, organizations(id, name, email, approval_status, is_test)')
+    .select('*, organizations(id, name, email, approval_status, is_test, is_active)')
     .eq('is_active', true)
+    .eq('organizations.is_active', true)
 
   if (!criteriaList || (criteriaList as unknown as RescueCriteria[]).length === 0) {
     return NextResponse.json({ message: 'No active rescue criteria found' })
@@ -124,6 +126,7 @@ export async function POST(req: NextRequest) {
 
     if (org.id === dog.shelter_id) continue
     if (org.approval_status !== 'approved') continue
+    if (org.is_active === false) continue  // Deactivated orgs never receive alerts
     if (org.is_test) continue  // Don't send real alerts to test rescue orgs
     if (alreadyAlerted.has(org.id)) continue
 

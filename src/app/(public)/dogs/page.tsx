@@ -97,6 +97,7 @@ export default async function BrowsePage({
       .select('*, organizations!inner(name, city, state)', { count: 'exact' })
       .in('status', ['available', 'urgent'])
       .eq('organizations.is_test', false)
+      .eq('organizations.is_active', true)
       .order('created_at', { ascending: false })
       .range(from, to)
     if (stateFilter) query = query.eq('organizations.state', stateFilter)
@@ -116,6 +117,7 @@ export default async function BrowsePage({
       .eq('type', 'shelter')
       .eq('approval_status', 'approved')
       .eq('is_test', false)
+      .eq('is_active', true)
       .order('name')
     if (stateFilter) shelterQuery = shelterQuery.eq('state', stateFilter)
     const { data } = await shelterQuery
@@ -144,6 +146,7 @@ export default async function BrowsePage({
       .eq('type', 'rescue')
       .eq('approval_status', 'approved')
       .eq('is_test', false)
+      .eq('is_active', true)
       .order('name')
     if (stateFilter) rescueQuery = rescueQuery.eq('state', stateFilter)
     const { data } = await rescueQuery

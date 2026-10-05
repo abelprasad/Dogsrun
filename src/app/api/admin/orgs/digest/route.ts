@@ -49,13 +49,14 @@ export async function POST(req: NextRequest) {
 
   const { data: org } = await supabaseAdmin
     .from('organizations')
-    .select('id, name, email, type, approval_status')
+    .select('id, name, email, type, approval_status, is_active')
     .eq('id', org_id)
     .single()
 
   if (!org) return NextResponse.json({ error: 'Org not found' }, { status: 404 })
   if (org.type !== 'rescue') return NextResponse.json({ error: 'Only rescues can receive a digest' }, { status: 400 })
   if (org.approval_status !== 'approved') return NextResponse.json({ error: 'Org is not approved' }, { status: 400 })
+  if (org.is_active === false) return NextResponse.json({ error: 'Org is deactivated' }, { status: 403 })
 
   const { data: criteria } = await supabaseAdmin
     .from('rescue_criteria')

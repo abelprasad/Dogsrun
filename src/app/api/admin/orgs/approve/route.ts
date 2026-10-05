@@ -45,11 +45,15 @@ export async function POST(req: NextRequest) {
 
   const newStatus = action === 'approve' ? 'approved' : 'rejected'
 
+  if (action === 'approve' && org.is_active === false) {
+    return NextResponse.json({ error: 'Cannot approve a deactivated org' }, { status: 400 })
+  }
+
   const { data: org, error: updateError } = await supabaseAdmin
     .from('organizations')
     .update({ approval_status: newStatus })
     .eq('id', org_id)
-    .select('name, email, type')
+    .select('name, email, type, is_active')
     .single()
 
   if (updateError || !org) {
