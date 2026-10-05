@@ -150,7 +150,7 @@ export default async function RescuePortalPage() {
                 return (
                   <div
                     key={alert.id}
-                    className={`grid overflow-hidden border bg-[#122016] sm:grid-cols-[240px_1fr] ${
+                    className={`grid overflow-hidden border card-craft sm:grid-cols-[240px_1fr] ${
                       alert._urgent ? 'border-2 border-[#e04a3a]' : 'border-white/10'
                     }`}
                   >
@@ -247,7 +247,7 @@ export default async function RescuePortalPage() {
         )}
 
         {alerts.length === 0 && (
-          <div className="border border-dashed border-white/20 bg-[#122016] px-6 py-20 text-center">
+          <div className="border border-dashed border-white/20 card-craft px-6 py-20 text-center">
             <p className="text-[11px] font-black uppercase tracking-[0.3em] text-[#f4b942]">No matches yet</p>
             <h3 className="mt-4 text-4xl font-black uppercase tracking-tight">The next dog is coming.</h3>
             <p className="mx-auto mt-4 max-w-sm text-sm leading-7 text-[#f8f1e8]/55">

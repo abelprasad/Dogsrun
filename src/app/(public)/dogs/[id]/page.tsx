@@ -44,7 +44,9 @@ export default async function PublicDogProfilePage({ params }: { params: Promise
       {/* ── FULL-BLEED PHOTO HERO (65vh), massive overlaid name ── */}
       <header className="relative flex min-h-[65svh] flex-col justify-end overflow-hidden">
         {dog.photo_url ? (
-          <Image src={dog.photo_url} alt={dog.name} fill className="object-cover object-center" unoptimized priority />
+          <div className="cine cine-vignette absolute inset-0">
+            <Image src={dog.photo_url} alt={dog.name} fill className="object-cover object-center" unoptimized priority />
+          </div>
         ) : (
           <div className="absolute inset-0 flex items-center justify-center bg-[#1a2e1a] text-[12rem] font-black text-[#f4b942]">
             {dog.name?.[0] || 'D'}
@@ -86,7 +88,7 @@ export default async function PublicDogProfilePage({ params }: { params: Promise
 
       {/* ── URGENCY TIMELINE ── */}
       {urgent && timePct !== null && (
-        <section className="border-b border-white/10 bg-[#e04a3a]/10 px-5 py-10 sm:px-10 lg:px-16">
+        <section className="rule-double border-b border-white/10 bg-[#e04a3a]/10 px-5 py-10 sm:px-10 lg:px-16">
           <div className="mx-auto max-w-7xl">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
@@ -125,7 +127,7 @@ export default async function PublicDogProfilePage({ params }: { params: Promise
           <div className="lg:col-span-7">
             <p className="text-[11px] font-black uppercase tracking-[0.3em] text-[#f4b942]">The story</p>
             {cleanDescription ? (
-              <blockquote className="mt-6 border-l-4 border-[#f4b942] pl-6 font-serif text-[clamp(1.4rem,3vw,2.25rem)] font-bold leading-[1.35] text-[#f8f1e8]">
+              <blockquote className="mt-6 border-l-2 border-[#f4b942]/70 pl-6 serif-pull text-[clamp(1.35rem,2.8vw,2rem)] leading-[1.5] text-[#f8f1e8]/90">
                 &ldquo;{cleanDescription}&rdquo;
               </blockquote>
             ) : (
@@ -135,7 +137,7 @@ export default async function PublicDogProfilePage({ params }: { params: Promise
               </p>
             )}
 
-            <div className="mt-12 border border-white/10 bg-[#122016] p-7">
+            <div className="card-craft mt-12 p-7">
               <p className="text-[11px] font-black uppercase tracking-[0.3em] text-[#f4b942]">Listed by</p>
               <p className="mt-3 text-2xl font-black text-white">{dog.organizations?.name || 'Shelter partner'}</p>
               {locationLine && <p className="mt-1 text-sm uppercase tracking-[0.18em] text-[#f8f1e8]/50">{locationLine}</p>}

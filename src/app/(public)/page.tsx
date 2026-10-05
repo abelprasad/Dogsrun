@@ -48,15 +48,17 @@ export default async function Home() {
     <div className="bg-[#0b140e] text-[#f8f1e8]">
       {/* ── IMMERSIVE HERO: full viewport, photography-led, oversized type ── */}
       <section className="relative flex min-h-[100svh] flex-col overflow-hidden">
-        <Image
-          src={dogPhotos.hero}
-          alt="Golden retriever rescue dog looking upward"
-          fill
-          className="object-cover object-center"
-          sizes="100vw"
-          unoptimized
-          priority
-        />
+        <div className="cine cine-vignette absolute inset-0">
+          <Image
+            src={dogPhotos.hero}
+            alt="Golden retriever rescue dog looking upward"
+            fill
+            className="object-cover object-center"
+            sizes="100vw"
+            unoptimized
+            priority
+          />
+        </div>
         <div className="absolute inset-0 bg-gradient-to-t from-[#0b140e] via-[#0b140e]/35 to-[#0b140e]/55" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#0b140e]/70 via-transparent to-transparent" />
 
@@ -110,14 +112,21 @@ export default async function Home() {
       />
 
       {/* ── MISSION: oversized editorial statement ── */}
-      <section className="px-5 py-20 sm:px-10 sm:py-28 lg:px-16">
-        <div className="mx-auto max-w-7xl">
-          <p className="text-[11px] font-black uppercase tracking-[0.3em] text-[#e04a3a]">The mission</p>
-          <p className="mt-6 max-w-5xl font-serif text-[clamp(1.8rem,4.5vw,3.75rem)] font-bold leading-[1.15] text-[#f8f1e8]">
-            Thousands of healthy, adoptable dogs are euthanized every year —
-            not for lack of love, but for lack of <span className="text-[#f4b942]">a fast enough handoff</span>.
-            DOGSRUN exists to close that gap.
-          </p>
+      <section className="px-5 py-24 sm:px-10 sm:py-36 lg:px-16">
+        <div className="mx-auto max-w-4xl">
+          <p className="type-quiet flex items-center gap-3"><span className="tick-diamond" />The mission</p>
+          <blockquote className="mt-8">
+            <p className="serif-pull text-[clamp(1.6rem,3.8vw,2.9rem)] leading-[1.4] text-[#f8f1e8]/90">
+              &ldquo;Thousands of healthy, adoptable dogs are euthanized every year
+              &mdash; not for lack of love, but for lack of a fast enough handoff.&rdquo;
+            </p>
+            <footer className="mt-6 flex items-center gap-4">
+              <span className="rule-double block w-16" aria-hidden />
+              <cite className="text-xs font-bold uppercase tracking-[0.24em] text-[#f8f1e8]/45 not-italic">
+                Why DOGSRUN exists
+              </cite>
+            </footer>
+          </blockquote>
           <div className="mt-10 flex flex-wrap gap-x-12 gap-y-6">
             {[
               ["50+", "states in the network"],
@@ -153,7 +162,7 @@ export default async function Home() {
             {steps.map((step, i) => (
               <div
                 key={step.n}
-                className={`relative overflow-hidden border border-white/10 bg-[#122016] p-8 sm:p-10 ${
+                className={`card-craft hover-lift relative overflow-hidden p-8 sm:p-10 ${
                   i === 0
                     ? "lg:col-span-5"
                     : i === 1
@@ -163,7 +172,7 @@ export default async function Home() {
               >
                 <span
                   aria-hidden
-                  className={`pointer-events-none absolute -right-4 -top-8 select-none text-[9rem] font-black leading-none opacity-15 sm:text-[12rem] ${step.accent}`}
+                  className="ghost-num pointer-events-none absolute -right-3 -top-6 select-none text-[8rem] font-black leading-none sm:text-[10rem]"
                 >
                   {step.n}
                 </span>
@@ -205,7 +214,7 @@ export default async function Home() {
                   href={`/dogs/${dog.id}`}
                   className="group relative block overflow-hidden border-2 border-[#e04a3a] bg-[#122016]"
                 >
-                  <div className="relative aspect-[4/5] overflow-hidden">
+                  <div className="cine relative aspect-[4/5] overflow-hidden">
                     {dog.photo_url ? (
                       <Image
                         src={dog.photo_url}
@@ -278,14 +287,16 @@ export default async function Home() {
 
       {/* ── CLOSING: full-bleed photo, massive overlapping type ── */}
       <section className="relative flex min-h-[80svh] items-end overflow-hidden">
-        <Image
-          src={dogPhotos.rescue}
-          alt="Expressive close-up portrait of a rescue dog"
-          fill
-          className="object-cover object-center"
-          sizes="100vw"
-          unoptimized
-        />
+        <div className="cine cine-vignette absolute inset-0">
+          <Image
+            src={dogPhotos.rescue}
+            alt="Expressive close-up portrait of a rescue dog"
+            fill
+            className="object-cover object-center"
+            sizes="100vw"
+            unoptimized
+          />
+        </div>
         <div className="absolute inset-0 bg-gradient-to-t from-[#0b140e] via-[#0b140e]/30 to-transparent" />
         <div className="relative w-full px-5 pb-16 sm:px-10 lg:px-16">
           <h2 className="max-w-6xl text-[clamp(3rem,10vw,9rem)] font-black uppercase leading-[0.85] tracking-tight">
@@ -293,7 +304,7 @@ export default async function Home() {
           </h2>
           <Link
             href="/dogs"
-            className="mt-8 inline-flex items-center gap-3 border-b-2 border-[#f4b942] pb-1 text-sm font-black uppercase tracking-[0.22em] text-[#f8f1e8] transition hover:text-[#f4b942]"
+            className="link-draw mt-8 inline-flex items-center gap-3 text-sm font-black uppercase tracking-[0.22em] text-[#f8f1e8] transition hover:text-[#f4b942]"
           >
             Meet the dogs →
           </Link>

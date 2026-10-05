@@ -73,7 +73,7 @@ export default async function DashboardPage() {
         {/* ── BIG NUMBER STAT BAND ── */}
         <div className="grid grid-cols-2 gap-px bg-white/10 lg:grid-cols-4">
           {stats.map((s) => (
-            <div key={s.label} className={`bg-[#122016] p-7 sm:p-9 ${s.hot && s.value > 0 ? 'bg-[#e04a3a]/15' : ''}`}>
+            <div key={s.label} className={`card-craft p-7 sm:p-9 ${s.hot && s.value > 0 ? 'bg-[#e04a3a]/15' : ''}`}>
               <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#f8f1e8]/45">{s.label}</p>
               <p className={`mt-3 text-6xl font-black tracking-tight sm:text-7xl ${s.tone}`}>
                 {s.value}

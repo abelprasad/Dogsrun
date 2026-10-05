@@ -253,10 +253,10 @@ export default async function BrowsePage({
                     <Link
                       key={dog.id}
                       href={`/dogs/${dog.id}`}
-                      className="group relative block overflow-hidden border-2 border-[#e04a3a] bg-[#122016] sm:col-span-2"
+                      className="card-craft-deep hover-lift hover-press group relative block overflow-hidden border-2 border-[#e04a3a] sm:col-span-2"
                     >
                       <div className="grid sm:grid-cols-2">
-                        <div className="relative aspect-[4/3] overflow-hidden sm:aspect-auto sm:min-h-[320px]">
+                        <div className="cine relative aspect-[4/3] overflow-hidden sm:aspect-auto sm:min-h-[320px]">
                           {dog.photo_url ? (
                             <Image
                               src={dog.photo_url}
@@ -308,9 +308,9 @@ export default async function BrowsePage({
                     <Link
                       key={dog.id}
                       href={`/dogs/${dog.id}`}
-                      className="group flex min-h-full flex-col overflow-hidden border border-white/10 bg-[#122016] transition hover:-translate-y-1 hover:border-[#f4b942]/60"
+                      className="card-craft hover-lift hover-press group flex min-h-full flex-col overflow-hidden hover:border-[#f4b942]/60"
                     >
-                      <div className="relative aspect-[5/4] overflow-hidden">
+                      <div className="cine relative aspect-[5/4] overflow-hidden">
                         {dog.photo_url ? (
                           <Image
                             src={dog.photo_url}
@@ -358,7 +358,7 @@ export default async function BrowsePage({
                 />
               </>
             ) : (
-              <div className="border border-dashed border-white/20 bg-[#122016] px-6 py-20 text-center">
+              <div className="card-craft rule-double px-6 py-20 text-center">
                 <p className="text-sm font-black uppercase tracking-[0.24em] text-[#f4b942]">No dogs found</p>
                 <p className="mx-auto mt-4 max-w-md text-base leading-7 text-[#f8f1e8]/60">
                   {query ? `Nothing matches "${query}". Try a different name or breed.` : 'No dogs match these filters right now.'}
@@ -376,7 +376,7 @@ export default async function BrowsePage({
                 <Link
                   key={shelter.id}
                   href="/dogs?tab=dogs"
-                  className="group border border-white/10 bg-[#122016] p-7 transition hover:-translate-y-1 hover:border-[#f4b942]/60"
+                  className="card-craft hover-lift hover-press group p-7 hover:border-[#f4b942]/60"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex h-14 w-14 shrink-0 items-center justify-center bg-[#f4b942] text-2xl font-black text-[#140a08]">
@@ -405,7 +405,7 @@ export default async function BrowsePage({
               ))}
             </div>
           ) : (
-            <div className="border border-dashed border-white/20 bg-[#122016] px-6 py-20 text-center">
+            <div className="card-craft rule-double px-6 py-20 text-center">
               <p className="text-sm font-black uppercase tracking-[0.24em] text-[#f4b942]">No shelter partners</p>
               <p className="mx-auto mt-4 max-w-md text-base leading-7 text-[#f8f1e8]/60">
                 {stateFilter ? `No approved shelters in ${stateFilter}.` : "Shelters appear here once approved by the DOGSRUN team."}
@@ -422,7 +422,7 @@ export default async function BrowsePage({
                 const breeds: string[] = rescue.criteria?.breeds || []
                 const states: string[] = rescue.criteria?.states_served || []
                 return (
-                  <div key={rescue.id} className="border border-white/10 bg-[#122016] p-7">
+                  <div key={rescue.id} className="card-craft p-7">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex h-14 w-14 shrink-0 items-center justify-center bg-[#e04a3a] text-2xl font-black text-white">
                         {rescue.name?.[0] || 'R'}
@@ -458,7 +458,7 @@ export default async function BrowsePage({
               })}
             </div>
           ) : (
-            <div className="border border-dashed border-white/20 bg-[#122016] px-6 py-20 text-center">
+            <div className="card-craft rule-double px-6 py-20 text-center">
               <p className="text-sm font-black uppercase tracking-[0.24em] text-[#f4b942]">No rescue partners</p>
               <p className="mx-auto mt-4 max-w-md text-base leading-7 text-[#f8f1e8]/60">
                 {stateFilter ? `No approved rescues in ${stateFilter}.` : "Rescues appear here once approved by the DOGSRUN team."}
