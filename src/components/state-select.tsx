@@ -7,11 +7,13 @@ interface StateSelectProps {
   onChange: (value: string) => void
   className?: string
   placeholder?: string
+  id?: string
 }
 
-export default function StateSelect({ value, onChange, className = '', placeholder = 'State' }: StateSelectProps) {
+export default function StateSelect({ value, onChange, className = '', placeholder = 'State', id }: StateSelectProps) {
   return (
     <select
+      id={id}
       value={value}
       onChange={e => onChange(e.target.value)}
       className={`w-full border border-[#13241d]/20 bg-[#fffaf2] px-4 py-2.5 focus:outline-none focus:border-[#c08a3e] focus:ring-1 focus:ring-[#c08a3e] text-[#13241d] transition-all text-sm ${className}`}

@@ -34,5 +34,7 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
+  // L-23: matcher covers /dashboard only. /admin is protected by
+  // AdminLayout's server-side requireAuthContext check instead.
   matcher: ['/dashboard/:path*'],
 }

@@ -106,21 +106,13 @@ export default function NewDogForm() {
 
   return (
     <div className="min-h-screen bg-[#f5f0e8]">
-      {/* Header */}
-      <header className="bg-[#13241d] pb-12 px-8 pt-8 border-t border-white/5">
-        <div className="max-w-7xl mx-auto">
-          <p className="text-xs uppercase tracking-[0.24em] text-[#c08a3e]/70 mb-3 font-bold">Shelter</p>
-          <h1 className="text-4xl md:text-5xl font-black tracking-tight text-[#c08a3e]">Add a Dog</h1>
-          <p className="text-[#f5f0e8]/50 mt-2 text-sm">Help this dog find the perfect rescue match.</p>
-        </div>
-      </header>
-
       <main className="max-w-3xl mx-auto py-10 px-8">
         <form onSubmit={handleSubmit} className="bg-[#fff9ef] outline outline-1 outline-[#13241d]/10 p-8 space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className={labelCls}>Dog Name</label>
+              <label htmlFor="new-dog-name" className={labelCls}>Dog Name</label>
               <input
+                id="new-dog-name"
                 type="text"
                 placeholder="Buddy"
                 value={form.name}
@@ -129,15 +121,16 @@ export default function NewDogForm() {
               />
             </div>
             <div>
-              <label className={labelCls}>Primary Breed</label>
-              <BreedSelect value={form.breed} onChange={val => setForm(f => ({ ...f, breed: val }))} placeholder="Search or type breed..." />
+              <label htmlFor="new-primary-breed" className={labelCls}>Primary Breed</label>
+              <BreedSelect id="new-primary-breed" value={form.breed} onChange={val => setForm(f => ({ ...f, breed: val }))} placeholder="Search or type breed..." />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className={labelCls}>Age (years)</label>
+              <label htmlFor="new-age-years" className={labelCls}>Age (years)</label>
               <input
+                id="new-age-years"
                 type="number"
                 placeholder="2"
                 value={form.age_years}
@@ -152,8 +145,9 @@ export default function NewDogForm() {
               </p>
             </div>
             <div>
-              <label className={labelCls}>Weight (lbs)</label>
+              <label htmlFor="new-weight-lbs" className={labelCls}>Weight (lbs)</label>
               <input
+                id="new-weight-lbs"
                 type="number"
                 placeholder="45"
                 value={form.weight_lbs}
@@ -168,8 +162,8 @@ export default function NewDogForm() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className={labelCls}>Sex</label>
-              <select value={form.sex} onChange={e => setForm(f => ({ ...f, sex: e.target.value }))}
+              <label htmlFor="new-sex" className={labelCls}>Sex</label>
+              <select id="new-sex" value={form.sex} onChange={e => setForm(f => ({ ...f, sex: e.target.value }))}
                 className={inputCls}>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
@@ -177,16 +171,17 @@ export default function NewDogForm() {
               </select>
             </div>
             <div>
-              <label className={labelCls}>State</label>
-              <StateSelect value={form.state} onChange={val => setForm(f => ({ ...f, state: val }))} />
+              <label htmlFor="new-state" className={labelCls}>State</label>
+              <StateSelect id="new-state" value={form.state} onChange={val => setForm(f => ({ ...f, state: val }))} />
             </div>
           </div>
 
           {/* Intake & Euthanasia dates */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className={labelCls}>Date Brought to Shelter</label>
+              <label htmlFor="new-date-brought-to-shelter" className={labelCls}>Date Brought to Shelter</label>
               <input
+                id="new-date-brought-to-shelter"
                 type="date"
                 value={form.intake_date}
                 onChange={e => setForm(f => ({ ...f, intake_date: e.target.value }))}
@@ -194,11 +189,12 @@ export default function NewDogForm() {
               />
             </div>
             <div>
-              <label className={labelCls}>
+              <label htmlFor="new-euthanasia-date" className={labelCls}>
                 Euthanasia Date
                 <span className="ml-2 normal-case tracking-normal font-normal text-[#5d6a64]">(if applicable)</span>
               </label>
               <input
+                id="new-euthanasia-date"
                 type="date"
                 value={form.euthanasia_date}
                 onChange={e => setForm(f => ({ ...f, euthanasia_date: e.target.value }))}
@@ -213,17 +209,17 @@ export default function NewDogForm() {
             </div>
           </div>
 
-          <ColorPicker selected={form.color} onChange={colors => setForm(f => ({ ...f, color: colors }))} label="Color(s)" />
+          <ColorPicker id="new-colors" selected={form.color} onChange={colors => setForm(f => ({ ...f, color: colors }))} label="Color(s)" />
 
-          <label className="flex items-center gap-3 p-4 bg-[#f5f0e8] cursor-pointer">
+          <label htmlFor="mix" className="flex items-center gap-3 p-4 bg-[#f5f0e8] cursor-pointer">
             <input type="checkbox" id="mix" checked={form.mix} onChange={e => setForm(f => ({ ...f, mix: e.target.checked }))}
               className="w-4 h-4 border-[#13241d]/30 text-[#13241d] focus:ring-[#13241d]" />
             <span className="text-xs uppercase tracking-[0.24em] font-bold text-[#13241d]">Mixed breed dog</span>
           </label>
 
           <div>
-            <label className={labelCls}>Description & Medical Notes</label>
-            <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+            <label htmlFor="new-description-medical-notes" className={labelCls}>Description & Medical Notes</label>
+            <textarea id="new-description-medical-notes" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
               placeholder="Any relevant info about behavior, medical needs, or urgency..."
               rows={4} className={inputCls + ' resize-none'} />
           </div>
@@ -264,11 +260,11 @@ export default function NewDogForm() {
 
           {/* Photo upload */}
           <div>
-            <label className={labelCls}>Dog Photo</label>
+            <label htmlFor="new-dog-photo" className={labelCls}>Dog Photo</label>
             <div className="relative group">
-              <input type="file" accept="image/*" onChange={e => setPhoto(e.target.files?.[0] || null)}
+              <input id="new-dog-photo" type="file" accept="image/*" onChange={e => setPhoto(e.target.files?.[0] || null)}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-              <div className="border-2 border-dashed border-[#13241d]/20 bg-[#f5f0e8] p-8 text-center group-hover:border-[#13241d]/40 transition-colors">
+              <div className="border-2 border-dashed border-[#13241d]/20 bg-[#f5f0e8] p-8 text-center group-hover:border-[#13241d]/40 group-focus-within:border-[#c08a3e] group-focus-within:ring-2 group-focus-within:ring-[#c08a3e]/50 transition-colors">
                 {photo ? (
                   <p className="text-[#13241d] font-bold text-sm">{photo.name}</p>
                 ) : (

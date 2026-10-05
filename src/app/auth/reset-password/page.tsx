@@ -90,8 +90,9 @@ export default function ResetPasswordPage() {
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-5">
         <div>
-          <label className={authLabelClass}>Email Address</label>
+          <label htmlFor="reset-email" className={authLabelClass}>Email Address</label>
           <input
+            id="reset-email"
             type="email"
             value={email}
             onChange={e => setEmail(e.target.value)}

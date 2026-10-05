@@ -168,9 +168,9 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
 
       {/* Breeds */}
       <div>
-        <label className={labelClass}>Breeds <span className="normal-case font-normal tracking-normal text-[#5d6a64]/70">— leave empty to match all</span></label>
+        <label htmlFor="criteria-breeds" className={labelClass}>Breeds <span className="normal-case font-normal tracking-normal text-[#5d6a64]/70">— leave empty to match all</span></label>
         <div className="flex gap-2 mb-3">
-          <BreedSelect value={breedInput} onChange={setBreedInput} placeholder="Search or type a breed..." className="flex-1" />
+          <BreedSelect id="criteria-breeds" value={breedInput} onChange={setBreedInput} placeholder="Search or type a breed..." className="flex-1" />
           <button
             type="button"
             onClick={() => addBreed(breedInput)}
@@ -194,6 +194,7 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
 
       {/* Colors */}
       <ColorPicker
+        id="criteria-colors"
         selected={form.colors}
         onChange={colors => setForm(f => ({ ...f, colors }))}
         label="Colors — leave empty to accept all"
@@ -201,8 +202,8 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
 
       {/* Age Ranges */}
       <div>
-        <label className={labelClass}>Age ranges <span className="normal-case font-normal tracking-normal text-[#5d6a64]/70">— leave empty to accept all ages</span></label>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <label id="criteria-age-ranges-label" className={labelClass}>Age ranges <span className="normal-case font-normal tracking-normal text-[#5d6a64]/70">— leave empty to accept all ages</span></label>
+        <div role="group" aria-labelledby="criteria-age-ranges-label" className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {AGE_RANGES.map(({ value, label, sub }) => {
             const selected = form.age_ranges.includes(value)
             return (
@@ -226,8 +227,8 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
 
       {/* Size Classes */}
       <div>
-        <label className={labelClass}>Size classes <span className="normal-case font-normal tracking-normal text-[#5d6a64]/70">— leave empty to accept all sizes</span></label>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+        <label id="criteria-size-classes-label" className={labelClass}>Size classes <span className="normal-case font-normal tracking-normal text-[#5d6a64]/70">— leave empty to accept all sizes</span></label>
+        <div role="group" aria-labelledby="criteria-size-classes-label" className="grid grid-cols-2 gap-3 sm:grid-cols-5">
           {SIZE_CLASSES.map(({ value, label, sub }) => {
             const selected = form.size_classes.includes(value)
             return (
@@ -252,13 +253,14 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
       {/* Location + Sex */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <StateMultiSelect
+          id="criteria-states-served"
           selected={form.states_served}
           onChange={states => setForm({ ...form, states_served: states })}
           label="States served"
         />
         <div>
-          <label className={labelClass}>Sex preference</label>
-          <select value={form.sex_preference} onChange={e => setForm({ ...form, sex_preference: e.target.value })} className={inputClass}>
+          <label htmlFor="criteria-sex-preference" className={labelClass}>Sex preference</label>
+          <select id="criteria-sex-preference" value={form.sex_preference} onChange={e => setForm({ ...form, sex_preference: e.target.value })} className={inputClass}>
             <option value="any">Any</option>
             <option value="male">Male only</option>
             <option value="female">Female only</option>
@@ -279,8 +281,8 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
 
       {/* Special needs */}
       <div>
-        <label className={labelClass}>Special needs we accept</label>
-        <div className="grid grid-cols-2 gap-3">
+        <label id="criteria-special-needs-label" className={labelClass}>Special needs we accept</label>
+        <div role="group" aria-labelledby="criteria-special-needs-label" className="grid grid-cols-2 gap-3">
           {[
             { key: 'accepts_parvo', label: 'Parvo' },
             { key: 'accepts_tripod', label: 'Tripod / Amputee' },

@@ -114,8 +114,9 @@ export default function UpdatePasswordPage() {
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-5">
         <div>
-          <label className={authLabelClass}>New Password</label>
+          <label htmlFor="update-password" className={authLabelClass}>New Password</label>
           <input
+            id="update-password"
             type="password"
             value={password}
             onChange={e => setPassword(e.target.value)}
@@ -126,8 +127,9 @@ export default function UpdatePasswordPage() {
           />
         </div>
         <div>
-          <label className={authLabelClass}>Confirm Password</label>
+          <label htmlFor="update-confirm" className={authLabelClass}>Confirm Password</label>
           <input
+            id="update-confirm"
             type="password"
             value={confirm}
             onChange={e => setConfirm(e.target.value)}

@@ -17,15 +17,23 @@ function getCountdown(euthanasiaDate: string) {
 }
 
 export default function EuthanasiaCountdown({ euthanasiaDate }: { euthanasiaDate: string }) {
-  const [countdown, setCountdown] = useState(() => getCountdown(euthanasiaDate));
+  const [countdown, setCountdown] = useState<ReturnType<typeof getCountdown> | null>(null); // M-F9: client-only to avoid hydration mismatch
 
   useEffect(() => {
+    setCountdown(getCountdown(euthanasiaDate));
     const interval = setInterval(() => {
       setCountdown(getCountdown(euthanasiaDate));
     }, 60000); // update every minute
     return () => clearInterval(interval);
   }, [euthanasiaDate]);
 
+  if (!countdown) {
+    return (
+      <div className="flex items-center gap-2 px-3 py-2 bg-[#1a2e1a] rounded-lg animate-pulse">
+        <span className="text-xs font-black text-[#c08a3e]/60 uppercase tracking-widest">Loading…</span>
+      </div>
+    );
+  }
   const { diffMs, diffDays, diffHoursRemainder, diffMins } = countdown;
   const risk = getRiskLevel(euthanasiaDate);
   const isCritical = risk === 'past-due' || risk === 'critical';

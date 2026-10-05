@@ -25,7 +25,7 @@ Before writing code, climb it. Stop at the first rung that holds:
 
 Task: "Log every API request."
 
-- **Rung 1:** Does it need to exist? The existing code already logs to `winston`. Skip building a new logger.
+- **Rung 1:** Does it need to exist? The existing code already has a logger. Skip building a new logger.
 - **Rung 2:** Already here? Yes. `import { logger } from './services/logging'` and use `logger.info()` in the route handler.
 - Done. One line. Don't build a wrapper, a middleware abstraction, a config object, or a "future-proof" transport layer.
 

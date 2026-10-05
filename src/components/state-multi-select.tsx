@@ -1,16 +1,19 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useId } from 'react'
 import { US_STATES } from '@/lib/us-states'
 
 interface StateMultiSelectProps {
   selected: string[]
   onChange: (states: string[]) => void
   label?: string
+  id?: string
 }
 
-export default function StateMultiSelect({ selected, onChange, label = 'States Served' }: StateMultiSelectProps) {
+export default function StateMultiSelect({ selected, onChange, label = 'States Served', id }: StateMultiSelectProps) {
   const [open, setOpen] = useState(false)
+  const fallbackId = useId()
+  const inputId = id ?? fallbackId
   const [query, setQuery] = useState('')
   const ref = useRef<HTMLDivElement>(null)
 
@@ -25,8 +28,16 @@ export default function StateMultiSelect({ selected, onChange, label = 'States S
         setQuery('')
       }
     }
+    // L-14: Escape closes the dropdown
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') { setOpen(false); setQuery('') }
+    }
     document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
+    document.addEventListener('keydown', handleKey)
+    return () => {
+      document.removeEventListener('mousedown', handleClick)
+      document.removeEventListener('keydown', handleKey)
+    }
   }, [])
 
   function toggle(state: string) {
@@ -45,7 +56,7 @@ export default function StateMultiSelect({ selected, onChange, label = 'States S
   return (
     <div ref={ref} className="relative">
       {label && (
-        <label className="mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-[#5d6a64]">{label}</label>
+        <label htmlFor={inputId} className="mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-[#5d6a64]">{label}</label>
       )}
 
       {/* Selected tags */}
@@ -62,6 +73,10 @@ export default function StateMultiSelect({ selected, onChange, label = 'States S
 
       {/* Search input */}
       <input
+        id={inputId}
+        role="combobox"
+        aria-expanded={open}
+        aria-autocomplete="list"
         type="text"
         value={query}
         onChange={e => { setQuery(e.target.value); setOpen(true) }}
@@ -72,11 +87,13 @@ export default function StateMultiSelect({ selected, onChange, label = 'States S
 
       {/* Dropdown */}
       {open && filtered.length > 0 && (
-        <div className="absolute z-50 mt-1 w-full border border-[#13241d]/20 bg-[#fffaf2] shadow-lg max-h-48 overflow-y-auto">
+        <div role="listbox" aria-multiselectable="true" className="absolute z-50 mt-1 w-full border border-[#13241d]/20 bg-[#fffaf2] shadow-lg max-h-48 overflow-y-auto">
           {filtered.map(state => (
             <button
               key={state}
               type="button"
+              role="option"
+              aria-selected={selected.includes(state)}
               onMouseDown={() => toggle(state)}
               className={`w-full px-4 py-2.5 text-left text-sm font-black transition-colors ${
                 selected.includes(state)

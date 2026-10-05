@@ -64,10 +64,12 @@ interface BreedSelectProps {
   onChange: (value: string) => void
   placeholder?: string
   className?: string
+  id?: string
+  ariaLabelledBy?: string
 }
 
 // REVIEW: custom combobox; native <input list> + <datalist> does this. The "X mix" entries above are redundant with the mix checkbox and substring matching.
-export default function BreedSelect({ value, onChange, placeholder = 'Search breed...', className = '' }: BreedSelectProps) {
+export default function BreedSelect({ value, onChange, placeholder = 'Search breed...', className = '', id, ariaLabelledBy }: BreedSelectProps) {
   const [query, setQuery] = useState(value)
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -82,8 +84,16 @@ export default function BreedSelect({ value, onChange, placeholder = 'Search bre
     function handleClick(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
     }
+    // L-14: Escape closes the dropdown
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false)
+    }
     document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
+    document.addEventListener('keydown', handleKey)
+    return () => {
+      document.removeEventListener('mousedown', handleClick)
+      document.removeEventListener('keydown', handleKey)
+    }
   }, [])
 
   function handleSelect(breed: string) {
@@ -101,6 +111,11 @@ export default function BreedSelect({ value, onChange, placeholder = 'Search bre
   return (
     <div ref={ref} className={`relative ${className}`}>
       <input
+        id={id}
+        aria-labelledby={ariaLabelledBy}
+        role="combobox"
+        aria-expanded={open}
+        aria-autocomplete="list"
         type="text"
         value={query}
         onChange={handleInputChange}
@@ -109,12 +124,14 @@ export default function BreedSelect({ value, onChange, placeholder = 'Search bre
         className="w-full border border-[#13241d]/20 bg-[#fffaf2] px-4 py-3 text-sm text-[#13241d] placeholder-[#5d6a64]/50 transition-all focus:border-[#c08a3e] focus:outline-none focus:ring-1 focus:ring-[#c08a3e]"
       />
       {open && (
-        <div className="absolute z-50 mt-1 w-full border border-[#13241d]/20 bg-[#fffaf2] shadow-lg max-h-56 overflow-y-auto">
+        <div role="listbox" className="absolute z-50 mt-1 w-full border border-[#13241d]/20 bg-[#fffaf2] shadow-lg max-h-56 overflow-y-auto">
           {filtered.length > 0 ? (
             filtered.map(breed => (
               <button
                 key={breed}
                 type="button"
+                role="option"
+                aria-selected={query === breed}
                 onMouseDown={() => handleSelect(breed)}
                 className="w-full px-4 py-2.5 text-left text-sm font-black text-[#13241d] transition-colors hover:bg-[#f5f0e8]"
               >

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, Suspense } from 'react'
+import { useState, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
@@ -265,7 +265,7 @@ function RegisterForm() {
           </div>
 
           <div>
-            <label className={labelClass}>
+            <label htmlFor="reg-tax-doc" className={labelClass}>
               501(c)(3) determination letter <span className="text-[#a8583f]">*</span>
             </label>
             <p className="mb-2 text-xs text-[#f8f1e8]/30">PDF only · Max 10MB</p>
@@ -276,7 +276,7 @@ function RegisterForm() {
               <span className={`flex-1 truncate text-sm ${taxDoc ? 'font-black text-[#f8f1e8]' : 'text-[#f8f1e8]/30'}`}>
                 {taxDoc ? taxDoc.name : 'Tap to upload PDF'}
               </span>
-              <input type="file" accept="application/pdf" onChange={handleFileChange} className="hidden" />
+              <input id="reg-tax-doc" type="file" accept="application/pdf" onChange={handleFileChange} className="hidden" />
             </label>
             {taxDocError && <p className="mt-1 text-xs font-bold text-[#c98a7a]">{taxDocError}</p>}
           </div>
