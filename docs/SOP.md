@@ -13,6 +13,11 @@ This doc covers two things: how to run the platform day-to-day (approving orgs, 
 3. Open their uploaded 501(c)(3) document and confirm it's real and current
 4. Click **Approve** or **Reject** — an email goes out to them automatically either way
 5. Once approved, a shelter can add dogs and a rescue can set matching criteria
+6. If you approve a rescue that has **already** saved matching criteria, they also get an automatic digest of matching dogs. Rescues that set criteria after approval get nothing until a new dog is added, so send them a Digest (below) once their criteria are in.
+
+### Deactivating an organization
+
+The **Deactivate** button in the Organizations tab currently only changes a label. It does **not** stop alerts, hide their dogs, or block their login (tracked in `docs/audit-2026-10.md`, H5). To actually stop an org, ask a developer to set their `approval_status` to `rejected` in Supabase.
 
 ### Adding a new admin
 
@@ -27,11 +32,13 @@ Admin-only users do **not** register through the normal sign-up form — that wo
 
 ### Sending a rescue their available matches manually (Digest)
 
-Normally, matching happens automatically the moment a dog is added or a rescue sets their criteria. But if a rescue just set up their criteria for the first time and hasn't received anything yet, they may need a manual push:
+Matching happens automatically **only when a shelter adds a new dog**. It does not run when a rescue saves or changes its criteria, or when a shelter edits a dog (changing status back to available, adding a euthanasia date, etc.). So a rescue that just set up its criteria won't hear about dogs that were already listed until you push a digest:
 
 1. Admin portal → **Organizations** tab → find the rescue → click **Digest**
-2. This checks every currently-available dog against their criteria and emails them one summary of all matches
-3. Safe to click more than once — it won't send duplicate alerts for dogs they've already been matched with
+2. This checks every dog with status **Available** against their criteria and emails them one summary of all matches. Dogs marked **Urgent** are currently left out of digests (audit M3); use the dog's **Resend Alerts** button for those.
+3. It won't create duplicate alert records, but every click sends the full summary email again, so click once.
+
+For a single dog that was edited after it was listed, use **Resend Alerts** (admin Dogs tab, or the shelter's dog edit page). It only emails rescues that haven't already been alerted about that dog.
 
 ### "This rescue/shelter says they're not getting any alerts"
 
@@ -49,7 +56,9 @@ This has happened before and the cause was almost always the same thing: **the o
 
 ### A dog needs an urgent euthanasia-date update
 
-Shelters can update this themselves on the dog's edit page in their dashboard. Admins can also do it directly from the **Dogs** tab in the admin portal — the dog automatically gets an "at-risk" or "critical" badge as the date approaches.
+Shelters can update this themselves on the dog's edit page in their dashboard. Admins can also do it directly from the **Dogs** tab in the admin portal — the dog automatically gets an "at-risk" or "critical" badge as the date approaches. Known quirk: the countdown treats the date as midnight UTC, so on the East Coast a dog shows "Past Due" from about 8pm the evening **before** its date (audit M7).
+
+Setting or changing a euthanasia date sends no emails. Rescues already alerted about the dog aren't told it became urgent, so contact the interested ones directly if time is short.
 
 ---
 
@@ -76,10 +85,11 @@ If you're not sure which of these applies, start with Sentry — most issues sho
 ### Alert emails aren't going out
 
 **For developers:**
-1. Check Resend's dashboard for delivery failures or bounces first — often it's a Resend-side issue, not a code bug.
+1. Check Resend's dashboard for delivery failures or bounces first. This is the only place email failures show up: the app doesn't check Resend's response, so a failed send produces no Sentry error, and the alert is still recorded as "sent" in Supabase (audit H3).
 2. Confirm `RESEND_API_KEY` is still valid in Vercel's environment variables.
 3. Check Sentry for errors thrown inside `/api/alerts` — if the matching logic itself is throwing, no emails will send at all even though the dog/rescue data looks fine.
-4. If a specific rescue isn't getting matches at all (but others are), see "wrong org type" above before assuming it's a system-wide issue.
+4. If a specific rescue isn't getting matches at all (but others are), see "wrong org type" above before assuming it's a system-wide issue. Also check their criteria: an empty breed list matches all breeds, but a breed spelled differently from the shelter's (e.g. "German Shepherd Dog" vs "German Shepherd") won't match.
+5. A rescue whose alert email failed won't be retried by **Resend Alerts**, because the app thinks they were already alerted. A developer has to delete that row from the `alerts` table first.
 
 ### Login is broken for everyone
 

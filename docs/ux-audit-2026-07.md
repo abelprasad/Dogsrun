@@ -1,5 +1,7 @@
 # DOGSRUN UX Audit — July 2026
 
+> **Status (2026-10-04):** P1 is resolved; test orgs are now hidden via the `is_test` column (d153944). Other items haven't been re-checked. Correctness/security findings are in [`audit-2026-10.md`](./audit-2026-10.md).
+
 Audited from code only (no rendered pages). Items marked **NVC** = Needs visual confirmation before acting.
 
 Files reviewed: dashboard (page, nav, layout), My Dogs, new/edit dog forms, rescue portal, alert-actions, criteria form, admin (page, tabs, org-table, dogs-table, layout), navbar, browse page, login, status-badge, breed-select, state-multi-select. Not yet reviewed in depth: homepage, about/faq/contact/merch, register, dog public profile, approval-wall, color-picker, euthanasia-countdown. These get a follow-up pass before their branches start.
