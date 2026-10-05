@@ -36,10 +36,11 @@ export default function AdminDogsTable() {
   const [editingDate, setEditingDate] = useState<string | null>(null)
   const [dateValue, setDateValue] = useState('')
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
-  const [now, setNow] = useState(() => Date.now())
+  const [now, setNow] = useState<number | null>(null) // M-F9: client-only to avoid hydration mismatch
   const toast = useToast()
 
   useEffect(() => {
+    setNow(Date.now())
     const id = setInterval(() => setNow(Date.now()), 60_000)
     return () => clearInterval(id)
   }, [])
