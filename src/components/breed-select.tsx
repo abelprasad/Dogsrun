@@ -64,10 +64,12 @@ interface BreedSelectProps {
   onChange: (value: string) => void
   placeholder?: string
   className?: string
+  id?: string
+  ariaLabelledBy?: string
 }
 
 // REVIEW: custom combobox; native <input list> + <datalist> does this. The "X mix" entries above are redundant with the mix checkbox and substring matching.
-export default function BreedSelect({ value, onChange, placeholder = 'Search breed...', className = '' }: BreedSelectProps) {
+export default function BreedSelect({ value, onChange, placeholder = 'Search breed...', className = '', id, ariaLabelledBy }: BreedSelectProps) {
   const [query, setQuery] = useState(value)
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -101,6 +103,8 @@ export default function BreedSelect({ value, onChange, placeholder = 'Search bre
   return (
     <div ref={ref} className={`relative ${className}`}>
       <input
+        id={id}
+        aria-labelledby={ariaLabelledBy}
         type="text"
         value={query}
         onChange={handleInputChange}

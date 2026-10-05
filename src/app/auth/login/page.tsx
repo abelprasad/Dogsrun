@@ -121,8 +121,9 @@ export default function LoginPage() {
 
       <form onSubmit={handleLogin} className="mt-8 space-y-5">
         <div>
-          <label className={authLabelClass}>Email Address</label>
+          <label htmlFor="login-email" className={authLabelClass}>Email Address</label>
           <input
+            id="login-email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -135,7 +136,7 @@ export default function LoginPage() {
         {mode === 'password' && (
           <div>
             <div className="flex items-baseline justify-between">
-              <label className={authLabelClass}>Password</label>
+              <label htmlFor="login-password" className={authLabelClass}>Password</label>
               <Button
                 href="/auth/reset-password"
                 variant="ghost"
@@ -145,6 +146,7 @@ export default function LoginPage() {
               </Button>
             </div>
             <input
+              id="login-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}

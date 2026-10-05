@@ -123,20 +123,20 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
     <form onSubmit={handleSubmit} className="bg-[#fffaf2] rounded-lg border border-[#13241d]/15 p-8 space-y-8 shadow-none">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className={labelCls}>Dog Name</label>
-          <input type="text" placeholder="Buddy" value={form.name}
+          <label htmlFor="edit-dog-name" className={labelCls}>Dog Name</label>
+          <input id="edit-dog-name" type="text" placeholder="Buddy" value={form.name}
             onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className={inputCls} />
         </div>
         <div>
-          <label className={labelCls}>Primary Breed</label>
-          <BreedSelect value={form.breed} onChange={val => setForm(f => ({ ...f, breed: val }))} placeholder="Search or type breed..." />
+          <label htmlFor="edit-primary-breed" className={labelCls}>Primary Breed</label>
+          <BreedSelect id="edit-primary-breed" value={form.breed} onChange={val => setForm(f => ({ ...f, breed: val }))} placeholder="Search or type breed..." />
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className={labelCls}>Age (years)</label>
-          <input type="number" placeholder="2" value={form.age_years} min="0" step="0.1"
+          <label htmlFor="edit-age-years" className={labelCls}>Age (years)</label>
+          <input id="edit-age-years" type="number" placeholder="2" value={form.age_years} min="0" step="0.1"
             onChange={e => { setForm(f => ({ ...f, age_years: e.target.value })); setFieldErrors(f => ({ ...f, age_years: undefined })) }} className={inputCls} />
           {fieldErrors.age_years && <p className="mt-1.5 text-xs font-bold text-red-600">{fieldErrors.age_years}</p>}
           <p className="mt-1.5 text-[10px] text-[#5d6a64]/60 font-semibold">
@@ -144,8 +144,8 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
           </p>
         </div>
         <div>
-          <label className={labelCls}>Weight (lbs)</label>
-          <input type="number" placeholder="45" value={form.weight_lbs} min="0" step="1"
+          <label htmlFor="edit-weight-lbs" className={labelCls}>Weight (lbs)</label>
+          <input id="edit-weight-lbs" type="number" placeholder="45" value={form.weight_lbs} min="0" step="1"
             onChange={e => { setForm(f => ({ ...f, weight_lbs: e.target.value })); setFieldErrors(f => ({ ...f, weight_lbs: undefined })) }} className={inputCls} />
           {fieldErrors.weight_lbs && <p className="mt-1.5 text-xs font-bold text-red-600">{fieldErrors.weight_lbs}</p>}
         </div>
@@ -153,24 +153,25 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className={labelCls}>Sex</label>
-          <select value={form.sex} onChange={e => setForm(f => ({ ...f, sex: e.target.value }))} className={inputCls}>
+          <label htmlFor="edit-sex" className={labelCls}>Sex</label>
+          <select id="edit-sex" value={form.sex} onChange={e => setForm(f => ({ ...f, sex: e.target.value }))} className={inputCls}>
             <option value="male">Male</option>
             <option value="female">Female</option>
             <option value="unknown">Unknown</option>
           </select>
         </div>
         <div>
-          <label className={labelCls}>State</label>
-          <StateSelect value={form.state} onChange={val => setForm(f => ({ ...f, state: val }))} />
+          <label htmlFor="edit-state" className={labelCls}>State</label>
+          <StateSelect id="edit-state" value={form.state} onChange={val => setForm(f => ({ ...f, state: val }))} />
         </div>
       </div>
 
       {/* Intake & Euthanasia dates */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className={labelCls}>Date Brought to Shelter</label>
+          <label htmlFor="edit-date-brought-to-shelter" className={labelCls}>Date Brought to Shelter</label>
           <input
+            id="edit-date-brought-to-shelter"
             type="date"
             value={form.intake_date}
             onChange={e => setForm(f => ({ ...f, intake_date: e.target.value }))}
@@ -179,10 +180,11 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
         </div>
         <div>
           <div className="space-y-1 mb-2">
-            <label className={labelCls + ' mb-0'}>Euthanasia Date</label>
+            <label htmlFor="edit-euthanasia-date" className={labelCls + ' mb-0'}>Euthanasia Date</label>
             <p className="text-xs text-[#5d6a64]">Sets the dog as at-risk and shows a countdown to rescues.</p>
           </div>
           <input
+            id="edit-euthanasia-date"
             type="date"
             value={form.euthanasia_date}
             onChange={e => setForm(f => ({ ...f, euthanasia_date: e.target.value }))}
@@ -197,7 +199,7 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
         </div>
       </div>
 
-      <ColorPicker selected={form.color} onChange={colors => setForm(f => ({ ...f, color: colors }))} label="Color(s)" />
+      <ColorPicker id="edit-colors" selected={form.color} onChange={colors => setForm(f => ({ ...f, color: colors }))} label="Color(s)" />
 
       <div className="flex items-center gap-3 p-4 bg-[#f8f1e8] rounded-lg border border-[#13241d]/10">
         <input type="checkbox" id="mix" checked={form.mix}
@@ -207,8 +209,8 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
       </div>
 
       <div>
-        <label className={labelCls}>Description & Medical Notes</label>
-        <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+        <label htmlFor="edit-description-medical-notes" className={labelCls}>Description & Medical Notes</label>
+        <textarea id="edit-description-medical-notes" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
           placeholder="Any relevant info about behavior, medical needs, or urgency..."
           rows={4} className={inputCls + ' resize-none'} />
       </div>
@@ -241,16 +243,16 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
       </div>
 
       <div className="space-y-4">
-        <label className={labelCls}>Dog Photo</label>
+        <label htmlFor="edit-dog-photo" className={labelCls}>Dog Photo</label>
         {dog.photo_url && (
           <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-[#13241d]/10 mb-4">
             <Image src={dog.photo_url} alt={dog.name} fill className="object-cover" unoptimized />
           </div>
         )}
         <div className="relative group">
-          <input type="file" accept="image/*" onChange={e => setPhoto(e.target.files?.[0] || null)}
+          <input id="edit-dog-photo" type="file" accept="image/*" onChange={e => setPhoto(e.target.files?.[0] || null)}
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-          <div className="border-2 border-dashed border-[#13241d]/20 bg-[#f8f1e8] rounded-lg p-8 text-center group-hover:bg-[#efe7dc] transition-colors">
+          <div className="border-2 border-dashed border-[#13241d]/20 bg-[#f8f1e8] rounded-lg p-8 text-center group-hover:bg-[#efe7dc] group-focus-within:border-[#c08a3e] group-focus-within:ring-2 group-focus-within:ring-[#c08a3e]/50 transition-colors">
             {photo ? (
               <p className="text-[#13241d] font-bold text-sm">{photo.name}</p>
             ) : (

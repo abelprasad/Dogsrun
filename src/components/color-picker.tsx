@@ -1,5 +1,7 @@
 'use client'
 
+import { useId } from 'react'
+
 export const DOG_COLORS = [
   'Black', 'White', 'Brown', 'Tan', 'Golden', 'Red',
   'Gray', 'Brindle', 'Merle', 'Spotted', 'Cream', 'Blue',
@@ -24,9 +26,12 @@ interface ColorPickerProps {
   selected: string[]
   onChange: (colors: string[]) => void
   label?: string
+  id?: string
 }
 
-export default function ColorPicker({ selected, onChange, label = 'Color(s)' }: ColorPickerProps) {
+export default function ColorPicker({ selected, onChange, label = 'Color(s)', id }: ColorPickerProps) {
+  const fallbackId = useId()
+  const labelId = id ?? fallbackId
   function toggle(color: string) {
     if (selected.includes(color)) {
       onChange(selected.filter(c => c !== color))
@@ -38,9 +43,9 @@ export default function ColorPicker({ selected, onChange, label = 'Color(s)' }: 
   return (
     <div>
       {label && (
-        <label className="mb-3 block text-xs font-bold uppercase tracking-[0.18em] text-[#5d6a64]">{label}</label>
+        <label id={labelId} className="mb-3 block text-xs font-bold uppercase tracking-[0.18em] text-[#5d6a64]">{label}</label>
       )}
-      <div className="flex flex-wrap gap-2">
+      <div role="group" aria-labelledby={labelId} className="flex flex-wrap gap-2">
         {DOG_COLORS.map(color => {
           const isSelected = selected.includes(color)
           return (
