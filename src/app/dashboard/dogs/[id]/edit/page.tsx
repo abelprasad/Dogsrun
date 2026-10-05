@@ -1,4 +1,3 @@
-import { createClient } from '@supabase/supabase-js'
 import { requireAuthContext } from '@/lib/auth-context'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -7,15 +6,12 @@ import EditDogForm from './edit-form'
 import ResendAlertsButton from './resend-alerts-button'
 import EuthanasiaCountdown from '@/components/euthanasia-countdown'
 import StatusBadge from '@/components/status-badge'
+import { supabaseAdmin } from '@/lib/supabase-server'
 
 export default async function EditDogPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const { org } = await requireAuthContext()
 
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
 
   const { data: dog } = await supabaseAdmin
     .from('dogs')

@@ -1,18 +1,14 @@
-import { createClient } from '@supabase/supabase-js'
 import Link from 'next/link'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import StatusBadge from '@/components/status-badge'
+import { supabaseAdmin } from '@/lib/supabase-server'
 
-const serviceClient = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
 
 export default async function PublicDogProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
 
-  const { data: dog } = await serviceClient
+  const { data: dog } = await supabaseAdmin
     .from('dogs')
     .select('*, organizations(*)')
     .eq('id', id)

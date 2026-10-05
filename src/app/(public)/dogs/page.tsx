@@ -1,13 +1,9 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { createClient } from '@supabase/supabase-js'
 import StatusBadge from '@/components/status-badge'
 import BrowseStateFilter from '@/components/browse-state-filter'
+import { supabaseAdmin } from '@/lib/supabase-server'
 
-const serviceClient = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
 
 const PAGE_SIZE = 12
 
@@ -94,7 +90,7 @@ export default async function BrowsePage({
   let totalPages = 1
 
   if (tab === 'dogs') {
-    let query = serviceClient
+    let query = supabaseAdmin
       .from('dogs')
       .select('*, organizations!inner(name, city, state)', { count: 'exact' })
       .in('status', ['available', 'urgent'])
@@ -112,7 +108,7 @@ export default async function BrowsePage({
   let shelters: ShelterCard[] = []
 
   if (tab === 'shelters') {
-    let shelterQuery = serviceClient
+    let shelterQuery = supabaseAdmin
       .from('organizations')
       .select('id, name, city, state')
       .eq('type', 'shelter')
@@ -126,7 +122,7 @@ export default async function BrowsePage({
     // Attach dog counts
     const counts = await Promise.all(
       shelterOrgs.map(s =>
-        serviceClient
+        supabaseAdmin
           .from('dogs')
           .select('id', { count: 'exact', head: true })
           .eq('shelter_id', s.id)
@@ -140,7 +136,7 @@ export default async function BrowsePage({
   let rescues: RescueCard[] = []
 
   if (tab === 'rescues') {
-    let rescueQuery = serviceClient
+    let rescueQuery = supabaseAdmin
       .from('organizations')
       .select('id, name, city, state')
       .eq('type', 'rescue')
@@ -153,7 +149,7 @@ export default async function BrowsePage({
 
     const criteria = await Promise.all(
       orgs.map(o =>
-        serviceClient
+        supabaseAdmin
           .from('rescue_criteria')
           .select('breeds, states_served')
           .eq('rescue_id', o.id)

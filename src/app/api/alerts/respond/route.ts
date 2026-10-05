@@ -1,14 +1,10 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
-import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { escapeHtml } from '@/lib/html'
+import { supabaseAdmin } from '@/lib/supabase-server'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
-const serviceClient = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
 
 export async function POST(req: NextRequest) {
   const supabase = await createSupabaseServerClient()
@@ -21,7 +17,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Verify the alert belongs to this rescue
-  const { data: alert } = await serviceClient
+  const { data: alert } = await supabaseAdmin
     .from('alerts')
     .select('*, dogs(*), organizations!alerts_rescue_id_fkey(*)')
     .eq('id', alert_id)
@@ -30,14 +26,14 @@ export async function POST(req: NextRequest) {
 
   if (!alert) return NextResponse.json({ error: 'Alert not found' }, { status: 404 })
 
-  await serviceClient.from('alerts').update({ status }).eq('id', alert_id)
+  await supabaseAdmin.from('alerts').update({ status }).eq('id', alert_id)
 
   // REVIEW: same shelter email as api/respond/route.ts; extract one notifyShelter(alert).
   // Notify shelter when rescue is interested
   if (status === 'responded') {
     const dog = alert.dogs
     const rescue = alert.organizations
-    const { data: shelter } = await serviceClient
+    const { data: shelter } = await supabaseAdmin
       .from('organizations')
       .select('name, email')
       .eq('id', dog.shelter_id)

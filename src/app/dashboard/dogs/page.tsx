@@ -2,7 +2,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { redirect } from 'next/navigation'
 import { requireAuthContext } from '@/lib/auth-context'
-import StatusBadge, { DogStatus } from '@/components/status-badge'
+import StatusBadge from '@/components/status-badge'
+import type { DogStatus } from '@/lib/dog-status'
 import DogRowActions from './dog-row-actions'
 
 const PAGE_SIZE = 10

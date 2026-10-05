@@ -1,9 +1,9 @@
-import { createClient } from '@supabase/supabase-js'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { escapeHtml } from '@/lib/html'
 import { dogMatchesCriteria } from '@/lib/matching'
+import { supabaseAdmin } from '@/lib/supabase-server'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
@@ -46,12 +46,8 @@ export async function POST(req: NextRequest) {
 
   if (!org_id) return NextResponse.json({ error: 'org_id required' }, { status: 400 })
 
-  const serviceClient = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
 
-  const { data: org } = await serviceClient
+  const { data: org } = await supabaseAdmin
     .from('organizations')
     .select('id, name, email, type, approval_status')
     .eq('id', org_id)
@@ -61,7 +57,7 @@ export async function POST(req: NextRequest) {
   if (org.type !== 'rescue') return NextResponse.json({ error: 'Only rescues can receive a digest' }, { status: 400 })
   if (org.approval_status !== 'approved') return NextResponse.json({ error: 'Org is not approved' }, { status: 400 })
 
-  const { data: criteria } = await serviceClient
+  const { data: criteria } = await supabaseAdmin
     .from('rescue_criteria')
     .select('*')
     .eq('rescue_id', org_id)
@@ -70,7 +66,7 @@ export async function POST(req: NextRequest) {
 
   if (!criteria) return NextResponse.json({ error: 'Rescue has no active criteria set' }, { status: 400 })
 
-  const { data: dogs } = await serviceClient
+  const { data: dogs } = await supabaseAdmin
     .from('dogs')
     .select('*, organizations(name)')
     .eq('status', 'available')
@@ -98,7 +94,7 @@ export async function POST(req: NextRequest) {
   }
 
   for (const dog of matches) {
-    await serviceClient.from('alerts').upsert({
+    await supabaseAdmin.from('alerts').upsert({
       dog_id: dog.id,
       rescue_id: org_id,
       criteria_id: criteria.id,

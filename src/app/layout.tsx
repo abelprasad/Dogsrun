@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import Image from "next/image";
 import Navbar from "@/components/navbar";
+import { NAV_LINKS } from "@/lib/navigation";
 import "./globals.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -48,11 +49,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 </div>
               </div>
               <div className="flex items-center gap-8">
-                <Link href="/dogs" className="text-sm font-medium text-[#9ca3af] hover:text-white transition-colors">Browse Dogs</Link>
-                <Link href="/about" className="text-sm font-medium text-[#9ca3af] hover:text-white transition-colors">About</Link>
-                <Link href="/faq" className="text-sm font-medium text-[#9ca3af] hover:text-white transition-colors">FAQ</Link>
-                <Link href="/contact" className="text-sm font-medium text-[#9ca3af] hover:text-white transition-colors">Contact</Link>
-                <Link href="/merch" className="text-sm font-medium text-[#9ca3af] hover:text-white transition-colors">Shop</Link>
+                {NAV_LINKS.map((link) => (
+                  <Link key={link.href} href={link.href} className="text-sm font-medium text-[#9ca3af] hover:text-white transition-colors">{link.footerLabel}</Link>
+                ))}
               </div>
               <div className="text-[#6b7280] text-xs font-medium">
                 © {new Date().getFullYear()} DOGSRUN | 501(c)(3) nonprofit

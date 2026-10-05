@@ -1,12 +1,8 @@
-import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { escapeHtml } from '@/lib/html'
+import { supabaseAdmin } from '@/lib/supabase-server'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
@@ -27,7 +23,7 @@ export async function GET(req: NextRequest) {
   const status = action === 'interested' ? 'responded' : 'declined'
 
   // Update alert status
-  const { data: alert, error: updateError } = await supabase
+  const { data: alert, error: updateError } = await supabaseAdmin
     .from('alerts')
     .update({ status })
     .eq('id', alert_id)
@@ -48,7 +44,7 @@ export async function GET(req: NextRequest) {
     const dog = alert.dogs
     const rescue = alert.organizations
 
-    const { data: shelter } = await supabase
+    const { data: shelter } = await supabaseAdmin
       .from('organizations')
       .select('*')
       .eq('id', dog.shelter_id)

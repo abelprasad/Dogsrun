@@ -1,9 +1,9 @@
-import { createClient } from '@supabase/supabase-js'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { escapeHtml } from '@/lib/html'
 import { dogMatchesCriteria } from '@/lib/matching'
+import { supabaseAdmin } from '@/lib/supabase-server'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
@@ -42,14 +42,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'org_id and action (approve|reject) required' }, { status: 400 })
   }
 
-  const serviceClient = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
 
   const newStatus = action === 'approve' ? 'approved' : 'rejected'
 
-  const { data: org, error: updateError } = await serviceClient
+  const { data: org, error: updateError } = await supabaseAdmin
     .from('organizations')
     .update({ approval_status: newStatus })
     .eq('id', org_id)
@@ -112,7 +108,7 @@ export async function POST(req: NextRequest) {
   // If a rescue just got approved, send them a digest of all currently matching dogs
   if (action === 'approve' && org.type === 'rescue') {
     try {
-      await sendRescueApprovalDigest(serviceClient, org_id, org.name, org.email)
+      await sendRescueApprovalDigest(supabaseAdmin, org_id, org.name, org.email)
     } catch (e) {
       console.error('Rescue approval digest failed:', e)
     }
@@ -122,8 +118,8 @@ export async function POST(req: NextRequest) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function sendRescueApprovalDigest(serviceClient: any, rescueId: string, rescueName: string, rescueEmail: string) {
-  const { data: criteria } = await serviceClient
+async function sendRescueApprovalDigest(supabaseAdmin: any, rescueId: string, rescueName: string, rescueEmail: string) {
+  const { data: criteria } = await supabaseAdmin
     .from('rescue_criteria')
     .select('*')
     .eq('rescue_id', rescueId)
@@ -132,7 +128,7 @@ async function sendRescueApprovalDigest(serviceClient: any, rescueId: string, re
 
   if (!criteria) return
 
-  const { data: dogs } = await serviceClient
+  const { data: dogs } = await supabaseAdmin
     .from('dogs')
     .select('*, organizations(name)')
     .eq('status', 'available')
@@ -156,7 +152,7 @@ async function sendRescueApprovalDigest(serviceClient: any, rescueId: string, re
   if (matches.length === 0) return
 
   for (const dog of matches) {
-    await serviceClient.from('alerts').upsert({
+    await supabaseAdmin.from('alerts').upsert({
       dog_id: dog.id,
       rescue_id: rescueId,
       criteria_id: criteria.id,

@@ -1,19 +1,15 @@
-import { createClient } from '@supabase/supabase-js'
 import AdminOrgTable from './org-table'
 import AdminDogsTable from './dogs-table'
 import AdminTabs from './admin-tabs'
+import { supabaseAdmin } from '@/lib/supabase-server'
 
 export default async function AdminPage() {
-  const serviceClient = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
 
   const [{ data: orgs }, { data: dogs }, { data: alerts }, { data: recentAlerts }] = await Promise.all([
-    serviceClient.from('organizations').select('*').order('created_at', { ascending: false }),
-    serviceClient.from('dogs').select('*, organizations(name)').order('created_at', { ascending: false }),
-    serviceClient.from('alerts').select('rescue_id, status'),
-    serviceClient.from('alerts')
+    supabaseAdmin.from('organizations').select('*').order('created_at', { ascending: false }),
+    supabaseAdmin.from('dogs').select('*, organizations(name)').order('created_at', { ascending: false }),
+    supabaseAdmin.from('alerts').select('rescue_id, status'),
+    supabaseAdmin.from('alerts')
       .select('*, dogs(name, breed), organizations!alerts_rescue_id_fkey(name)')
       .order('sent_at', { ascending: false })
       .limit(20),

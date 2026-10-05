@@ -2,14 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation'
 
-// REVIEW: copy of lib/us-states.ts; import it (or use StateSelect). "Clear" does the same as choosing "All States".
-const US_STATES = [
-  'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
-  'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
-  'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
-  'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
-  'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY', 'DC',
-]
+import { US_STATES } from '@/lib/us-states'
 
 interface BrowseStateFilterProps {
   tab: string

@@ -1,11 +1,12 @@
-import { createClient } from '@supabase/supabase-js'
 import { requireAuthContext } from '@/lib/auth-context'
 import Link from 'next/link'
 import Image from 'next/image'
 import { notFound, redirect } from 'next/navigation'
-import StatusBadge, { DogStatus } from '@/components/status-badge'
+import StatusBadge from '@/components/status-badge'
+import type { DogStatus } from '@/lib/dog-status'
 import SignOutButton from '../../sign-out-button'
 import EuthanasiaCountdown from '@/components/euthanasia-countdown'
+import { supabaseAdmin } from '@/lib/supabase-server'
 
 // REVIEW(bug): color is string[] in the DB but typed string here; renders as "BlackWhite".
 interface Dog {
@@ -35,10 +36,6 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
   const { id } = await params
   const { org, isAdmin } = await requireAuthContext()
 
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
 
   const { data: dogData } = await supabaseAdmin
     .from('dogs')

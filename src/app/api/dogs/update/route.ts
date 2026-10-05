@@ -1,6 +1,6 @@
-import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { createSupabaseServerClient, supabaseAdmin } from '@/lib/supabase-server'
+import { VALID_DOG_STATUSES } from '@/lib/dog-status'
 
 const EDITABLE_DOG_FIELDS = [
   'name',
@@ -24,17 +24,6 @@ const EDITABLE_DOG_FIELDS = [
 ] as const
 
 const VALID_SEXES = new Set(['male', 'female', 'unknown'])
-// REVIEW: dog status list lives in 4 places plus status-badge labels; one DOG_STATUSES in lib (or a Postgres enum/CHECK).
-const VALID_DOG_STATUSES = new Set([
-  'available',
-  'pending',
-  'adopted',
-  'deceased',
-  'transferred',
-  'urgent',
-  'rescue_requested',
-  'placed',
-])
 
 export async function POST(req: NextRequest) {
   try {
@@ -51,12 +40,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'dog_id is required' }, { status: 400 })
     }
 
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
 
-    const { data: org } = await supabase
+    const { data: org } = await supabaseAdmin
       .from('organizations')
       .select('id')
       .eq('id', user.id)
@@ -66,7 +51,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Organization not found' }, { status: 403 })
     }
 
-    const { data: dog } = await supabase
+    const { data: dog } = await supabaseAdmin
       .from('dogs')
       .select('shelter_id')
       .eq('id', dog_id)
@@ -107,7 +92,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid color value' }, { status: 400 })
     }
 
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('dogs')
       .update(updates)
       .eq('id', dog_id)

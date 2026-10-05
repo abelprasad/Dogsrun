@@ -1,8 +1,8 @@
-import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { registerRatelimit } from '@/lib/ratelimit'
 import { escapeHtml } from '@/lib/html'
+import { supabaseAdmin } from '@/lib/supabase-server'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
@@ -42,19 +42,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid document path' }, { status: 403 })
   }
 
-  const serviceClient = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
 
   // Verify the auth user actually exists and the email matches
-  const { data: authUser, error: authUserError } = await serviceClient.auth.admin.getUserById(user_id)
+  const { data: authUser, error: authUserError } = await supabaseAdmin.auth.admin.getUserById(user_id)
   if (authUserError || !authUser.user || authUser.user.email?.toLowerCase() !== email.toLowerCase()) {
     return NextResponse.json({ error: 'Invalid registration user' }, { status: 403 })
   }
 
   // Check the file actually exists in storage (proves the client-side upload completed)
-  const { data: fileData, error: fileCheckError } = await serviceClient.storage
+  const { data: fileData, error: fileCheckError } = await supabaseAdmin.storage
     .from('tax-docs')
     .list(user_id)
 
@@ -64,7 +60,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Check for existing org
-  const { data: existing } = await serviceClient
+  const { data: existing } = await supabaseAdmin
     .from('organizations')
     .select('id')
     .eq('id', user_id)
@@ -75,7 +71,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Insert org
-  const { error: insertError } = await serviceClient.from('organizations').insert({
+  const { error: insertError } = await supabaseAdmin.from('organizations').insert({
     id: user_id,
     name,
     email,
@@ -92,7 +88,7 @@ export async function POST(req: NextRequest) {
 
   // REVIEW: email chrome and <tr> rows duplicate the other templates; use lib/email.ts helpers.
   // Notify all admins
-  const { data: admins } = await serviceClient
+  const { data: admins } = await supabaseAdmin
     .from('admins')
     .select('email')
 
