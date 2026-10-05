@@ -63,7 +63,7 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
     euthanasia_date: dog.euthanasia_date ? dog.euthanasia_date.split('T')[0] : '',
   });
 
-  const inputCls = "w-full border border-[#13241d]/20 bg-[#fffaf2] px-4 py-2.5 focus:outline-none focus:border-[#f4b942] focus:ring-1 focus:ring-[#f4b942] text-[#13241d] placeholder-[#5d6a64]/50 transition-all text-sm"
+  const inputCls = "w-full border border-[#13241d]/20 bg-[#fffaf2] px-4 py-2.5 focus:outline-none focus:border-[#c08a3e] focus:ring-1 focus:ring-[#c08a3e] text-[#13241d] placeholder-[#5d6a64]/50 transition-all text-sm"
   const labelCls = "block text-sm font-semibold text-[#13241d] mb-2"
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -213,7 +213,7 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
       <div className="flex items-center gap-3 p-4 bg-[#f8f1e8] rounded-lg border border-[#13241d]/10">
         <input type="checkbox" id="mix" checked={form.mix}
           onChange={e => setForm(f => ({ ...f, mix: e.target.checked }))}
-          className="w-4 h-4 border-[#13241d]/30 text-[#f4b942] focus:ring-[#f4b942]" />
+          className="w-4 h-4 border-[#13241d]/30 text-[#c08a3e] focus:ring-[#c08a3e]" />
         <label htmlFor="mix" className="text-sm font-semibold text-[#13241d] cursor-pointer">This is a mixed breed dog</label>
       </div>
 
@@ -240,7 +240,7 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
                   [key]: e.target.checked,
                   ...(key === 'other_issues' && !e.target.checked ? { other_issues_notes: '' } : {}),
                 }))}
-                className="w-4 h-4 border-[#13241d]/30 text-[#f4b942] focus:ring-[#f4b942]" />
+                className="w-4 h-4 border-[#13241d]/30 text-[#c08a3e] focus:ring-[#c08a3e]" />
               <span className="text-sm font-semibold text-[#13241d]">{label}</span>
             </label>
           ))}
@@ -276,7 +276,7 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
 
       <div className="space-y-4">
         <button type="submit" disabled={loading}
-          className="w-full bg-[#f4b942] text-[#13241d] py-3 rounded-lg font-bold text-lg hover:bg-[#e3a72c] disabled:opacity-50 transition-colors">
+          className="w-full bg-[#c08a3e] text-[#13241d] py-3 rounded-lg font-bold text-lg hover:bg-[#e3a72c] disabled:opacity-50 transition-colors">
           {loading ? 'Saving Changes...' : 'Save Changes'}
         </button>
         <Link href="/dashboard/dogs"

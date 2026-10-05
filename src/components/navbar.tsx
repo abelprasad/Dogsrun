@@ -23,12 +23,12 @@ export default async function Navbar() {
             />
             <div>
               <span className="font-semibold tracking-wider text-white text-sm block">DOGSRUN</span>
-              <span className="text-[10px] font-bold text-[#f59e0b] uppercase tracking-widest">Loyalty Repaid</span>
+              <span className="text-[10px] font-bold text-[#c08a3e] uppercase tracking-widest">Loyalty Repaid</span>
             </div>
           </Link>
           <div className="hidden md:flex items-center gap-6">
             {NAV_LINKS.map((link) => (
-              <Link key={link.href} href={link.href} className="text-sm font-medium text-[#9ca3af] hover:text-[#f59e0b] transition-colors">{link.label}</Link>
+              <Link key={link.href} href={link.href} className="text-sm font-medium text-[#9ca3af] hover:text-[#c08a3e] transition-colors">{link.label}</Link>
             ))}
           </div>
         </div>
@@ -36,16 +36,16 @@ export default async function Navbar() {
           {user ? (
             <Link
               href={signedInHref}
-              className="bg-[#f59e0b] text-[#451a03] px-4 py-2 rounded-lg font-semibold text-sm hover:bg-[#d97706] transition-colors"
+              className="bg-[#c08a3e] text-[#451a03] px-4 py-2 rounded-lg font-semibold text-sm hover:bg-[#d4a050] transition-colors"
             >
               {signedInLabel}
             </Link>
           ) : (
             <>
-              <Link href="/auth/login" className="text-sm font-medium text-[#9ca3af] hover:text-[#f59e0b] transition-colors">
+              <Link href="/auth/login" className="text-sm font-medium text-[#9ca3af] hover:text-[#c08a3e] transition-colors">
                 Login
               </Link>
-              <Link href="/register" className="bg-[#f59e0b] text-[#451a03] px-4 py-2 rounded-lg font-semibold text-sm hover:bg-[#d97706] transition-colors">
+              <Link href="/register" className="bg-[#c08a3e] text-[#451a03] px-4 py-2 rounded-lg font-semibold text-sm hover:bg-[#d4a050] transition-colors">
                 Register
               </Link>
             </>

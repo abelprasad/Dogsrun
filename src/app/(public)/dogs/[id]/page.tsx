@@ -48,7 +48,7 @@ export default async function PublicDogProfilePage({ params }: { params: Promise
             <Image src={dog.photo_url} alt={dog.name} fill className="object-cover object-center" unoptimized priority />
           </div>
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center bg-[#1a2e1a] text-[12rem] font-black text-[#f4b942]">
+          <div className="absolute inset-0 flex items-center justify-center bg-[#1a2e1a] text-[12rem] font-black text-[#c08a3e]">
             {dog.name?.[0] || 'D'}
           </div>
         )}
@@ -56,14 +56,14 @@ export default async function PublicDogProfilePage({ params }: { params: Promise
 
         <Link
           href="/dogs"
-          className="absolute left-5 top-6 z-10 border border-white/20 bg-black/40 px-4 py-2 text-[11px] font-black uppercase tracking-[0.2em] text-white backdrop-blur transition hover:border-[#f4b942] hover:text-[#f4b942] sm:left-10"
+          className="absolute left-5 top-6 z-10 border border-white/20 bg-black/40 px-4 py-2 text-[11px] font-black uppercase tracking-[0.2em] text-white backdrop-blur transition hover:border-[#c08a3e] hover:text-[#c08a3e] sm:left-10"
         >
           ← All dogs
         </Link>
 
         {urgent && (
           <div className="absolute right-5 top-6 z-10 sm:right-10">
-            <div className="animate-urgent-glow flex items-center gap-2 bg-[#e04a3a] px-4 py-2.5 text-sm font-black uppercase tracking-[0.18em] text-white">
+            <div className="animate-urgent-glow flex items-center gap-2 bg-[#a8583f] px-4 py-2.5 text-sm font-black uppercase tracking-[0.18em] text-white">
               <span className="animate-pulse-dot h-2.5 w-2.5 rounded-full bg-white" />
               {daysLeftLabel(daysLeft) || 'Urgent'}
             </div>
@@ -71,7 +71,7 @@ export default async function PublicDogProfilePage({ params }: { params: Promise
         )}
 
         <div className="relative px-5 pb-10 sm:px-10 lg:px-16">
-          <p className="mb-4 text-[11px] font-black uppercase tracking-[0.3em] text-[#f4b942]">
+          <p className="mb-4 text-[11px] font-black uppercase tracking-[0.3em] text-[#c08a3e]">
             {dog.breed}{dog.mix ? ' mix' : ''}
             {dog.dogsrun_id && <span className="ml-3 text-[#f8f1e8]/40">· {dog.dogsrun_id}</span>}
           </p>
@@ -88,12 +88,12 @@ export default async function PublicDogProfilePage({ params }: { params: Promise
 
       {/* ── URGENCY TIMELINE ── */}
       {urgent && timePct !== null && (
-        <section className="rule-double border-b border-white/10 bg-[#e04a3a]/10 px-5 py-10 sm:px-10 lg:px-16">
+        <section className="rule-double border-b border-white/10 bg-[#a8583f]/10 px-5 py-10 sm:px-10 lg:px-16">
           <div className="mx-auto max-w-7xl">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
-                <p className="flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.3em] text-[#ff8a7a]">
-                  <span className="animate-pulse-dot h-2.5 w-2.5 rounded-full bg-[#e04a3a]" />
+                <p className="flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.3em] text-[#c98a7a]">
+                  <span className="animate-pulse-dot h-2.5 w-2.5 rounded-full bg-[#a8583f]" />
                   Time remaining
                 </p>
                 <p className="mt-3 text-[clamp(2.5rem,6vw,4.5rem)] font-black uppercase leading-none tracking-tight text-white">
@@ -108,7 +108,7 @@ export default async function PublicDogProfilePage({ params }: { params: Promise
             </div>
             <div className="mt-6 h-4 w-full overflow-hidden bg-black/50">
               <div
-                className={`h-full transition-all ${daysLeft !== null && daysLeft <= 3 ? 'bg-[#e04a3a]' : 'bg-[#f4b942]'}`}
+                className={`h-full transition-all ${daysLeft !== null && daysLeft <= 3 ? 'bg-[#a8583f]' : 'bg-[#c08a3e]'}`}
                 style={{ width: `${timePct}%` }}
               />
             </div>
@@ -125,9 +125,9 @@ export default async function PublicDogProfilePage({ params }: { params: Promise
         <div className="grid gap-12 lg:grid-cols-12">
           {/* Left: the story */}
           <div className="lg:col-span-7">
-            <p className="text-[11px] font-black uppercase tracking-[0.3em] text-[#f4b942]">The story</p>
+            <p className="text-[11px] font-black uppercase tracking-[0.3em] text-[#c08a3e]">The story</p>
             {cleanDescription ? (
-              <blockquote className="mt-6 border-l-2 border-[#f4b942]/70 pl-6 serif-pull text-[clamp(1.35rem,2.8vw,2rem)] leading-[1.5] text-[#f8f1e8]/90">
+              <blockquote className="mt-6 border-l-2 border-[#c08a3e]/70 pl-6 serif-pull text-[clamp(1.35rem,2.8vw,2rem)] leading-[1.5] text-[#f8f1e8]/90">
                 &ldquo;{cleanDescription}&rdquo;
               </blockquote>
             ) : (
@@ -138,7 +138,7 @@ export default async function PublicDogProfilePage({ params }: { params: Promise
             )}
 
             <div className="card-craft mt-12 p-7">
-              <p className="text-[11px] font-black uppercase tracking-[0.3em] text-[#f4b942]">Listed by</p>
+              <p className="text-[11px] font-black uppercase tracking-[0.3em] text-[#c08a3e]">Listed by</p>
               <p className="mt-3 text-2xl font-black text-white">{dog.organizations?.name || 'Shelter partner'}</p>
               {locationLine && <p className="mt-1 text-sm uppercase tracking-[0.18em] text-[#f8f1e8]/50">{locationLine}</p>}
             </div>
@@ -146,7 +146,7 @@ export default async function PublicDogProfilePage({ params }: { params: Promise
 
           {/* Right: the facts, oversized */}
           <div className="lg:col-span-5">
-            <p className="text-[11px] font-black uppercase tracking-[0.3em] text-[#f4b942]">The facts</p>
+            <p className="text-[11px] font-black uppercase tracking-[0.3em] text-[#c08a3e]">The facts</p>
             <dl className="mt-6 divide-y divide-white/10 border-y border-white/10">
               {facts.map(([label, value]) => (
                 <div key={label} className="flex items-baseline justify-between gap-6 py-5">
@@ -156,7 +156,7 @@ export default async function PublicDogProfilePage({ params }: { params: Promise
               ))}
               <div className="flex items-baseline justify-between gap-6 py-5">
                 <dt className="text-xs font-black uppercase tracking-[0.24em] text-[#f8f1e8]/45">Status</dt>
-                <dd className={`text-right text-2xl font-black uppercase ${urgent ? 'text-[#ff8a7a]' : 'text-[#f4b942]'}`}>
+                <dd className={`text-right text-2xl font-black uppercase ${urgent ? 'text-[#c98a7a]' : 'text-[#c08a3e]'}`}>
                   {urgent ? 'Urgent' : dog.status}
                 </dd>
               </div>
@@ -164,7 +164,7 @@ export default async function PublicDogProfilePage({ params }: { params: Promise
 
             <Link
               href="/register?type=rescue"
-              className="mt-8 hidden w-full bg-[#f4b942] py-5 text-center text-sm font-black uppercase tracking-[0.2em] text-[#140a08] transition hover:bg-[#ffd86a] md:block"
+              className="mt-8 hidden w-full bg-[#c08a3e] py-5 text-center text-sm font-black uppercase tracking-[0.2em] text-[#140a08] transition hover:bg-[#d4a050] md:block"
             >
               I&apos;m interested in {dog.name || 'this dog'}
             </Link>
@@ -176,12 +176,12 @@ export default async function PublicDogProfilePage({ params }: { params: Promise
       </main>
 
       {/* ── STICKY MOBILE CTA ── */}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t-2 border-[#f4b942]/30 bg-[#0b140e]/95 p-4 backdrop-blur md:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t-2 border-[#c08a3e]/30 bg-[#0b140e]/95 p-4 backdrop-blur md:hidden">
         <Link
           href="/register?type=rescue"
-          className="flex w-full items-center justify-center gap-3 bg-[#f4b942] py-4 text-sm font-black uppercase tracking-[0.2em] text-[#140a08]"
+          className="flex w-full items-center justify-center gap-3 bg-[#c08a3e] py-4 text-sm font-black uppercase tracking-[0.2em] text-[#140a08]"
         >
-          {urgent && <span className="animate-pulse-dot h-2.5 w-2.5 rounded-full bg-[#e04a3a]" />}
+          {urgent && <span className="animate-pulse-dot h-2.5 w-2.5 rounded-full bg-[#a8583f]" />}
           I&apos;m interested{urgent && daysLeft !== null && daysLeft > 0 ? ` — ${daysLeftLabel(daysLeft)}` : ''}
         </Link>
       </div>

@@ -67,7 +67,7 @@ export default function StateMultiSelect({ selected, onChange, label = 'States S
         onChange={e => { setQuery(e.target.value); setOpen(true) }}
         onFocus={() => setOpen(true)}
         placeholder={selected.length === 0 ? 'Type a state (e.g. PA, NY)...' : 'Add another state...'}
-        className="w-full border border-[#13241d]/20 bg-[#fffaf2] px-4 py-3 text-sm text-[#13241d] placeholder-[#5d6a64]/50 transition-all focus:border-[#f4b942] focus:outline-none focus:ring-1 focus:ring-[#f4b942]"
+        className="w-full border border-[#13241d]/20 bg-[#fffaf2] px-4 py-3 text-sm text-[#13241d] placeholder-[#5d6a64]/50 transition-all focus:border-[#c08a3e] focus:outline-none focus:ring-1 focus:ring-[#c08a3e]"
       />
 
       {/* Dropdown */}
@@ -80,7 +80,7 @@ export default function StateMultiSelect({ selected, onChange, label = 'States S
               onMouseDown={() => toggle(state)}
               className={`w-full px-4 py-2.5 text-left text-sm font-black transition-colors ${
                 selected.includes(state)
-                  ? 'bg-[#f4b942] text-[#13241d]'
+                  ? 'bg-[#c08a3e] text-[#13241d]'
                   : 'text-[#13241d] hover:bg-[#f5f0e8]'
               }`}
             >

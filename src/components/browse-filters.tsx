@@ -53,7 +53,7 @@ export default function BrowseFilters({ tab, currentState, currentUrgency, curre
       >
         <input type="hidden" name="tab" value={tab} />
         <div className="relative flex-1">
-          <span aria-hidden className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-xl text-[#f4b942]">
+          <span aria-hidden className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-xl text-[#c08a3e]">
             ⌕
           </span>
           <input
@@ -61,12 +61,12 @@ export default function BrowseFilters({ tab, currentState, currentUrgency, curre
             name="q"
             defaultValue={currentQuery}
             placeholder="Search by name or breed…"
-            className="w-full border-2 border-white/15 bg-[#122016] py-4 pl-14 pr-5 text-lg font-semibold text-[#f8f1e8] placeholder:text-[#f8f1e8]/30 focus:border-[#f4b942] focus:outline-none"
+            className="w-full border-2 border-white/15 bg-[#122016] py-4 pl-14 pr-5 text-lg font-semibold text-[#f8f1e8] placeholder:text-[#f8f1e8]/30 focus:border-[#c08a3e] focus:outline-none"
           />
         </div>
         <button
           type="submit"
-          className="bg-[#f4b942] px-8 py-4 text-sm font-black uppercase tracking-[0.18em] text-[#140a08] transition hover:bg-[#ffd86a]"
+          className="bg-[#c08a3e] px-8 py-4 text-sm font-black uppercase tracking-[0.18em] text-[#140a08] transition hover:bg-[#d4a050]"
         >
           Search
         </button>
@@ -84,9 +84,9 @@ export default function BrowseFilters({ tab, currentState, currentUrgency, curre
               className={`flex shrink-0 items-center gap-2 border-2 px-5 py-2.5 text-xs font-black uppercase tracking-[0.18em] transition ${
                 active
                   ? chip.key === 'urgent'
-                    ? 'border-[#e04a3a] bg-[#e04a3a] text-white'
-                    : 'border-[#f4b942] bg-[#f4b942] text-[#140a08]'
-                  : 'border-white/15 text-[#f8f1e8]/60 hover:border-[#f4b942]/60 hover:text-[#f8f1e8]'
+                    ? 'border-[#a8583f] bg-[#a8583f] text-white'
+                    : 'border-[#c08a3e] bg-[#c08a3e] text-[#140a08]'
+                  : 'border-white/15 text-[#f8f1e8]/60 hover:border-[#c08a3e]/60 hover:text-[#f8f1e8]'
               }`}
             >
               {chip.key === 'urgent' && <span className="animate-pulse-dot h-2 w-2 rounded-full bg-current" />}
@@ -105,8 +105,8 @@ export default function BrowseFilters({ tab, currentState, currentUrgency, curre
             onClick={() => go({ state: null })}
             className={`shrink-0 border px-4 py-2 text-[11px] font-black uppercase tracking-[0.14em] transition ${
               currentState === ''
-                ? 'border-[#f4b942] bg-[#f4b942] text-[#140a08]'
-                : 'border-white/15 text-[#f8f1e8]/60 hover:border-[#f4b942]/60 hover:text-[#f8f1e8]'
+                ? 'border-[#c08a3e] bg-[#c08a3e] text-[#140a08]'
+                : 'border-white/15 text-[#f8f1e8]/60 hover:border-[#c08a3e]/60 hover:text-[#f8f1e8]'
             }`}
           >
             All states
@@ -117,8 +117,8 @@ export default function BrowseFilters({ tab, currentState, currentUrgency, curre
               onClick={() => go({ state: s })}
               className={`shrink-0 border px-4 py-2 text-[11px] font-black uppercase tracking-[0.14em] transition ${
                 currentState === s
-                  ? 'border-[#f4b942] bg-[#f4b942] text-[#140a08]'
-                  : 'border-white/15 text-[#f8f1e8]/60 hover:border-[#f4b942]/60 hover:text-[#f8f1e8]'
+                  ? 'border-[#c08a3e] bg-[#c08a3e] text-[#140a08]'
+                  : 'border-white/15 text-[#f8f1e8]/60 hover:border-[#c08a3e]/60 hover:text-[#f8f1e8]'
               }`}
             >
               {s}

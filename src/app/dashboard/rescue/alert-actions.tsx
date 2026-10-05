@@ -52,7 +52,7 @@ export default function AlertActions({ alertId, currentStatus, large = false }: 
         <button
           onClick={() => updateStatus('sent')}
           disabled={loading}
-          className="border border-white/25 px-5 py-2 text-xs font-black uppercase tracking-[0.16em] text-[#f8f1e8]/70 transition hover:border-[#f4b942] hover:text-[#f4b942] disabled:opacity-50"
+          className="border border-white/25 px-5 py-2 text-xs font-black uppercase tracking-[0.16em] text-[#f8f1e8]/70 transition hover:border-[#c08a3e] hover:text-[#c08a3e] disabled:opacity-50"
         >
           {loading ? '...' : 'Undo'}
         </button>
@@ -64,7 +64,7 @@ export default function AlertActions({ alertId, currentStatus, large = false }: 
     <button
       onClick={() => updateStatus('responded')}
       disabled={loading}
-      className={`bg-[#f4b942] font-black uppercase tracking-[0.16em] text-[#140a08] transition hover:bg-[#ffd86a] disabled:opacity-50 ${btnSize}`}
+      className={`bg-[#c08a3e] font-black uppercase tracking-[0.16em] text-[#140a08] transition hover:bg-[#d4a050] disabled:opacity-50 ${btnSize}`}
     >
       {loading ? '...' : "I'm interested"}
     </button>

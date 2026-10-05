@@ -17,9 +17,9 @@ const solidBase = (size: ButtonSize) =>
   `inline-flex items-center justify-center ${sizes[size]} font-black uppercase tracking-[0.16em] transition disabled:cursor-not-allowed disabled:opacity-50`;
 
 const variantClasses: Record<ButtonVariant, (size: ButtonSize) => string> = {
-  primary: (size) => `${solidBase(size)} bg-[#f4b942] text-[#1a2e1a] hover:bg-[#ffd86a]`,
+  primary: (size) => `${solidBase(size)} bg-[#c08a3e] text-[#1a2e1a] hover:bg-[#d4a050]`,
   secondary: (size) =>
-    `${solidBase(size)} border border-[#13241d]/20 bg-[#fff9ef] text-[#13241d] hover:bg-[#13241d] hover:text-[#f4b942]`,
+    `${solidBase(size)} border border-[#13241d]/20 bg-[#fff9ef] text-[#13241d] hover:bg-[#13241d] hover:text-[#c08a3e]`,
   danger: (size) => `${solidBase(size)} bg-red-600 text-white hover:bg-red-700`,
   // Link-style: callers supply their own size/weight via className.
   ghost: () => "text-[#d95f4b] transition hover:underline disabled:opacity-50",

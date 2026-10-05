@@ -106,7 +106,7 @@ export default function BreedSelect({ value, onChange, placeholder = 'Search bre
         onChange={handleInputChange}
         onFocus={() => setOpen(true)}
         placeholder={placeholder}
-        className="w-full border border-[#13241d]/20 bg-[#fffaf2] px-4 py-3 text-sm text-[#13241d] placeholder-[#5d6a64]/50 transition-all focus:border-[#f4b942] focus:outline-none focus:ring-1 focus:ring-[#f4b942]"
+        className="w-full border border-[#13241d]/20 bg-[#fffaf2] px-4 py-3 text-sm text-[#13241d] placeholder-[#5d6a64]/50 transition-all focus:border-[#c08a3e] focus:outline-none focus:ring-1 focus:ring-[#c08a3e]"
       />
       {open && (
         <div className="absolute z-50 mt-1 w-full border border-[#13241d]/20 bg-[#fffaf2] shadow-lg max-h-56 overflow-y-auto">

@@ -10,7 +10,7 @@ const COLOR_SWATCHES: Record<string, string> = {
   White: '#f5f0e8',
   Brown: '#7c4a1e',
   Tan: '#c8996b',
-  Golden: '#f4b942',
+  Golden: '#c08a3e',
   Red: '#b94a2c',
   Gray: '#6b7280',
   Brindle: '#5c4a2a',
@@ -50,8 +50,8 @@ export default function ColorPicker({ selected, onChange, label = 'Color(s)' }: 
               onClick={() => toggle(color)}
               className={`flex items-center gap-2 border px-3 py-2 text-xs font-black transition-all ${
                 isSelected
-                  ? 'border-[#f4b942] bg-[#f4b942] text-[#13241d]'
-                  : 'border-[#13241d]/15 bg-[#f5f0e8] text-[#5d6a64] hover:border-[#f4b942] hover:text-[#13241d]'
+                  ? 'border-[#c08a3e] bg-[#c08a3e] text-[#13241d]'
+                  : 'border-[#13241d]/15 bg-[#f5f0e8] text-[#5d6a64] hover:border-[#c08a3e] hover:text-[#13241d]'
               }`}
             >
               <span

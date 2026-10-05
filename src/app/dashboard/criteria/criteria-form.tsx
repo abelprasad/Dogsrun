@@ -32,7 +32,7 @@ interface CriteriaFormProps {
   initialCriteria?: RescueCriteria;
 }
 
-const inputClass = "w-full border border-[#13241d]/20 bg-[#fffaf2] px-4 py-3 text-sm text-[#13241d] placeholder-[#5d6a64]/50 transition-all focus:border-[#f4b942] focus:outline-none focus:ring-1 focus:ring-[#f4b942]"
+const inputClass = "w-full border border-[#13241d]/20 bg-[#fffaf2] px-4 py-3 text-sm text-[#13241d] placeholder-[#5d6a64]/50 transition-all focus:border-[#c08a3e] focus:outline-none focus:ring-1 focus:ring-[#c08a3e]"
 const labelClass = "mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-[#5d6a64]"
 
 // REVIEW: the age and size picker blocks in the form are the same markup twice; map over both option lists.
@@ -175,7 +175,7 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
             type="button"
             onClick={() => addBreed(breedInput)}
             disabled={!breedInput.trim()}
-            className="bg-[#f4b942] px-5 text-sm font-black uppercase tracking-[0.16em] text-[#1a2e1a] transition hover:bg-[#ffd86a] disabled:opacity-40"
+            className="bg-[#c08a3e] px-5 text-sm font-black uppercase tracking-[0.16em] text-[#1a2e1a] transition hover:bg-[#d4a050] disabled:opacity-40"
           >
             Add
           </button>
@@ -212,8 +212,8 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
                 onClick={() => setForm(f => ({ ...f, age_ranges: toggleItem(f.age_ranges, value) }))}
                 className={`flex flex-col items-center gap-0.5 border p-4 transition-all ${
                   selected
-                    ? 'border-[#f4b942] bg-[#f4b942]/10 text-[#13241d]'
-                    : 'border-[#13241d]/10 bg-[#f5f0e8] text-[#5d6a64] hover:border-[#f4b942]/50'
+                    ? 'border-[#c08a3e] bg-[#c08a3e]/10 text-[#13241d]'
+                    : 'border-[#13241d]/10 bg-[#f5f0e8] text-[#5d6a64] hover:border-[#c08a3e]/50'
                 }`}
               >
                 <span className="text-sm font-black text-[#13241d]">{label}</span>
@@ -237,8 +237,8 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
                 onClick={() => setForm(f => ({ ...f, size_classes: toggleItem(f.size_classes, value) }))}
                 className={`flex flex-col items-center gap-0.5 border p-4 transition-all ${
                   selected
-                    ? 'border-[#f4b942] bg-[#f4b942]/10 text-[#13241d]'
-                    : 'border-[#13241d]/10 bg-[#f5f0e8] text-[#5d6a64] hover:border-[#f4b942]/50'
+                    ? 'border-[#c08a3e] bg-[#c08a3e]/10 text-[#13241d]'
+                    : 'border-[#13241d]/10 bg-[#f5f0e8] text-[#5d6a64] hover:border-[#c08a3e]/50'
                 }`}
               >
                 <span className="text-sm font-black text-[#13241d]">{label}</span>
@@ -272,7 +272,7 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
           type="checkbox"
           checked={form.accepts_mixes}
           onChange={e => setForm({ ...form, accepts_mixes: e.target.checked })}
-          className="h-4 w-4 border-[#13241d]/20 text-[#f4b942] focus:ring-[#f4b942]"
+          className="h-4 w-4 border-[#13241d]/20 text-[#c08a3e] focus:ring-[#c08a3e]"
         />
         <span className="text-sm font-black text-[#13241d]">Accept mixed breeds</span>
       </label>
@@ -287,12 +287,12 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
             { key: 'accepts_blind', label: 'Blind / Vision Impaired' },
             { key: 'accepts_other', label: 'Other Issues' },
           ].map(({ key, label }) => (
-            <label key={key} className={`flex cursor-pointer items-center gap-3 border p-4 transition-all ${form[key as keyof typeof form] ? 'border-[#f4b942] bg-[#f4b942]/10' : 'border-[#13241d]/10 bg-[#f5f0e8] hover:border-[#f4b942]/50'}`}>
+            <label key={key} className={`flex cursor-pointer items-center gap-3 border p-4 transition-all ${form[key as keyof typeof form] ? 'border-[#c08a3e] bg-[#c08a3e]/10' : 'border-[#13241d]/10 bg-[#f5f0e8] hover:border-[#c08a3e]/50'}`}>
               <input
                 type="checkbox"
                 checked={form[key as keyof typeof form] as boolean}
                 onChange={e => setForm({ ...form, [key]: e.target.checked })}
-                className="h-4 w-4 border-[#13241d]/20 text-[#f4b942] focus:ring-[#f4b942]"
+                className="h-4 w-4 border-[#13241d]/20 text-[#c08a3e] focus:ring-[#c08a3e]"
               />
               <span className="text-sm font-black text-[#13241d]">{label}</span>
             </label>

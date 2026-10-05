@@ -204,13 +204,13 @@ export default async function BrowsePage({
       {/* Hero */}
       <header className="border-b border-white/10 px-5 pb-10 pt-16 sm:px-10 lg:px-16">
         <div className="mx-auto max-w-7xl">
-          <p className="mb-6 flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.3em] text-[#f4b942]">
-            <span className="animate-pulse-dot h-2.5 w-2.5 rounded-full bg-[#e04a3a]" />
+          <p className="mb-6 flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.3em] text-[#c08a3e]">
+            <span className="animate-pulse-dot h-2.5 w-2.5 rounded-full bg-[#a8583f]" />
             DOGSRUN Network
           </p>
           <h1 className="max-w-5xl text-[clamp(2.75rem,7vw,6rem)] font-black uppercase leading-[0.88] tracking-tight">
             {hero.heading.split('clock')[0]}
-            {hero.heading.includes('clock') && <span className="text-[#e04a3a]">clock</span>}
+            {hero.heading.includes('clock') && <span className="text-[#a8583f]">clock</span>}
             {hero.heading.includes('clock') && hero.heading.split('clock')[1]}
           </h1>
           <p className="mt-6 max-w-2xl text-base leading-8 text-[#f8f1e8]/60">{hero.sub}</p>
@@ -223,8 +223,8 @@ export default async function BrowsePage({
                 href={baseParams({ tab: t.key, page: null })}
                 className={`px-6 py-3 text-xs font-black uppercase tracking-[0.2em] transition-colors ${
                   tab === t.key
-                    ? 'bg-[#f4b942] text-[#140a08]'
-                    : 'border border-white/15 text-[#f8f1e8]/50 hover:border-[#f4b942]/60 hover:text-[#f8f1e8]'
+                    ? 'bg-[#c08a3e] text-[#140a08]'
+                    : 'border border-white/15 text-[#f8f1e8]/50 hover:border-[#c08a3e]/60 hover:text-[#f8f1e8]'
                 }`}
               >
                 {t.label}
@@ -240,8 +240,8 @@ export default async function BrowsePage({
         {tab === 'dogs' && (
           <>
             {urgentCount > 0 && urgency === 'all' && !query && (
-              <p className="mb-8 flex items-center gap-3 border-l-4 border-[#e04a3a] bg-[#e04a3a]/10 px-5 py-4 text-sm font-black uppercase tracking-[0.18em] text-[#ff8a7a]">
-                <span className="animate-pulse-dot h-2.5 w-2.5 rounded-full bg-[#e04a3a]" />
+              <p className="mb-8 flex items-center gap-3 border-l-4 border-[#a8583f] bg-[#a8583f]/10 px-5 py-4 text-sm font-black uppercase tracking-[0.18em] text-[#c98a7a]">
+                <span className="animate-pulse-dot h-2.5 w-2.5 rounded-full bg-[#a8583f]" />
                 {urgentCount} dog{urgentCount !== 1 ? 's' : ''} on this page {urgentCount !== 1 ? 'are' : 'is'} running out of time
               </p>
             )}
@@ -253,7 +253,7 @@ export default async function BrowsePage({
                     <Link
                       key={dog.id}
                       href={`/dogs/${dog.id}`}
-                      className="card-craft-deep hover-lift hover-press group relative block overflow-hidden border-2 border-[#e04a3a] sm:col-span-2"
+                      className="card-craft-deep hover-lift hover-press group relative block overflow-hidden border-2 border-[#a8583f] sm:col-span-2"
                     >
                       <div className="grid sm:grid-cols-2">
                         <div className="cine relative aspect-[4/3] overflow-hidden sm:aspect-auto sm:min-h-[320px]">
@@ -267,7 +267,7 @@ export default async function BrowsePage({
                               sizes="(min-width: 1024px) 40vw, (min-width: 640px) 80vw, 100vw"
                             />
                           ) : (
-                            <div className="flex h-full w-full items-center justify-center bg-[#1a2e1a] text-8xl font-black text-[#f4b942]">
+                            <div className="flex h-full w-full items-center justify-center bg-[#1a2e1a] text-8xl font-black text-[#c08a3e]">
                               {dog.name?.[0] || 'D'}
                             </div>
                           )}
@@ -275,14 +275,14 @@ export default async function BrowsePage({
                         </div>
                         <div className="flex flex-col justify-between p-7 sm:p-9">
                           <div>
-                            <div className="animate-urgent-glow inline-flex items-center gap-2 bg-[#e04a3a] px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-white">
+                            <div className="animate-urgent-glow inline-flex items-center gap-2 bg-[#a8583f] px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-white">
                               <span className="animate-pulse-dot h-2 w-2 rounded-full bg-white" />
                               {daysLeftLabel(dog._daysLeft) || 'Urgent'}
                             </div>
                             <h2 className="mt-5 text-4xl font-black uppercase tracking-tight text-white sm:text-5xl">
                               {dog.name || 'Unnamed Dog'}
                             </h2>
-                            <p className="mt-2 text-sm font-bold uppercase tracking-[0.2em] text-[#f4b942]">
+                            <p className="mt-2 text-sm font-bold uppercase tracking-[0.2em] text-[#c08a3e]">
                               {dog.breed}{dog.mix ? ' mix' : ''}
                             </p>
                             <div className="mt-6 flex flex-wrap gap-x-8 gap-y-3 text-sm text-[#f8f1e8]/70">
@@ -296,7 +296,7 @@ export default async function BrowsePage({
                               {dog.organizations?.name || 'Shelter partner'}
                               {dog.organizations?.state ? ` · ${dog.organizations.state}` : ''}
                             </p>
-                            <span className="text-sm font-black uppercase tracking-[0.18em] text-[#ff8a7a] transition group-hover:text-white">
+                            <span className="text-sm font-black uppercase tracking-[0.18em] text-[#c98a7a] transition group-hover:text-white">
                               Act now →
                             </span>
                           </div>
@@ -308,7 +308,7 @@ export default async function BrowsePage({
                     <Link
                       key={dog.id}
                       href={`/dogs/${dog.id}`}
-                      className="card-craft hover-lift hover-press group flex min-h-full flex-col overflow-hidden hover:border-[#f4b942]/60"
+                      className="card-craft hover-lift hover-press group flex min-h-full flex-col overflow-hidden hover:border-[#c08a3e]/60"
                     >
                       <div className="cine relative aspect-[5/4] overflow-hidden">
                         {dog.photo_url ? (
@@ -327,13 +327,13 @@ export default async function BrowsePage({
                         )}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
                         <div className="absolute left-4 top-4">
-                          <span className="bg-[#f4b942] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#140a08]">
+                          <span className="bg-[#c08a3e] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#140a08]">
                             Available
                           </span>
                         </div>
                         <div className="absolute inset-x-0 bottom-0 p-5">
                           <h2 className="text-3xl font-black uppercase tracking-tight text-white">{dog.name || 'Unnamed Dog'}</h2>
-                          <p className="mt-1 text-xs font-bold uppercase tracking-[0.2em] text-[#f4b942]">
+                          <p className="mt-1 text-xs font-bold uppercase tracking-[0.2em] text-[#c08a3e]">
                             {dog.breed}{dog.mix ? ' mix' : ''}
                           </p>
                         </div>
@@ -342,7 +342,7 @@ export default async function BrowsePage({
                         <p className="text-xs uppercase tracking-[0.16em] text-[#f8f1e8]/50">
                           {dog.age_years ? `${dog.age_years}y` : '—'} · <span className="capitalize">{dog.sex || '—'}</span> · {dog.weight_lbs ? `${dog.weight_lbs} lb` : '—'}
                         </p>
-                        <span className="shrink-0 text-xs font-black uppercase tracking-[0.18em] text-[#f4b942] group-hover:underline">
+                        <span className="shrink-0 text-xs font-black uppercase tracking-[0.18em] text-[#c08a3e] group-hover:underline">
                           Review →
                         </span>
                       </div>
@@ -359,7 +359,7 @@ export default async function BrowsePage({
               </>
             ) : (
               <div className="card-craft rule-double px-6 py-20 text-center">
-                <p className="text-sm font-black uppercase tracking-[0.24em] text-[#f4b942]">No dogs found</p>
+                <p className="text-sm font-black uppercase tracking-[0.24em] text-[#c08a3e]">No dogs found</p>
                 <p className="mx-auto mt-4 max-w-md text-base leading-7 text-[#f8f1e8]/60">
                   {query ? `Nothing matches "${query}". Try a different name or breed.` : 'No dogs match these filters right now.'}
                 </p>
@@ -376,13 +376,13 @@ export default async function BrowsePage({
                 <Link
                   key={shelter.id}
                   href="/dogs?tab=dogs"
-                  className="card-craft hover-lift hover-press group p-7 hover:border-[#f4b942]/60"
+                  className="card-craft hover-lift hover-press group p-7 hover:border-[#c08a3e]/60"
                 >
                   <div className="flex items-start justify-between gap-4">
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center bg-[#f4b942] text-2xl font-black text-[#140a08]">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center bg-[#c08a3e] text-2xl font-black text-[#140a08]">
                       {shelter.name?.[0] || 'S'}
                     </div>
-                    <span className="border border-[#f4b942]/40 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#f4b942]">
+                    <span className="border border-[#c08a3e]/40 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#c08a3e]">
                       Verified
                     </span>
                   </div>
@@ -395,9 +395,9 @@ export default async function BrowsePage({
                   <div className="mt-6 flex items-end justify-between border-t border-white/10 pt-5">
                     <div>
                       <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#f8f1e8]/40">Dogs listed</p>
-                      <p className="mt-1 text-4xl font-black text-[#f4b942]">{shelter.dog_count}</p>
+                      <p className="mt-1 text-4xl font-black text-[#c08a3e]">{shelter.dog_count}</p>
                     </div>
-                    <span className="text-xs font-black uppercase tracking-[0.18em] text-[#f4b942] group-hover:underline">
+                    <span className="text-xs font-black uppercase tracking-[0.18em] text-[#c08a3e] group-hover:underline">
                       View dogs →
                     </span>
                   </div>
@@ -406,7 +406,7 @@ export default async function BrowsePage({
             </div>
           ) : (
             <div className="card-craft rule-double px-6 py-20 text-center">
-              <p className="text-sm font-black uppercase tracking-[0.24em] text-[#f4b942]">No shelter partners</p>
+              <p className="text-sm font-black uppercase tracking-[0.24em] text-[#c08a3e]">No shelter partners</p>
               <p className="mx-auto mt-4 max-w-md text-base leading-7 text-[#f8f1e8]/60">
                 {stateFilter ? `No approved shelters in ${stateFilter}.` : "Shelters appear here once approved by the DOGSRUN team."}
               </p>
@@ -424,10 +424,10 @@ export default async function BrowsePage({
                 return (
                   <div key={rescue.id} className="card-craft p-7">
                     <div className="flex items-start justify-between gap-4">
-                      <div className="flex h-14 w-14 shrink-0 items-center justify-center bg-[#e04a3a] text-2xl font-black text-white">
+                      <div className="flex h-14 w-14 shrink-0 items-center justify-center bg-[#a8583f] text-2xl font-black text-white">
                         {rescue.name?.[0] || 'R'}
                       </div>
-                      <span className="border border-[#e04a3a]/50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#ff8a7a]">
+                      <span className="border border-[#a8583f]/50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#c98a7a]">
                         Active rescue
                       </span>
                     </div>
@@ -442,7 +442,7 @@ export default async function BrowsePage({
                         <p className="mb-2 text-[10px] font-black uppercase tracking-[0.22em] text-[#f8f1e8]/40">Serves</p>
                         <div className="flex flex-wrap gap-1.5">
                           {states.slice(0, 8).map(s => (
-                            <span key={s} className="bg-[#f4b942] px-2 py-0.5 text-[10px] font-black text-[#140a08]">{s}</span>
+                            <span key={s} className="bg-[#c08a3e] px-2 py-0.5 text-[10px] font-black text-[#140a08]">{s}</span>
                           ))}
                         </div>
                       </div>
@@ -459,7 +459,7 @@ export default async function BrowsePage({
             </div>
           ) : (
             <div className="card-craft rule-double px-6 py-20 text-center">
-              <p className="text-sm font-black uppercase tracking-[0.24em] text-[#f4b942]">No rescue partners</p>
+              <p className="text-sm font-black uppercase tracking-[0.24em] text-[#c08a3e]">No rescue partners</p>
               <p className="mx-auto mt-4 max-w-md text-base leading-7 text-[#f8f1e8]/60">
                 {stateFilter ? `No approved rescues in ${stateFilter}.` : "Rescues appear here once approved by the DOGSRUN team."}
               </p>

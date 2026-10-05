@@ -17,18 +17,18 @@ export default function PaginationControls({ page, totalPages, total, pageSize, 
   for (let p = start; p <= end; p++) pages.push(p)
 
   const btn = (active: boolean, disabled = false) =>
-    `px-3 py-1.5 text-xs font-bold uppercase tracking-[0.1em] transition-colors ${
+    `border px-3 py-1.5 text-xs font-bold uppercase tracking-[0.1em] transition-colors ${
       active
-        ? 'bg-[#13241d] text-[#f4b942]'
-        : 'bg-[#f5f0e8] text-[#5d6a64] hover:bg-[#13241d]/10'
+        ? 'border-[#c08a3e] bg-[#c08a3e] text-[#140a08]'
+        : 'border-white/15 text-[#f8f1e8]/55 hover:border-[#c08a3e]/60 hover:text-[#f8f1e8]'
     } ${disabled ? 'opacity-40 pointer-events-none' : ''}`
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 py-4">
-      <p className="text-xs text-[#5d6a64]">
+      <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#f8f1e8]/40">
         Page {page} of {totalPages} · {total} total
       </p>
-      <div className="flex items-center gap-1">
+      <div className="flex flex-wrap items-center gap-1">
         <button
           type="button"
           onClick={() => onPageChange(page - 1)}

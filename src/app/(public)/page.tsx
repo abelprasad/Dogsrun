@@ -14,13 +14,13 @@ const steps = [
     n: "01",
     title: "Intake",
     copy: "Shelters publish the essential context: behavior notes, timeline, size, medical flags, and transfer constraints.",
-    accent: "text-[#f4b942]",
+    accent: "text-[#c08a3e]",
   },
   {
     n: "02",
     title: "Match",
     copy: "DOGSRUN compares each case against active rescue criteria and highlights the organizations most likely to say yes.",
-    accent: "text-[#e04a3a]",
+    accent: "text-[#a8583f]",
   },
   {
     n: "03",
@@ -63,11 +63,11 @@ export default async function Home() {
         <div className="absolute inset-0 bg-gradient-to-r from-[#0b140e]/70 via-transparent to-transparent" />
 
         <div className="relative flex flex-1 flex-col justify-end px-5 pb-14 pt-28 sm:px-10 sm:pb-20 lg:px-16">
-          <div className="mb-6 flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.3em] text-[#f4b942]">
-            <span className="animate-pulse-dot h-2.5 w-2.5 rounded-full bg-[#e04a3a]" />
+          <div className="mb-6 flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.3em] text-[#c08a3e]">
+            <span className="animate-pulse-dot h-2.5 w-2.5 rounded-full bg-[#a8583f]" />
             Live shelter-to-rescue matching
             {onTheClock.length > 0 && (
-              <span className="border border-[#e04a3a]/60 px-2 py-1 text-[#ff8a7a]">
+              <span className="border border-[#a8583f]/60 px-2 py-1 text-[#c98a7a]">
                 {onTheClock.length} on the clock
               </span>
             )}
@@ -75,7 +75,7 @@ export default async function Home() {
 
           <h1 className="font-black uppercase leading-[0.82] tracking-tight">
             <span className="block text-[clamp(3.2rem,11vw,10rem)] text-[#f8f1e8]">Every</span>
-            <span className="block text-[clamp(3.2rem,11vw,10rem)] text-[#f4b942]">second</span>
+            <span className="block text-[clamp(3.2rem,11vw,10rem)] text-[#c08a3e]">second</span>
             <span className="text-outline block text-[clamp(3.2rem,11vw,10rem)]">counts.</span>
           </h1>
 
@@ -87,13 +87,13 @@ export default async function Home() {
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
             <Link
               href="/register"
-              className="inline-flex items-center justify-center bg-[#f4b942] px-8 py-4 text-sm font-black uppercase tracking-[0.18em] text-[#140a08] transition hover:bg-[#ffd86a]"
+              className="inline-flex items-center justify-center bg-[#c08a3e] px-8 py-4 text-sm font-black uppercase tracking-[0.18em] text-[#140a08] transition hover:bg-[#d4a050]"
             >
               Start matching
             </Link>
             <Link
               href="/dogs?urgency=urgent"
-              className="inline-flex items-center justify-center gap-3 border-2 border-[#e04a3a] px-8 py-4 text-sm font-black uppercase tracking-[0.18em] text-[#ff8a7a] transition hover:bg-[#e04a3a] hover:text-white"
+              className="inline-flex items-center justify-center gap-3 border-2 border-[#a8583f] px-8 py-4 text-sm font-black uppercase tracking-[0.18em] text-[#c98a7a] transition hover:bg-[#a8583f] hover:text-white"
             >
               <span className="animate-pulse-dot h-2 w-2 rounded-full bg-current" />
               Dogs on the clock
@@ -134,7 +134,7 @@ export default async function Home() {
               ["1-click", "rescue response"],
             ].map(([big, small]) => (
               <div key={small}>
-                <p className="text-5xl font-black tracking-tight text-[#f4b942]">{big}</p>
+                <p className="text-5xl font-black tracking-tight text-[#c08a3e]">{big}</p>
                 <p className="mt-1 text-xs font-bold uppercase tracking-[0.22em] text-[#f8f1e8]/50">{small}</p>
               </div>
             ))}
@@ -147,9 +147,9 @@ export default async function Home() {
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-wrap items-end justify-between gap-6">
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.3em] text-[#e04a3a]">How it works</p>
+              <p className="text-[11px] font-black uppercase tracking-[0.3em] text-[#a8583f]">How it works</p>
               <h2 className="mt-4 text-[clamp(2.5rem,6vw,5rem)] font-black uppercase leading-[0.9] tracking-tight">
-                Built for the<br />handoff <span className="text-[#f4b942]">moment.</span>
+                Built for the<br />handoff <span className="text-[#c08a3e]">moment.</span>
               </h2>
             </div>
             <p className="max-w-xs text-sm leading-7 text-[#f8f1e8]/60">
@@ -191,17 +191,17 @@ export default async function Home() {
           <div className="mx-auto max-w-7xl">
             <div className="flex flex-wrap items-end justify-between gap-6">
               <div>
-                <p className="flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.3em] text-[#e04a3a]">
-                  <span className="animate-pulse-dot h-2.5 w-2.5 rounded-full bg-[#e04a3a]" />
+                <p className="flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.3em] text-[#a8583f]">
+                  <span className="animate-pulse-dot h-2.5 w-2.5 rounded-full bg-[#a8583f]" />
                   On the clock
                 </p>
                 <h2 className="mt-4 text-[clamp(2.5rem,6vw,5rem)] font-black uppercase leading-[0.9] tracking-tight">
-                  Running out<br />of <span className="text-[#e04a3a]">time.</span>
+                  Running out<br />of <span className="text-[#a8583f]">time.</span>
                 </h2>
               </div>
               <Link
                 href="/dogs?urgency=urgent"
-                className="border-b-2 border-[#f4b942] pb-1 text-sm font-black uppercase tracking-[0.2em] text-[#f4b942] transition hover:text-[#ffd86a]"
+                className="border-b-2 border-[#c08a3e] pb-1 text-sm font-black uppercase tracking-[0.2em] text-[#c08a3e] transition hover:text-[#d4a050]"
               >
                 See all urgent dogs →
               </Link>
@@ -212,7 +212,7 @@ export default async function Home() {
                 <Link
                   key={dog.id}
                   href={`/dogs/${dog.id}`}
-                  className="group relative block overflow-hidden border-2 border-[#e04a3a] bg-[#122016]"
+                  className="group relative block overflow-hidden border-2 border-[#a8583f] bg-[#122016]"
                 >
                   <div className="cine relative aspect-[4/5] overflow-hidden">
                     {dog.photo_url ? (
@@ -225,18 +225,18 @@ export default async function Home() {
                         sizes="(min-width: 768px) 33vw, 100vw"
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-[#1a2e1a] text-8xl font-black text-[#f4b942]">
+                      <div className="flex h-full w-full items-center justify-center bg-[#1a2e1a] text-8xl font-black text-[#c08a3e]">
                         {dog.name?.[0] || "D"}
                       </div>
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
-                    <div className="absolute left-4 top-4 flex items-center gap-2 bg-[#e04a3a] px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-white">
+                    <div className="absolute left-4 top-4 flex items-center gap-2 bg-[#a8583f] px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-white">
                       <span className="animate-pulse-dot h-2 w-2 rounded-full bg-white" />
                       {daysLeftLabel(dog.daysLeft) || "Urgent"}
                     </div>
                     <div className="absolute inset-x-0 bottom-0 p-6">
                       <h3 className="text-4xl font-black uppercase tracking-tight text-white">{dog.name}</h3>
-                      <p className="mt-1 text-sm font-bold uppercase tracking-[0.2em] text-[#f4b942]">{dog.breed}</p>
+                      <p className="mt-1 text-sm font-bold uppercase tracking-[0.2em] text-[#c08a3e]">{dog.breed}</p>
                     </div>
                   </div>
                 </Link>
@@ -252,7 +252,7 @@ export default async function Home() {
           <span aria-hidden className="pointer-events-none absolute -bottom-10 right-0 select-none text-[10rem] font-black leading-none text-white/5">
             →
           </span>
-          <p className="text-[11px] font-black uppercase tracking-[0.3em] text-[#f4b942]">For shelters</p>
+          <p className="text-[11px] font-black uppercase tracking-[0.3em] text-[#c08a3e]">For shelters</p>
           <h2 className="mt-5 text-[clamp(2rem,4.5vw,3.75rem)] font-black uppercase leading-[0.92] tracking-tight">
             Publish the case once. Reach the rescues that fit.
           </h2>
@@ -262,23 +262,23 @@ export default async function Home() {
           </p>
           <Link
             href="/register?type=shelter"
-            className="mt-9 inline-flex bg-[#f4b942] px-8 py-4 text-sm font-black uppercase tracking-[0.18em] text-[#140a08] transition hover:bg-[#ffd86a]"
+            className="mt-9 inline-flex bg-[#c08a3e] px-8 py-4 text-sm font-black uppercase tracking-[0.18em] text-[#140a08] transition hover:bg-[#d4a050]"
           >
             Register shelter
           </Link>
         </div>
-        <div className="group relative overflow-hidden border-t border-white/10 bg-[#e04a3a] px-8 py-16 sm:px-12 sm:py-24">
-          <p className="text-[11px] font-black uppercase tracking-[0.3em] text-white/90">For rescues</p>
-          <h2 className="mt-5 text-[clamp(2rem,4.5vw,3.75rem)] font-black uppercase leading-[0.92] tracking-tight text-white">
+        <div className="card-craft group relative overflow-hidden border-t-2 border-t-[#a8583f] px-8 py-16 sm:px-12 sm:py-24">
+          <p className="text-[11px] font-black uppercase tracking-[0.3em] text-[#a8583f]">For rescues</p>
+          <h2 className="mt-5 text-[clamp(2rem,4.5vw,3.75rem)] font-black uppercase leading-[0.92] tracking-tight text-[#f8f1e8]">
             Set your criteria. Get the dogs you can actually pull.
           </h2>
-          <p className="mt-6 max-w-md text-base leading-8 text-white/80">
+          <p className="mt-6 max-w-md text-base leading-8 text-[#f8f1e8]/70">
             Define geography, breed focus, weight, age, and capacity once.
             Receive urgent alerts that respect your mission and your limits.
           </p>
           <Link
             href="/register?type=rescue"
-            className="mt-9 inline-flex bg-[#140a08] px-8 py-4 text-sm font-black uppercase tracking-[0.18em] text-white transition hover:bg-black"
+            className="mt-9 inline-flex border-2 border-[#a8583f] px-8 py-4 text-sm font-black uppercase tracking-[0.18em] text-[#c98a7a] transition hover:bg-[#a8583f] hover:text-white"
           >
             Register rescue
           </Link>
@@ -300,11 +300,11 @@ export default async function Home() {
         <div className="absolute inset-0 bg-gradient-to-t from-[#0b140e] via-[#0b140e]/30 to-transparent" />
         <div className="relative w-full px-5 pb-16 sm:px-10 lg:px-16">
           <h2 className="max-w-6xl text-[clamp(3rem,10vw,9rem)] font-black uppercase leading-[0.85] tracking-tight">
-            Every dog deserves <span className="text-[#f4b942]">a second run.</span>
+            Every dog deserves <span className="text-[#c08a3e]">a second run.</span>
           </h2>
           <Link
             href="/dogs"
-            className="link-draw mt-8 inline-flex items-center gap-3 text-sm font-black uppercase tracking-[0.22em] text-[#f8f1e8] transition hover:text-[#f4b942]"
+            className="link-draw mt-8 inline-flex items-center gap-3 text-sm font-black uppercase tracking-[0.22em] text-[#f8f1e8] transition hover:text-[#c08a3e]"
           >
             Meet the dogs →
           </Link>

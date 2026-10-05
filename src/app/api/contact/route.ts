@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
       subject: `[DOGSRUN Contact] ${safeSubject} — from ${safeName}`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-          <h2 style="color: #f59e0b; border-bottom: 1px solid #eee; padding-bottom: 10px;">New Contact Message</h2>
+          <h2 style="color: #c08a3e; border-bottom: 1px solid #eee; padding-bottom: 10px;">New Contact Message</h2>
           
           <div style="margin: 20px 0;">
             <p><strong>Name:</strong> ${safeName}</p>

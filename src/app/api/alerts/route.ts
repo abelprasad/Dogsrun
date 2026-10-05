@@ -183,7 +183,7 @@ export async function POST(req: NextRequest) {
         html: `
           <div style="background-color: #f9fafb; padding: 32px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;">
             <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-              <div style="background-color: #f59e0b; padding: 24px; text-align: center;">
+              <div style="background-color: #c08a3e; padding: 24px; text-align: center;">
                 <span style="color: #ffffff; font-size: 24px; font-weight: 800; letter-spacing: -0.025em;">DOGSRUN</span>
               </div>
               <div style="padding: 32px 40px;">
@@ -227,17 +227,17 @@ export async function POST(req: NextRequest) {
                 </table>
                 <div style="text-align: center; margin-bottom: 32px;">
                   <a href="https://dogsrun.org/api/respond?alert_id=${encodeURIComponent(alertData.id)}&amp;action=interested"
-                     style="background-color: #f59e0b; color: #ffffff; padding: 16px 32px; border-radius: 12px; text-decoration: none; display: inline-block; font-weight: 700; font-size: 16px;">
+                     style="background-color: #c08a3e; color: #ffffff; padding: 16px 32px; border-radius: 12px; text-decoration: none; display: inline-block; font-weight: 700; font-size: 16px;">
                     Interested
                   </a>
                 </div>
                 <div style="text-align: center;">
-                  <a href="https://dogsrun.org/dashboard/rescue" style="color: #f59e0b; text-decoration: underline; font-size: 14px; font-weight: 600;">View all matches on your dashboard</a>
+                  <a href="https://dogsrun.org/dashboard/rescue" style="color: #c08a3e; text-decoration: underline; font-size: 14px; font-weight: 600;">View all matches on your dashboard</a>
                 </div>
               </div>
               <div style="background-color: #f9fafb; padding: 24px 40px; border-top: 1px solid #e5e7eb; text-align: center;">
                 <p style="color: #9ca3af; font-size: 12px; line-height: 18px; margin: 0;">
-                  You received this alert because your rescue organization has active matching criteria on DOGSRUN. To update your criteria, <a href="https://dogsrun.org/dashboard/rescue" style="color: #f59e0b; text-decoration: underline;">log in to your rescue portal</a>.
+                  You received this alert because your rescue organization has active matching criteria on DOGSRUN. To update your criteria, <a href="https://dogsrun.org/dashboard/rescue" style="color: #c08a3e; text-decoration: underline;">log in to your rescue portal</a>.
                 </p>
               </div>
             </div>

@@ -19,14 +19,14 @@ export default function ApprovalWall({ org }: { org: Org }) {
 
       <header className="bg-[#13241d] px-5 py-16 sm:px-8 lg:px-12">
         <div className="mx-auto max-w-7xl">
-          <h1 className="text-5xl font-black leading-[0.9] tracking-tight text-[#f4b942]">{org.name}</h1>
+          <h1 className="text-5xl font-black leading-[0.9] tracking-tight text-[#c08a3e]">{org.name}</h1>
           <p className="mt-3 text-[#c8d3ce]">Portal</p>
         </div>
       </header>
 
       <main className="mx-auto max-w-7xl px-5 py-20 sm:px-8 flex justify-center">
         <div className="max-w-md w-full border border-[#13241d]/10 bg-[#fff9ef] p-10 text-center">
-          <div className={`mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full ${isRejected ? 'bg-red-100' : 'bg-[#f4b942]'}`}>
+          <div className={`mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full ${isRejected ? 'bg-red-100' : 'bg-[#c08a3e]'}`}>
             {isRejected ? (
               <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -48,7 +48,7 @@ export default function ApprovalWall({ org }: { org: Org }) {
           {isRejected && (
             <a
               href="mailto:admin@dogsrun.org"
-              className="inline-flex items-center justify-center bg-[#f4b942] px-6 py-3 text-sm font-black uppercase tracking-[0.16em] text-[#1a2e1a] transition hover:bg-[#ffd86a]"
+              className="inline-flex items-center justify-center bg-[#c08a3e] px-6 py-3 text-sm font-black uppercase tracking-[0.16em] text-[#1a2e1a] transition hover:bg-[#d4a050]"
             >
               Contact Us
             </a>

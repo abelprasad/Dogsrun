@@ -43,7 +43,7 @@ export default function NewDogForm() {
     intake_date: '', euthanasia_date: '',
   })
 
-  const inputCls = "w-full border border-[#13241d]/20 bg-[#fffaf2] px-4 py-3 focus:outline-none focus:border-[#f4b942] focus:ring-1 focus:ring-[#f4b942] text-[#13241d] placeholder-[#5d6a64]/40 text-sm"
+  const inputCls = "w-full border border-[#13241d]/20 bg-[#fffaf2] px-4 py-3 focus:outline-none focus:border-[#c08a3e] focus:ring-1 focus:ring-[#c08a3e] text-[#13241d] placeholder-[#5d6a64]/40 text-sm"
   const labelCls = "block text-xs uppercase tracking-[0.24em] font-bold text-[#13241d] mb-2"
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -104,8 +104,8 @@ export default function NewDogForm() {
       {/* Header */}
       <header className="bg-[#13241d] pb-12 px-8 pt-8 border-t border-white/5">
         <div className="max-w-7xl mx-auto">
-          <p className="text-xs uppercase tracking-[0.24em] text-[#f4b942]/70 mb-3 font-bold">Shelter</p>
-          <h1 className="text-4xl md:text-5xl font-black tracking-tight text-[#f4b942]">Add a Dog</h1>
+          <p className="text-xs uppercase tracking-[0.24em] text-[#c08a3e]/70 mb-3 font-bold">Shelter</p>
+          <h1 className="text-4xl md:text-5xl font-black tracking-tight text-[#c08a3e]">Add a Dog</h1>
           <p className="text-[#f5f0e8]/50 mt-2 text-sm">Help this dog find the perfect rescue match.</p>
         </div>
       </header>
@@ -228,7 +228,7 @@ export default function NewDogForm() {
             <button type="button" onClick={() => setShowSpecialNeeds(!showSpecialNeeds)}
               className="flex items-center gap-2 text-xs uppercase tracking-[0.24em] font-bold text-[#5d6a64] hover:text-[#13241d] transition-colors">
               <span className={`w-4 h-4 border-2 flex items-center justify-center transition-colors ${showSpecialNeeds ? 'border-[#13241d] bg-[#13241d]' : 'border-[#13241d]/30'}`}>
-                {showSpecialNeeds && <svg className="w-2.5 h-2.5 text-[#f4b942]" fill="none" viewBox="0 0 12 12" stroke="currentColor" strokeWidth="2"><path d="M2 6l3 3 5-5" strokeLinecap="round"/></svg>}
+                {showSpecialNeeds && <svg className="w-2.5 h-2.5 text-[#c08a3e]" fill="none" viewBox="0 0 12 12" stroke="currentColor" strokeWidth="2"><path d="M2 6l3 3 5-5" strokeLinecap="round"/></svg>}
               </span>
               This dog has special needs
             </button>
@@ -277,7 +277,7 @@ export default function NewDogForm() {
           </div>
 
           <button type="submit" disabled={loading}
-            className="w-full bg-[#13241d] text-[#f4b942] py-4 font-black text-xs uppercase tracking-[0.24em] hover:bg-[#1a2e1a] disabled:opacity-50 transition-colors">
+            className="w-full bg-[#13241d] text-[#c08a3e] py-4 font-black text-xs uppercase tracking-[0.24em] hover:bg-[#1a2e1a] disabled:opacity-50 transition-colors">
             {loading ? 'Adding Dog...' : 'Post to Network'}
           </button>
         </form>

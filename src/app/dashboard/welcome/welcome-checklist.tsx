@@ -100,7 +100,7 @@ export default function WelcomeChecklist({
       <div className="flex items-center gap-4 mb-8">
         <div className="flex-1 h-2 bg-[#13241d]/10 overflow-hidden">
           <div
-            className="h-full bg-[#f4b942] transition-all duration-500"
+            className="h-full bg-[#c08a3e] transition-all duration-500"
             style={{ width: `${(completedCount / steps.length) * 100}%` }}
           />
         </div>
@@ -124,7 +124,7 @@ export default function WelcomeChecklist({
             <div className={`w-8 h-8 flex items-center justify-center flex-shrink-0 text-sm font-bold ${
               step.done
                 ? 'bg-[#dbe7d6] text-[#2f5d3a]'
-                : 'bg-[#13241d] text-[#f4b942]'
+                : 'bg-[#13241d] text-[#c08a3e]'
             }`}>
               {step.done ? (
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -157,7 +157,7 @@ export default function WelcomeChecklist({
       <div className="flex items-center gap-4">
         <Link
           href={dashboardHref}
-          className="inline-block bg-[#f4b942] text-[#13241d] font-semibold px-5 py-2.5 hover:bg-[#e3a72c] transition-colors"
+          className="inline-block bg-[#c08a3e] text-[#13241d] font-semibold px-5 py-2.5 hover:bg-[#e3a72c] transition-colors"
         >
           Go to Dashboard
         </Link>

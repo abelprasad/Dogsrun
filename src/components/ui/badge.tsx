@@ -6,13 +6,13 @@ const statusColors: Record<string, string> = {
   placed: "bg-[#dbe7d6] text-[#2f5d3a] border border-[#2f5d3a]/20",
   adopted: "bg-[#dbe7d6] text-[#2f5d3a] border border-[#2f5d3a]/20",
   urgent: "bg-red-100 text-red-700 border border-red-200",
-  pending: "bg-[#f4b942]/25 text-[#13241d] border border-[#f4b942]/40",
-  rescue_requested: "bg-[#13241d] text-[#f4b942] border border-[#f4b942]/30",
+  pending: "bg-[#c08a3e]/25 text-[#13241d] border border-[#c08a3e]/40",
+  rescue_requested: "bg-[#13241d] text-[#c08a3e] border border-[#c08a3e]/30",
   deceased: "bg-[#efe7dc] text-[#5d6a64] border border-[#13241d]/10",
   transferred: "bg-[#efe7dc] text-[#5d6a64] border border-[#13241d]/10",
   pastDue: "bg-red-600 text-white font-black",
   critical: "bg-red-100 text-red-700 border border-red-200 font-black",
-  atRisk: "bg-[#13241d] text-[#f4b942] border border-[#f4b942]/30 font-black",
+  atRisk: "bg-[#13241d] text-[#c08a3e] border border-[#c08a3e]/30 font-black",
 };
 
 export type BadgeVariant = keyof typeof statusColors | "eyebrow";
@@ -22,7 +22,7 @@ const base =
 
 // The bordered gold eyebrow strip used on public page heroes.
 const eyebrowClasses =
-  "inline-flex items-center gap-3 border-y border-[#f4b942]/30 py-3 text-[11px] font-bold uppercase tracking-[0.28em] text-[#f4b942]";
+  "inline-flex items-center gap-3 border-y border-[#c08a3e]/30 py-3 text-[11px] font-bold uppercase tracking-[0.28em] text-[#c08a3e]";
 
 interface BadgeProps {
   variant?: BadgeVariant;
