@@ -99,7 +99,7 @@ export default function LoginPage() {
         <div className="max-w-md w-full">
           <div className="bg-[#fff9ef] outline outline-1 outline-[#13241d]/10 p-10">
             {error && (
-              <div className="p-4 bg-red-50 text-red-700 text-sm border border-red-200 mb-6">{error}</div>
+              <div role="alert" className="p-4 bg-red-50 text-red-700 text-sm border border-red-200 mb-6">{error}</div>
             )}
 
             <form onSubmit={handleLogin} className="space-y-5">

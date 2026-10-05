@@ -18,14 +18,17 @@ export default async function DashboardPage() {
   if (org.approval_status !== 'approved') return <ApprovalWall org={org} />
 
 
-  const [{ count: total }, { count: available }, { count: urgent }, { count: placed }] = await Promise.all([
-    supabaseAdmin.from('dogs').select('*', { count: 'exact', head: true }).eq('shelter_id', org.id),
-    supabaseAdmin.from('dogs').select('*', { count: 'exact', head: true }).eq('shelter_id', org.id).in('status', ['available', null as unknown as string]),
-    supabaseAdmin.from('dogs').select('*', { count: 'exact', head: true }).eq('shelter_id', org.id).eq('status', 'urgent'),
-    supabaseAdmin.from('dogs').select('*', { count: 'exact', head: true }).eq('shelter_id', org.id).in('status', ['placed', 'adopted']),
-  ])
+  // Single query counted in JS (was 4 separate count queries).
+  // L-9: NULL status counts as 'available' to match the page's rendering logic.
+  const { data: statusRows } = await supabaseAdmin
+    .from('dogs')
+    .select('status')
+    .eq('shelter_id', org.id)
 
-  // REVIEW: the 4 count queries above could be one select('status') counted in JS.
+  const total = statusRows?.length ?? 0
+  const available = statusRows?.filter((d) => d.status === 'available' || d.status === null).length ?? 0
+  const urgent = statusRows?.filter((d) => d.status === 'urgent').length ?? 0
+  const placed = statusRows?.filter((d) => d.status === 'placed' || d.status === 'adopted').length ?? 0
   const { data: recentDogs } = await supabaseAdmin
     .from('dogs')
     .select('*, alerts(status)')

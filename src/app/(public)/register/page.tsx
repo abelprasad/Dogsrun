@@ -169,7 +169,7 @@ function RegisterForm() {
 
         <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-5">
           {error && (
-            <div className="border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
+            <div role="alert" className="border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
           )}
 
           <div>
