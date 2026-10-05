@@ -48,12 +48,18 @@ export async function POST(req: NextRequest) {
   // Don't approve a deactivated org — check before the update below
   const { data: existingOrg } = await supabaseAdmin
     .from('organizations')
-    .select('is_active')
+    .select('is_active, approval_status')
     .eq('id', org_id)
     .maybeSingle()
 
   if (action === 'approve' && existingOrg?.is_active === false) {
     return NextResponse.json({ error: 'Cannot approve a deactivated org' }, { status: 400 })
+  }
+
+  // Idempotency (M-D4): skip if already at the target status — prevents
+  // duplicate "You're Approved!" + digest emails on double-click/retry.
+  if (existingOrg?.approval_status === newStatus) {
+    return NextResponse.json({ success: true, message: 'Already at target status', skipped: true })
   }
 
   const { data: org, error: updateError } = await supabaseAdmin

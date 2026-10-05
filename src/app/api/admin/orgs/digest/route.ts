@@ -24,6 +24,13 @@ interface Dog {
   organizations: { name: string } | null
 }
 
+// Idempotency (M-D5): in-memory debounce to prevent duplicate digest emails
+// from double-clicks. 5-minute window per org. Note: does not survive
+// restarts or share across instances — a `last_digest_sent_at` column
+// would be more robust.
+const recentDigests = new Map<string, number>()
+const DIGEST_DEBOUNCE_MS = 5 * 60 * 1000
+
 export async function POST(req: NextRequest) {
   const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -45,6 +52,11 @@ export async function POST(req: NextRequest) {
   }
 
   if (!org_id) return NextResponse.json({ error: 'org_id required' }, { status: 400 })
+
+  const lastSent = recentDigests.get(org_id)
+  if (lastSent && Date.now() - lastSent < DIGEST_DEBOUNCE_MS) {
+    return NextResponse.json({ success: true, message: 'Digest recently sent, skipping duplicate', skipped: true })
+  }
 
 
   const { data: org } = await supabaseAdmin
@@ -167,6 +179,8 @@ export async function POST(req: NextRequest) {
     subject: `${matches.length} dog${matches.length === 1 ? '' : 's'} matching your criteria on DOGSRUN`,
     html: digestHtml,
   })
+
+  recentDigests.set(org_id, Date.now())
 
   return NextResponse.json({ success: true, matches: matches.length })
 }

@@ -26,11 +26,13 @@ export async function POST(req: NextRequest) {
 
   if (!alert) return NextResponse.json({ error: 'Alert not found' }, { status: 404 })
 
+  const wasResponded = alert.status === 'responded'
+
   await supabaseAdmin.from('alerts').update({ status }).eq('id', alert_id)
 
-  // REVIEW: same shelter email as api/respond/route.ts; extract one notifyShelter(alert).
-  // Notify shelter when rescue is interested
-  if (status === 'responded') {
+  // Idempotency (M-D2): only notify the shelter on transition into 'responded',
+  // not on repeat POSTs or the dashboard Undo -> Interested flow.
+  if (status === 'responded' && !wasResponded) {
     const dog = alert.dogs
     const rescue = alert.organizations
     const { data: shelter } = await supabaseAdmin
