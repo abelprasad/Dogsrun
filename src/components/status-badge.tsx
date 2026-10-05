@@ -1,8 +1,11 @@
-// REVIEW: the prop already accepts string; drop this type and the `as DogStatus` casts.
-import { dogStatusLabel, getRiskLevel, type DogStatus } from '@/lib/dog-status';
+import Badge, { type BadgeVariant } from "@/components/ui/badge";
+import { dogStatusLabel, getRiskLevel } from '@/lib/dog-status';
+
+// Kept for existing importers; the status prop accepts any string.
+export type DogStatus = string;
 
 interface StatusBadgeProps {
-  status: DogStatus | string;
+  status: string;
   euthanasiaDate?: string | null;
 }
 
@@ -12,28 +15,15 @@ export default function StatusBadge({ status, euthanasiaDate }: StatusBadgeProps
     const risk = getRiskLevel(euthanasiaDate);
 
     if (risk === 'past-due') {
-      return <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-black uppercase tracking-wider bg-red-600 text-white">Past Due</span>;
+      return <Badge variant="pastDue">Past Due</Badge>;
     }
     if (risk === 'critical') {
-      return <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-black uppercase tracking-wider bg-red-100 text-red-700 border border-red-200">Critical</span>;
+      return <Badge variant="critical">Critical</Badge>;
     }
-    return <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-black uppercase tracking-wider bg-[#13241d] text-[#f4b942] border border-[#f4b942]/30">At Risk</span>;
+    return <Badge variant="atRisk">At Risk</Badge>;
   }
 
-  const styles: Record<string, string> = {
-    available: "bg-[#dbe7d6] text-[#2f5d3a] border border-[#2f5d3a]/20",
-    urgent: "bg-red-100 text-red-700 border border-red-200",
-    pending: "bg-[#f4b942]/25 text-[#13241d] border border-[#f4b942]/40",
-    rescue_requested: "bg-[#13241d] text-[#f4b942] border border-[#f4b942]/30",
-    placed: "bg-[#dbe7d6] text-[#2f5d3a] border border-[#2f5d3a]/20",
-    adopted: "bg-[#dbe7d6] text-[#2f5d3a] border border-[#2f5d3a]/20",
-    deceased: "bg-[#efe7dc] text-[#5d6a64] border border-[#13241d]/10",
-    transferred: "bg-[#efe7dc] text-[#5d6a64] border border-[#13241d]/10",
-  };
-
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider ${styles[status] || styles.available}`}>
-      {dogStatusLabel(status)}
-    </span>
+    <Badge variant={status as BadgeVariant}>{dogStatusLabel(status)}</Badge>
   );
 }

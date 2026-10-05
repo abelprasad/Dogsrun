@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Button from '@/components/ui/button'
 
 import { DOG_STATUSES, getRiskLevel } from '@/lib/dog-status'
 
@@ -186,13 +187,14 @@ export default function AdminDogsTable({ dogs: initialDogs }: { dogs: Dog[] }) {
                     {isDeleting ? (
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-red-600 font-semibold">Delete?</span>
-                        <button
+                        <Button
+                          variant="danger"
+                          size="sm"
                           onClick={() => deleteDog(dog.id)}
                           disabled={loading === dog.id + '-delete'}
-                          className="text-xs font-bold px-2 py-1 bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
                         >
                           {loading === dog.id + '-delete' ? '...' : 'Yes'}
-                        </button>
+                        </Button>
                         <button onClick={() => setConfirmDelete(null)} className="text-xs font-bold text-[#5d6a64] hover:text-[#13241d]">No</button>
                       </div>
                     ) : (
@@ -204,12 +206,13 @@ export default function AdminDogsTable({ dogs: initialDogs }: { dogs: Dog[] }) {
                         >
                           {loading === dog.id + '-alerts' ? '...' : 'Resend Alerts'}
                         </button>
-                        <button
+                        <Button
+                          variant="danger"
+                          size="sm"
                           onClick={() => setConfirmDelete(dog.id)}
-                          className="text-xs font-bold px-2 py-1 bg-red-50 text-red-600 hover:bg-red-100 uppercase tracking-[0.1em]"
                         >
                           Delete
-                        </button>
+                        </Button>
                       </div>
                     )}
                   </td>

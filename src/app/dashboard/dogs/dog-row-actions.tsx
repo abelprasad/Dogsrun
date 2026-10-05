@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { DOG_STATUSES, DOG_STATUS_LABELS } from '@/lib/dog-status';
+import Button from '@/components/ui/button';
 
 // REVIEW: pending status + Apply button; save on change like the admin dogs-table.
 export default function DogRowActions({ dogId, currentStatus }: { dogId: string; currentStatus: string }) {
@@ -60,12 +60,13 @@ export default function DogRowActions({ dogId, currentStatus }: { dogId: string;
       )}
 
       {/* Edit */}
-      <Link
+      <Button
         href={`/dashboard/dogs/${dogId}/edit`}
-        className="text-xs font-semibold px-3 py-2 bg-[#f4b942] text-[#13241d] hover:bg-[#e3a72c] transition-colors whitespace-nowrap"
+        size="sm"
+        className="whitespace-nowrap"
       >
         Edit
-      </Link>
+      </Button>
     </div>
   );
 }
