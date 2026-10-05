@@ -77,23 +77,41 @@ export default function AdminOrgTable() {
 
   async function toggleActive(orgId: string, currentState: boolean) {
     setLoading(orgId + '-active')
-    const res = await fetch('/api/admin/orgs', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ org_id: orgId, is_active: !currentState }),
-    })
-    if (res.ok) await refresh()
+    try {
+      const res = await fetch('/api/admin/orgs', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ org_id: orgId, is_active: !currentState }),
+      })
+      if (res.ok) {
+        await refresh()
+      } else {
+        // M-F4: surface admin failures instead of silent no-op
+        toast.error('Failed to update organization status. Please try again.')
+      }
+    } catch {
+      toast.error('Network error. Please check your connection and try again.')
+    }
     setLoading(null)
   }
 
   async function handleApproval(orgId: string, action: 'approve' | 'reject') {
     setLoading(orgId + '-' + action)
-    const res = await fetch('/api/admin/orgs/approve', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ org_id: orgId, action }),
-    })
-    if (res.ok) await refresh()
+    try {
+      const res = await fetch('/api/admin/orgs/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ org_id: orgId, action }),
+      })
+      if (res.ok) {
+        await refresh()
+      } else {
+        // M-F4: surface admin failures instead of silent no-op
+        toast.error(`Failed to ${action} organization. Please try again.`)
+      }
+    } catch {
+      toast.error('Network error. Please check your connection and try again.')
+    }
     setLoading(null)
   }
 
