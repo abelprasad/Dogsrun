@@ -3,6 +3,7 @@ import Image from "next/image";
 import { dashboardPathFor, getAuthContext } from "@/lib/auth-context";
 
 import { NAV_LINKS } from "@/lib/navigation";
+import MobileNav from "@/components/mobile-nav";
 
 export default async function Navbar() {
   const { user, org, isAdmin } = await getAuthContext();
@@ -33,6 +34,7 @@ export default async function Navbar() {
           </div>
         </div>
         <div className="flex items-center gap-6">
+          <MobileNav />
           {user ? (
             <Link
               href={signedInHref}
