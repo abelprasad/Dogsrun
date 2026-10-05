@@ -106,13 +106,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: 'No active rescue criteria found' })
   }
 
-  // Fetch existing alerts for this dog to prevent duplicates
+  // Fetch existing alerts for this dog to prevent duplicates. Rows stuck in
+  // 'failed' are excluded so the next run can retry the email send.
   const { data: existingAlerts } = await supabaseAdmin
     .from('alerts')
-    .select('rescue_id')
+    .select('rescue_id, status')
     .eq('dog_id', dog_id)
+    .neq('status', 'failed')
 
-  const alreadyAlerted = new Set((existingAlerts || []).map((a: { rescue_id: string }) => a.rescue_id))
+  const alreadyAlerted = new Set((existingAlerts || []).map((a: { rescue_id: string; status: string }) => a.rescue_id))
 
   const matches: Match[] = []
 
@@ -166,17 +168,21 @@ export async function POST(req: NextRequest) {
       const safeShelterCity = escapeHtml(shelter?.city)
       const safeShelterState = escapeHtml(shelter?.state)
 
-      const { data: alertData, error: alertError } = await supabaseAdmin.from('alerts').insert({
+      // Track the send lifecycle: row starts as 'sending' so a crash or a
+      // Resend failure never leaves a phantom 'sent' alert behind. Upsert on
+      // (dog_id, rescue_id) so retrying a 'failed' row reuses it.
+      const { data: alertData, error: alertError } = await supabaseAdmin.from('alerts').upsert({
         dog_id: dog.id,
         rescue_id: org.id,
         criteria_id: criteria.id,
-        status: 'sent',
+        status: 'sending',
         sent_at: new Date().toISOString(),
-      }).select().single()
+      }, { onConflict: 'dog_id,rescue_id' }).select().single()
 
       if (alertError || !alertData) throw alertError
 
-      await resend.emails.send({
+      try {
+        await resend.emails.send({
         from: 'DOGSRUN Alerts <alerts@dogsrun.org>',
         to: org.email,
         subject: `New dog match: ${dog.name ?? 'Unnamed'} (${dog.breed ?? 'Unknown breed'})`,
@@ -246,7 +252,13 @@ export async function POST(req: NextRequest) {
             </div>
           </div>
         `,
-      })
+        })
+
+        await supabaseAdmin.from('alerts').update({ status: 'sent' }).eq('id', alertData.id)
+      } catch (sendError) {
+        await supabaseAdmin.from('alerts').update({ status: 'failed' }).eq('id', alertData.id)
+        throw sendError
+      }
     })
   )
 
