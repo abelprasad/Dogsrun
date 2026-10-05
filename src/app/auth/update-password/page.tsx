@@ -11,6 +11,7 @@ export default function UpdatePasswordPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [ready, setReady] = useState(false)
+  const [linkExpired, setLinkExpired] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -19,7 +20,12 @@ export default function UpdatePasswordPage() {
     const isRecoveryRedirect = new URLSearchParams(window.location.search).get('recovery') === '1'
     if (isRecoveryRedirect) {
       supabase.auth.getSession().then(({ data: { session } }) => {
-        setReady(Boolean(session))
+        if (session) {
+          setReady(true)
+        } else {
+          // M-F6: don't leave user on infinite "Verifying..." — show expired state
+          setLinkExpired(true)
+        }
       })
     }
 
@@ -27,7 +33,18 @@ export default function UpdatePasswordPage() {
       if (event === 'PASSWORD_RECOVERY') setReady(true)
     })
 
-    return () => subscription.unsubscribe()
+    // M-F6: timeout fallback — if no recovery session in 10s, show expired
+    const timeout = setTimeout(() => {
+      setReady((r) => {
+        if (!r) setLinkExpired(true)
+        return r
+      })
+    }, 10000)
+
+    return () => {
+      subscription.unsubscribe()
+      clearTimeout(timeout)
+    }
   }, [])
 
   async function handleSubmit(e: React.FormEvent) {
@@ -66,7 +83,21 @@ export default function UpdatePasswordPage() {
         </header>
         <main className="py-16 px-8 flex items-center justify-center">
           <div className="max-w-md w-full bg-[#fff9ef] outline outline-1 outline-[#13241d]/10 p-10 text-center">
-            <p className="text-[#5d6a64] text-sm">Verifying your reset link...</p>
+            {linkExpired ? (
+              <>
+                <p className="text-red-700 text-sm mb-4" role="alert">
+                  This reset link is invalid or has expired.
+                </p>
+                <Link
+                  href="/auth/reset-password"
+                  className="text-[#13241d] font-bold underline"
+                >
+                  Request a new reset link
+                </Link>
+              </>
+            ) : (
+              <p className="text-[#5d6a64] text-sm">Verifying your reset link...</p>
+            )}
           </div>
         </main>
       </div>

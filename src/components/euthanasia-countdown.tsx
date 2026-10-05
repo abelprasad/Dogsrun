@@ -1,11 +1,12 @@
 'use client';
 
+import { parseLocalDate } from '@/lib/date-utils'
 import { useEffect, useState } from 'react';
 import { getRiskLevel } from '@/lib/dog-status';
 
 function getCountdown(euthanasiaDate: string) {
   const now = new Date();
-  const target = new Date(euthanasiaDate);
+  const target = parseLocalDate(euthanasiaDate);
   const diffMs = target.getTime() - now.getTime();
   const diffHours = diffMs / (1000 * 60 * 60);
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
@@ -59,7 +60,7 @@ export default function EuthanasiaCountdown({ euthanasiaDate }: { euthanasiaDate
         </div>
         <div className="flex-1 text-right">
           <p className={`text-[10px] font-semibold ${isCritical ? 'text-red-400' : 'text-[#d8cfc2]'}`}>
-            {new Date(euthanasiaDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            {parseLocalDate(euthanasiaDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
           </p>
         </div>
       </div>
