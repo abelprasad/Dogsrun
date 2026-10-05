@@ -1,22 +1,53 @@
 import Image from "next/image";
 import Link from "next/link";
+import { supabaseAdmin } from "@/lib/supabase-server";
+import { daysUntilEuthanasia, daysLeftLabel } from "@/lib/urgency";
+import UrgentTicker from "@/components/urgent-ticker";
 
 const dogPhotos = {
-  hero: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=1200&q=85",
-  rescue: "https://images.unsplash.com/photo-1561037404-61cd46aa615b?auto=format&fit=crop&w=1200&q=85",
+  hero: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=2000&q=85",
+  rescue: "https://images.unsplash.com/photo-1561037404-61cd46aa615b?auto=format&fit=crop&w=1600&q=85",
 };
 
 const steps = [
-  ["Intake", "Shelters publish the essential context: behavior notes, timeline, size, medical flags, and transfer constraints."],
-  ["Match", "DOGSRUN compares each case against active rescue criteria and highlights the organizations most likely to say yes."],
-  ["Move", "Rescues receive a focused alert with one-click response links so urgent dogs can get out faster."],
+  {
+    n: "01",
+    title: "Intake",
+    copy: "Shelters publish the essential context: behavior notes, timeline, size, medical flags, and transfer constraints.",
+    accent: "text-[#f4b942]",
+  },
+  {
+    n: "02",
+    title: "Match",
+    copy: "DOGSRUN compares each case against active rescue criteria and highlights the organizations most likely to say yes.",
+    accent: "text-[#e04a3a]",
+  },
+  {
+    n: "03",
+    title: "Move",
+    copy: "Rescues receive a focused alert with one-click response links so urgent dogs can get out faster.",
+    accent: "text-[#f8f1e8]",
+  },
 ];
 
-export default function Home() {
+export default async function Home() {
+  // Dogs on the clock: urgent status or a scheduled euthanasia date, soonest first.
+  const { data } = await supabaseAdmin
+    .from("dogs")
+    .select("id, name, breed, photo_url, status, euthanasia_date")
+    .in("status", ["available", "urgent"])
+    .not("euthanasia_date", "is", null)
+    .order("euthanasia_date", { ascending: true })
+    .limit(8);
+
+  const onTheClock = (data || [])
+    .map((d) => ({ ...d, daysLeft: daysUntilEuthanasia(d.euthanasia_date) }))
+    .sort((a, b) => (a.daysLeft ?? 9999) - (b.daysLeft ?? 9999));
+
   return (
-    <div className="bg-[#f5f0e8] text-[#17231f]">
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-[#1a2e1a] px-5 py-20 text-[#fff4c1] sm:px-8 sm:py-24 lg:px-12 lg:py-28">
+    <div className="bg-[#0b140e] text-[#f8f1e8]">
+      {/* ── IMMERSIVE HERO: full viewport, photography-led, oversized type ── */}
+      <section className="relative flex min-h-[100svh] flex-col overflow-hidden">
         <Image
           src={dogPhotos.hero}
           alt="Golden retriever rescue dog looking upward"
@@ -26,105 +57,246 @@ export default function Home() {
           unoptimized
           priority
         />
-        <div className="absolute inset-0 bg-[#1a2e1a]/75" />
-        <div className="absolute inset-0 bg-black/25" />
-        <div className="absolute inset-x-0 bottom-0 h-px bg-[#f4b942]/30" />
-        <div className="relative mx-auto max-w-7xl">
-          <div className="max-w-5xl">
-            <div className="mb-8 inline-flex items-center gap-3 border-y border-[#f4b942]/30 py-3 text-[11px] font-bold uppercase tracking-[0.28em] text-[#f4b942]">
-              <span className="h-2 w-2 rounded-full bg-[#f4b942]" />
-              Live shelter-to-rescue matching
-            </div>
-            <h1 className="text-6xl font-black leading-[0.86] tracking-tight text-[#f4b942] sm:text-7xl lg:text-8xl">
-              Find the rescue before the clock wins.
-            </h1>
-            <p className="mt-8 max-w-3xl text-xl font-semibold leading-8 text-[#f8f1e8] sm:text-2xl sm:leading-9">
-              A fast, high-signal matching platform that helps shelters reach the right rescue partners before urgent dogs run out of time.
-            </p>
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <Link href="/register" className="inline-flex items-center justify-center bg-[#f4b942] px-6 py-3 text-sm font-bold uppercase tracking-[0.16em] text-[#1a2e1a] transition hover:bg-[#ffd86a]">
-                Start matching
-              </Link>
-              <Link href="/dogs" className="inline-flex items-center justify-center border border-[#f8f1e8]/40 px-6 py-3 text-sm font-bold uppercase tracking-[0.16em] text-[#f8f1e8] transition hover:border-[#f8f1e8] hover:bg-[#f8f1e8] hover:text-[#1a2e1a]">
-                View dogs
-              </Link>
-            </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0b140e] via-[#0b140e]/35 to-[#0b140e]/55" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0b140e]/70 via-transparent to-transparent" />
+
+        <div className="relative flex flex-1 flex-col justify-end px-5 pb-14 pt-28 sm:px-10 sm:pb-20 lg:px-16">
+          <div className="mb-6 flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.3em] text-[#f4b942]">
+            <span className="animate-pulse-dot h-2.5 w-2.5 rounded-full bg-[#e04a3a]" />
+            Live shelter-to-rescue matching
+            {onTheClock.length > 0 && (
+              <span className="border border-[#e04a3a]/60 px-2 py-1 text-[#ff8a7a]">
+                {onTheClock.length} on the clock
+              </span>
+            )}
+          </div>
+
+          <h1 className="font-black uppercase leading-[0.82] tracking-tight">
+            <span className="block text-[clamp(3.2rem,11vw,10rem)] text-[#f8f1e8]">Every</span>
+            <span className="block text-[clamp(3.2rem,11vw,10rem)] text-[#f4b942]">second</span>
+            <span className="text-outline block text-[clamp(3.2rem,11vw,10rem)]">counts.</span>
+          </h1>
+
+          <p className="mt-7 max-w-xl text-lg font-medium leading-8 text-[#f8f1e8]/85 sm:text-xl">
+            A fast, high-signal matching platform that gets urgent dogs in front
+            of the right rescue partners — before the clock runs out.
+          </p>
+
+          <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+            <Link
+              href="/register"
+              className="inline-flex items-center justify-center bg-[#f4b942] px-8 py-4 text-sm font-black uppercase tracking-[0.18em] text-[#140a08] transition hover:bg-[#ffd86a]"
+            >
+              Start matching
+            </Link>
+            <Link
+              href="/dogs?urgency=urgent"
+              className="inline-flex items-center justify-center gap-3 border-2 border-[#e04a3a] px-8 py-4 text-sm font-black uppercase tracking-[0.18em] text-[#ff8a7a] transition hover:bg-[#e04a3a] hover:text-white"
+            >
+              <span className="animate-pulse-dot h-2 w-2 rounded-full bg-current" />
+              Dogs on the clock
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* How it works */}
-      <section className="bg-[#f5f0e8] px-5 py-16 text-[#17231f] sm:px-8 lg:px-12">
-        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.72fr_1.28fr]">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#d95f4b]">How it works</p>
-            <h2 className="mt-4 text-4xl font-black tracking-tight text-[#13241d] sm:text-5xl">
-              Built for the handoff moment.
-            </h2>
-          </div>
-          <div className="grid gap-4 md:grid-cols-3">
-            {steps.map(([title, copy], index) => (
-              <div key={title} className="border border-[#13241d]/12 bg-[#fff9ef] p-7">
-                <div className="mb-10 flex h-12 w-12 items-center justify-center rounded-full bg-[#f4b942] text-sm font-black text-[#13241d]">
-                  0{index + 1}
-                </div>
-                <h3 className="text-xl font-black text-[#13241d]">{title}</h3>
-                <p className="mt-4 text-sm leading-7 text-[#5d6a64]">{copy}</p>
+      {/* ── URGENCY TICKER ── */}
+      <UrgentTicker
+        dogs={onTheClock.map((d) => ({
+          id: d.id,
+          name: d.name,
+          daysLeft: daysLeftLabel(d.daysLeft),
+        }))}
+      />
+
+      {/* ── MISSION: oversized editorial statement ── */}
+      <section className="px-5 py-20 sm:px-10 sm:py-28 lg:px-16">
+        <div className="mx-auto max-w-7xl">
+          <p className="text-[11px] font-black uppercase tracking-[0.3em] text-[#e04a3a]">The mission</p>
+          <p className="mt-6 max-w-5xl font-serif text-[clamp(1.8rem,4.5vw,3.75rem)] font-bold leading-[1.15] text-[#f8f1e8]">
+            Thousands of healthy, adoptable dogs are euthanized every year —
+            not for lack of love, but for lack of <span className="text-[#f4b942]">a fast enough handoff</span>.
+            DOGSRUN exists to close that gap.
+          </p>
+          <div className="mt-10 flex flex-wrap gap-x-12 gap-y-6">
+            {[
+              ["50+", "states in the network"],
+              ["24/7", "matching, always on"],
+              ["1-click", "rescue response"],
+            ].map(([big, small]) => (
+              <div key={small}>
+                <p className="text-5xl font-black tracking-tight text-[#f4b942]">{big}</p>
+                <p className="mt-1 text-xs font-bold uppercase tracking-[0.22em] text-[#f8f1e8]/50">{small}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Shelter / Rescue CTAs */}
-      <section className="bg-[#1a2e1a] px-5 py-16 text-[#f8f1e8] sm:px-8 lg:px-12">
-        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-2">
-          <div className="border-l-4 border-[#f59e0b] bg-[#f5f0e8] p-8 lg:p-10">
-            <p className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.28em] text-[#d95f4b]">
-              <span className="text-lg leading-none text-[#f59e0b]">→</span>
-              For shelters
+      {/* ── HOW IT WORKS: asymmetric editorial, staggered ── */}
+      <section className="border-t border-white/10 px-5 py-20 sm:px-10 sm:py-28 lg:px-16">
+        <div className="mx-auto max-w-7xl">
+          <div className="flex flex-wrap items-end justify-between gap-6">
+            <div>
+              <p className="text-[11px] font-black uppercase tracking-[0.3em] text-[#e04a3a]">How it works</p>
+              <h2 className="mt-4 text-[clamp(2.5rem,6vw,5rem)] font-black uppercase leading-[0.9] tracking-tight">
+                Built for the<br />handoff <span className="text-[#f4b942]">moment.</span>
+              </h2>
+            </div>
+            <p className="max-w-xs text-sm leading-7 text-[#f8f1e8]/60">
+              Three moves. No spreadsheets, no phone tag — just the dog, the
+              details, and the rescue most likely to say yes.
             </p>
-            <h2 className="mt-5 max-w-2xl text-3xl font-black tracking-tight text-[#13241d] sm:text-4xl">Publish the case once. Reach the rescues that fit.</h2>
-            <p className="mt-5 max-w-xl text-sm leading-7 text-[#5d6a64]">
-              List urgent dogs, capture the details rescues need, and see who has responded without managing another spreadsheet.
-            </p>
-            <Link href="/register?type=shelter" className="mt-8 inline-flex bg-[#13241d] px-5 py-3 text-sm font-bold uppercase tracking-[0.16em] text-[#f8f1e8] transition hover:bg-[#f4b942] hover:text-[#13241d]">
-              Register shelter
-            </Link>
           </div>
 
-          <div className="border-l-4 border-[#f59e0b] bg-[#f5f0e8] p-8 lg:p-10">
-            <p className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.28em] text-[#d95f4b]">
-              <span className="text-lg leading-none text-[#f59e0b]">→</span>
-              For rescues
-            </p>
-            <h2 className="mt-5 max-w-2xl text-3xl font-black tracking-tight text-[#13241d] sm:text-4xl">Set your criteria. Get the dogs you can actually pull.</h2>
-            <p className="mt-5 max-w-xl text-sm leading-7 text-[#5d6a64]">
-              Define geography, breed focus, weight, age, and capacity once. Receive urgent alerts that respect your mission and your limits.
-            </p>
-            <Link href="/register?type=rescue" className="mt-8 inline-flex bg-[#13241d] px-5 py-3 text-sm font-bold uppercase tracking-[0.16em] text-[#f8f1e8] transition hover:bg-[#f4b942] hover:text-[#13241d]">
-              Register rescue
-            </Link>
+          <div className="mt-14 grid gap-6 lg:grid-cols-12">
+            {steps.map((step, i) => (
+              <div
+                key={step.n}
+                className={`relative overflow-hidden border border-white/10 bg-[#122016] p-8 sm:p-10 ${
+                  i === 0
+                    ? "lg:col-span-5"
+                    : i === 1
+                      ? "lg:col-span-7 lg:mt-16"
+                      : "lg:col-span-6 lg:col-start-4 lg:-mt-4"
+                }`}
+              >
+                <span
+                  aria-hidden
+                  className={`pointer-events-none absolute -right-4 -top-8 select-none text-[9rem] font-black leading-none opacity-15 sm:text-[12rem] ${step.accent}`}
+                >
+                  {step.n}
+                </span>
+                <p className={`text-sm font-black uppercase tracking-[0.3em] ${step.accent}`}>Step {step.n}</p>
+                <h3 className="mt-4 text-4xl font-black uppercase tracking-tight sm:text-5xl">{step.title}</h3>
+                <p className="mt-5 max-w-md text-base leading-8 text-[#f8f1e8]/70">{step.copy}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Closing — dog photo + text */}
-      <section className="grid grid-cols-1 lg:grid-cols-2">
-        <div className="relative min-h-[400px] lg:min-h-[560px]">
-          <Image
-            src={dogPhotos.rescue}
-            alt="Expressive close-up portrait of a rescue dog"
-            fill
-            className="object-cover object-center"
-            sizes="(min-width: 1024px) 50vw, 100vw"
-            unoptimized
-          />
-        </div>
-        <div className="bg-[#2d1f0e] flex items-center justify-center px-10 py-16 lg:py-24">
-          <h2 className="max-w-lg text-5xl font-black leading-none tracking-tight text-[#f5f0e8] sm:text-6xl lg:text-7xl">
-            Every dog deserves a second run.
+      {/* ── ON THE CLOCK: featured urgent dogs ── */}
+      {onTheClock.length > 0 && (
+        <section className="border-t border-white/10 px-5 py-20 sm:px-10 sm:py-28 lg:px-16">
+          <div className="mx-auto max-w-7xl">
+            <div className="flex flex-wrap items-end justify-between gap-6">
+              <div>
+                <p className="flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.3em] text-[#e04a3a]">
+                  <span className="animate-pulse-dot h-2.5 w-2.5 rounded-full bg-[#e04a3a]" />
+                  On the clock
+                </p>
+                <h2 className="mt-4 text-[clamp(2.5rem,6vw,5rem)] font-black uppercase leading-[0.9] tracking-tight">
+                  Running out<br />of <span className="text-[#e04a3a]">time.</span>
+                </h2>
+              </div>
+              <Link
+                href="/dogs?urgency=urgent"
+                className="border-b-2 border-[#f4b942] pb-1 text-sm font-black uppercase tracking-[0.2em] text-[#f4b942] transition hover:text-[#ffd86a]"
+              >
+                See all urgent dogs →
+              </Link>
+            </div>
+
+            <div className="mt-12 grid gap-6 md:grid-cols-3">
+              {onTheClock.slice(0, 3).map((dog) => (
+                <Link
+                  key={dog.id}
+                  href={`/dogs/${dog.id}`}
+                  className="group relative block overflow-hidden border-2 border-[#e04a3a] bg-[#122016]"
+                >
+                  <div className="relative aspect-[4/5] overflow-hidden">
+                    {dog.photo_url ? (
+                      <Image
+                        src={dog.photo_url}
+                        alt={dog.name || "Dog photo"}
+                        fill
+                        className="object-cover transition duration-700 group-hover:scale-105"
+                        unoptimized
+                        sizes="(min-width: 768px) 33vw, 100vw"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-[#1a2e1a] text-8xl font-black text-[#f4b942]">
+                        {dog.name?.[0] || "D"}
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
+                    <div className="absolute left-4 top-4 flex items-center gap-2 bg-[#e04a3a] px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-white">
+                      <span className="animate-pulse-dot h-2 w-2 rounded-full bg-white" />
+                      {daysLeftLabel(dog.daysLeft) || "Urgent"}
+                    </div>
+                    <div className="absolute inset-x-0 bottom-0 p-6">
+                      <h3 className="text-4xl font-black uppercase tracking-tight text-white">{dog.name}</h3>
+                      <p className="mt-1 text-sm font-bold uppercase tracking-[0.2em] text-[#f4b942]">{dog.breed}</p>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── SHELTER / RESCUE: bold split panels ── */}
+      <section className="grid lg:grid-cols-2">
+        <div className="group relative overflow-hidden border-t border-white/10 px-8 py-16 sm:px-12 sm:py-24">
+          <span aria-hidden className="pointer-events-none absolute -bottom-10 right-0 select-none text-[10rem] font-black leading-none text-white/5">
+            →
+          </span>
+          <p className="text-[11px] font-black uppercase tracking-[0.3em] text-[#f4b942]">For shelters</p>
+          <h2 className="mt-5 text-[clamp(2rem,4.5vw,3.75rem)] font-black uppercase leading-[0.92] tracking-tight">
+            Publish the case once. Reach the rescues that fit.
           </h2>
+          <p className="mt-6 max-w-md text-base leading-8 text-[#f8f1e8]/65">
+            List urgent dogs, capture the details rescues need, and see who has
+            responded — without managing another spreadsheet.
+          </p>
+          <Link
+            href="/register?type=shelter"
+            className="mt-9 inline-flex bg-[#f4b942] px-8 py-4 text-sm font-black uppercase tracking-[0.18em] text-[#140a08] transition hover:bg-[#ffd86a]"
+          >
+            Register shelter
+          </Link>
+        </div>
+        <div className="group relative overflow-hidden border-t border-white/10 bg-[#e04a3a] px-8 py-16 sm:px-12 sm:py-24">
+          <p className="text-[11px] font-black uppercase tracking-[0.3em] text-white/90">For rescues</p>
+          <h2 className="mt-5 text-[clamp(2rem,4.5vw,3.75rem)] font-black uppercase leading-[0.92] tracking-tight text-white">
+            Set your criteria. Get the dogs you can actually pull.
+          </h2>
+          <p className="mt-6 max-w-md text-base leading-8 text-white/80">
+            Define geography, breed focus, weight, age, and capacity once.
+            Receive urgent alerts that respect your mission and your limits.
+          </p>
+          <Link
+            href="/register?type=rescue"
+            className="mt-9 inline-flex bg-[#140a08] px-8 py-4 text-sm font-black uppercase tracking-[0.18em] text-white transition hover:bg-black"
+          >
+            Register rescue
+          </Link>
+        </div>
+      </section>
+
+      {/* ── CLOSING: full-bleed photo, massive overlapping type ── */}
+      <section className="relative flex min-h-[80svh] items-end overflow-hidden">
+        <Image
+          src={dogPhotos.rescue}
+          alt="Expressive close-up portrait of a rescue dog"
+          fill
+          className="object-cover object-center"
+          sizes="100vw"
+          unoptimized
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0b140e] via-[#0b140e]/30 to-transparent" />
+        <div className="relative w-full px-5 pb-16 sm:px-10 lg:px-16">
+          <h2 className="max-w-6xl text-[clamp(3rem,10vw,9rem)] font-black uppercase leading-[0.85] tracking-tight">
+            Every dog deserves <span className="text-[#f4b942]">a second run.</span>
+          </h2>
+          <Link
+            href="/dogs"
+            className="mt-8 inline-flex items-center gap-3 border-b-2 border-[#f4b942] pb-1 text-sm font-black uppercase tracking-[0.22em] text-[#f8f1e8] transition hover:text-[#f4b942]"
+          >
+            Meet the dogs →
+          </Link>
         </div>
       </section>
     </div>

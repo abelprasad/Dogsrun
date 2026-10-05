@@ -1,11 +1,9 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import StatusBadge from '@/components/status-badge'
-import BrowseStateFilter from '@/components/browse-state-filter'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { daysUntilEuthanasia, daysLeftLabel, isDogUrgent } from '@/lib/urgency'
 import Pagination from '@/components/ui/pagination'
-import Badge from '@/components/ui/badge'
-
+import BrowseFilters, { type UrgencyFilter } from '@/components/browse-filters'
 
 const PAGE_SIZE = 12
 
@@ -55,16 +53,16 @@ const TABS: { key: Tab; label: string }[] = [
 
 const HERO: Record<Tab, { heading: string; sub: string }> = {
   dogs: {
-    heading: 'Dogs ready for a rescue commitment.',
-    sub: 'A live view of available and urgent dogs in the DOGSRUN network. Open a profile to review the details shelters need rescues to see first.',
+    heading: 'Find the dog before the clock wins.',
+    sub: 'Every urgent case in the DOGSRUN network, sorted by time left. Open a profile to see what the shelter needs you to know first.',
   },
   shelters: {
-    heading: 'Shelter partners in the network.',
-    sub: 'Approved shelters actively listing dogs for rescue. Each partner has been verified and onboarded through DOGSRUN.',
+    heading: 'Shelters in the network.',
+    sub: 'Approved, verified shelters actively listing dogs for rescue.',
   },
   rescues: {
-    heading: 'Rescues looking for their next dog.',
-    sub: "Active rescue organizations in the DOGSRUN network and the dogs they're ready to take.",
+    heading: 'Rescues in the network.',
+    sub: "Active rescue organizations and the dogs they're ready to take.",
   },
 }
 
@@ -73,40 +71,75 @@ function parsePageParam(value: string | undefined): number {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 1
 }
 
+function sanitizeQuery(q: string | undefined): string {
+  return (q || '').replace(/[%(),]/g, '').trim().slice(0, 60)
+}
+
 export default async function BrowsePage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; page?: string; state?: string }>
+  searchParams: Promise<{ tab?: string; page?: string; state?: string; q?: string; urgency?: string }>
 }) {
-  const { tab: tabParam, page: pageParam, state: stateParam } = await searchParams
+  const { tab: tabParam, page: pageParam, state: stateParam, q: qParam, urgency: urgencyParam } = await searchParams
   const stateFilter = stateParam && stateParam.length === 2 ? stateParam.toUpperCase() : ''
   const tab: Tab = (tabParam === 'shelters' || tabParam === 'rescues') ? tabParam : 'dogs'
+  const urgency: UrgencyFilter = urgencyParam === 'urgent' || urgencyParam === 'available' ? urgencyParam : 'all'
+  const query = sanitizeQuery(qParam)
   const page = parsePageParam(pageParam)
   const from = (page - 1) * PAGE_SIZE
   const to = from + PAGE_SIZE - 1
 
-  // REVIEW: shelter and rescue queries are identical except type, each with N+1 per-org queries; use one select with embedded dogs(count) / rescue_criteria(...). In the JSX, render the empty state and BrowseStateFilter once; Prev/Next duplicate the page-number links.
+  const baseParams = (extra: Record<string, string | null>) => {
+    const p = new URLSearchParams()
+    p.set('tab', tab)
+    if (stateFilter) p.set('state', stateFilter)
+    if (query) p.set('q', query)
+    if (urgency !== 'all') p.set('urgency', urgency)
+    for (const [k, v] of Object.entries(extra)) {
+      if (v === null) p.delete(k)
+      else p.set(k, v)
+    }
+    return `/dogs?${p.toString()}`
+  }
+
   // ── Dogs ──────────────────────────────────────────────────────────────────
-  let dogs: DogCard[] = []
+  let dogs: (DogCard & { _daysLeft: number | null; _urgent: boolean })[] = []
   let dogCount = 0
   let totalPages = 1
 
   if (tab === 'dogs') {
-    let query = supabaseAdmin
+    let dbQuery = supabaseAdmin
       .from('dogs')
       .select('*, organizations!inner(name, city, state)', { count: 'exact' })
-      .in('status', ['available', 'urgent'])
       .eq('organizations.is_test', false)
+      .order('euthanasia_date', { ascending: true, nullsFirst: false })
       .order('created_at', { ascending: false })
       .range(from, to)
-    if (stateFilter) query = query.eq('organizations.state', stateFilter)
-    const { data, count } = await query
-    dogs = (data || []) as DogCard[]
+
+    if (urgency === 'urgent') {
+      dbQuery = dbQuery.in('status', ['available', 'urgent']).or('status.eq.urgent,euthanasia_date.not.is.null')
+    } else if (urgency === 'available') {
+      dbQuery = dbQuery.eq('status', 'available').is('euthanasia_date', null)
+    } else {
+      dbQuery = dbQuery.in('status', ['available', 'urgent'])
+    }
+
+    if (stateFilter) dbQuery = dbQuery.eq('organizations.state', stateFilter)
+    if (query) dbQuery = dbQuery.or(`name.ilike.%${query}%,breed.ilike.%${query}%`)
+
+    const { data, count } = await dbQuery
+    const rows = (data || []) as DogCard[]
+    dogs = rows
+      .map((d) => {
+        const daysLeft = daysUntilEuthanasia(d.euthanasia_date)
+        return { ...d, _daysLeft: daysLeft, _urgent: isDogUrgent(d.status, d.euthanasia_date) }
+      })
+      .sort((a, b) => Number(b._urgent) - Number(a._urgent))
     dogCount = count || 0
     totalPages = Math.max(1, Math.ceil(dogCount / PAGE_SIZE))
   }
 
-  // ── Shelters ───────────────────────────────────────────────────────────────
+  // ── Shelters ──────────────────────────────────────────────────────────────
   let shelters: ShelterCard[] = []
 
   if (tab === 'shelters') {
@@ -118,10 +151,10 @@ export default async function BrowsePage({
       .eq('is_test', false)
       .order('name')
     if (stateFilter) shelterQuery = shelterQuery.eq('state', stateFilter)
+    if (query) shelterQuery = shelterQuery.ilike('name', `%${query}%`)
     const { data } = await shelterQuery
     const shelterOrgs = (data || []) as OrganizationSummary[]
 
-    // Attach dog counts
     const counts = await Promise.all(
       shelterOrgs.map(s =>
         supabaseAdmin
@@ -134,7 +167,7 @@ export default async function BrowsePage({
     shelters = shelterOrgs.map((s, i) => ({ ...s, dog_count: counts[i].count || 0 }))
   }
 
-  // ── Rescues ────────────────────────────────────────────────────────────────
+  // ── Rescues ───────────────────────────────────────────────────────────────
   let rescues: RescueCard[] = []
 
   if (tab === 'rescues') {
@@ -146,6 +179,7 @@ export default async function BrowsePage({
       .eq('is_test', false)
       .order('name')
     if (stateFilter) rescueQuery = rescueQuery.eq('state', stateFilter)
+    if (query) rescueQuery = rescueQuery.ilike('name', `%${query}%`)
     const { data } = await rescueQuery
     const orgs = (data || []) as OrganizationSummary[]
 
@@ -163,33 +197,34 @@ export default async function BrowsePage({
   }
 
   const hero = HERO[tab]
+  const urgentCount = dogs.filter((d) => d._urgent).length
 
   return (
-    <div className="min-h-screen bg-[#f5f0e8] text-[#13241d]">
+    <div className="min-h-screen bg-[#0b140e] text-[#f8f1e8]">
       {/* Hero */}
-      <header className="bg-[#13241d] px-5 pb-0 pt-16 sm:px-8 lg:px-12">
+      <header className="border-b border-white/10 px-5 pb-10 pt-16 sm:px-10 lg:px-16">
         <div className="mx-auto max-w-7xl">
-          <Badge variant="eyebrow" className="mb-6">
-            <span className="h-2 w-2 rounded-full bg-[#d95f4b]" />
+          <p className="mb-6 flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.3em] text-[#f4b942]">
+            <span className="animate-pulse-dot h-2.5 w-2.5 rounded-full bg-[#e04a3a]" />
             DOGSRUN Network
-          </Badge>
-          <h1 className="max-w-4xl text-5xl font-black leading-[0.9] tracking-tight text-[#f4b942] sm:text-6xl lg:text-7xl">
-            {hero.heading}
-          </h1>
-          <p className="mt-6 max-w-2xl text-base leading-8 text-[#c8d3ce]">
-            {hero.sub}
           </p>
+          <h1 className="max-w-5xl text-[clamp(2.75rem,7vw,6rem)] font-black uppercase leading-[0.88] tracking-tight">
+            {hero.heading.split('clock')[0]}
+            {hero.heading.includes('clock') && <span className="text-[#e04a3a]">clock</span>}
+            {hero.heading.includes('clock') && hero.heading.split('clock')[1]}
+          </h1>
+          <p className="mt-6 max-w-2xl text-base leading-8 text-[#f8f1e8]/60">{hero.sub}</p>
 
           {/* Tabs */}
-          <div className="mt-10 flex gap-1">
+          <div className="mt-10 flex gap-2">
             {TABS.map(t => (
               <Link
                 key={t.key}
-                href={`/dogs?tab=${t.key}`}
-                className={`px-5 py-3 text-xs font-black uppercase tracking-[0.2em] transition-colors ${
+                href={baseParams({ tab: t.key, page: null })}
+                className={`px-6 py-3 text-xs font-black uppercase tracking-[0.2em] transition-colors ${
                   tab === t.key
-                    ? 'bg-[#f4b942] text-[#13241d]'
-                    : 'bg-[#13241d] text-[#f5f0e8]/50 hover:text-[#f5f0e8] border border-white/10'
+                    ? 'bg-[#f4b942] text-[#140a08]'
+                    : 'border border-white/15 text-[#f8f1e8]/50 hover:border-[#f4b942]/60 hover:text-[#f8f1e8]'
                 }`}
               >
                 {t.label}
@@ -199,242 +234,238 @@ export default async function BrowsePage({
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-5 py-10 sm:px-8 lg:px-12">
+      <main className="mx-auto max-w-7xl px-5 py-10 sm:px-10 lg:px-16">
+        <BrowseFilters tab={tab} currentState={stateFilter} currentUrgency={urgency} currentQuery={query} />
 
-        {/* ── Dogs tab ── */}
         {tab === 'dogs' && (
           <>
-            <BrowseStateFilter tab={tab} currentState={stateFilter} />
+            {urgentCount > 0 && urgency === 'all' && !query && (
+              <p className="mb-8 flex items-center gap-3 border-l-4 border-[#e04a3a] bg-[#e04a3a]/10 px-5 py-4 text-sm font-black uppercase tracking-[0.18em] text-[#ff8a7a]">
+                <span className="animate-pulse-dot h-2.5 w-2.5 rounded-full bg-[#e04a3a]" />
+                {urgentCount} dog{urgentCount !== 1 ? 's' : ''} on this page {urgentCount !== 1 ? 'are' : 'is'} running out of time
+              </p>
+            )}
             {dogs.length > 0 ? (
-            <>
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                {dogs.map((dog) => (
-                  <Link
-                    key={dog.id}
-                    href={`/dogs/${dog.id}`}
-                    className="group flex min-h-full flex-col overflow-hidden bg-[#fff9ef] outline outline-1 outline-[#13241d]/10 transition hover:-translate-y-1 hover:outline-[#d95f4b]"
-                  >
-                    <div className="relative aspect-[5/4] overflow-hidden bg-[#dce8dd]">
-                      {dog.photo_url ? (
-                        <Image
-                          src={dog.photo_url}
-                          alt={dog.name || 'Dog photo'}
-                          fill
-                          className="object-cover saturate-[0.92] transition duration-700 group-hover:scale-105"
-                          unoptimized
-                          sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center bg-[#dce8dd] text-7xl font-black text-[#436154]">
-                          {dog.name?.[0] || 'D'}
+              <>
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {dogs.map((dog) => dog._urgent ? (
+                    // ── FEATURED URGENT CARD: 2x, horizontal, dramatic ──
+                    <Link
+                      key={dog.id}
+                      href={`/dogs/${dog.id}`}
+                      className="group relative block overflow-hidden border-2 border-[#e04a3a] bg-[#122016] sm:col-span-2"
+                    >
+                      <div className="grid sm:grid-cols-2">
+                        <div className="relative aspect-[4/3] overflow-hidden sm:aspect-auto sm:min-h-[320px]">
+                          {dog.photo_url ? (
+                            <Image
+                              src={dog.photo_url}
+                              alt={dog.name || 'Dog photo'}
+                              fill
+                              className="object-cover transition duration-700 group-hover:scale-105"
+                              unoptimized
+                              sizes="(min-width: 1024px) 40vw, (min-width: 640px) 80vw, 100vw"
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center bg-[#1a2e1a] text-8xl font-black text-[#f4b942]">
+                              {dog.name?.[0] || 'D'}
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent sm:bg-gradient-to-r" />
                         </div>
-                      )}
-                      <div className="absolute left-4 top-4">
-                        <StatusBadge status={dog.status || 'available'} euthanasiaDate={dog.euthanasia_date} />
+                        <div className="flex flex-col justify-between p-7 sm:p-9">
+                          <div>
+                            <div className="animate-urgent-glow inline-flex items-center gap-2 bg-[#e04a3a] px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-white">
+                              <span className="animate-pulse-dot h-2 w-2 rounded-full bg-white" />
+                              {daysLeftLabel(dog._daysLeft) || 'Urgent'}
+                            </div>
+                            <h2 className="mt-5 text-4xl font-black uppercase tracking-tight text-white sm:text-5xl">
+                              {dog.name || 'Unnamed Dog'}
+                            </h2>
+                            <p className="mt-2 text-sm font-bold uppercase tracking-[0.2em] text-[#f4b942]">
+                              {dog.breed}{dog.mix ? ' mix' : ''}
+                            </p>
+                            <div className="mt-6 flex flex-wrap gap-x-8 gap-y-3 text-sm text-[#f8f1e8]/70">
+                              <span><span className="font-black text-white">{dog.age_years ? `${dog.age_years}y` : '—'}</span> old</span>
+                              <span><span className="font-black capitalize text-white">{dog.sex || '—'}</span></span>
+                              <span><span className="font-black text-white">{dog.weight_lbs ? `${dog.weight_lbs} lb` : '—'}</span></span>
+                            </div>
+                          </div>
+                          <div className="mt-8 flex items-center justify-between border-t border-white/10 pt-5">
+                            <p className="text-xs uppercase tracking-[0.18em] text-[#f8f1e8]/50">
+                              {dog.organizations?.name || 'Shelter partner'}
+                              {dog.organizations?.state ? ` · ${dog.organizations.state}` : ''}
+                            </p>
+                            <span className="text-sm font-black uppercase tracking-[0.18em] text-[#ff8a7a] transition group-hover:text-white">
+                              Act now →
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#13241d]/75 to-transparent p-4 pt-16">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#f8f1e8]/80">
-                          {dog.organizations?.city}{dog.organizations?.state ? `, ${dog.organizations.state}` : ''}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-1 flex-col p-5">
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <h2 className="text-2xl font-black tracking-tight text-[#13241d]">{dog.name || 'Unnamed Dog'}</h2>
-                          <p className="mt-1 text-sm font-semibold text-[#617069]">
+                    </Link>
+                  ) : (
+                    // ── STANDARD CARD ──
+                    <Link
+                      key={dog.id}
+                      href={`/dogs/${dog.id}`}
+                      className="group flex min-h-full flex-col overflow-hidden border border-white/10 bg-[#122016] transition hover:-translate-y-1 hover:border-[#f4b942]/60"
+                    >
+                      <div className="relative aspect-[5/4] overflow-hidden">
+                        {dog.photo_url ? (
+                          <Image
+                            src={dog.photo_url}
+                            alt={dog.name || 'Dog photo'}
+                            fill
+                            className="object-cover transition duration-700 group-hover:scale-105"
+                            unoptimized
+                            sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center bg-[#1a2e1a] text-7xl font-black text-[#436154]">
+                            {dog.name?.[0] || 'D'}
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                        <div className="absolute left-4 top-4">
+                          <span className="bg-[#f4b942] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#140a08]">
+                            Available
+                          </span>
+                        </div>
+                        <div className="absolute inset-x-0 bottom-0 p-5">
+                          <h2 className="text-3xl font-black uppercase tracking-tight text-white">{dog.name || 'Unnamed Dog'}</h2>
+                          <p className="mt-1 text-xs font-bold uppercase tracking-[0.2em] text-[#f4b942]">
                             {dog.breed}{dog.mix ? ' mix' : ''}
                           </p>
                         </div>
-                        <span className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#13241d] text-xs font-black text-[#f8f1e8]">
-                          {dog.organizations?.name?.[0] || 'S'}
+                      </div>
+                      <div className="flex flex-1 items-center justify-between gap-4 p-5">
+                        <p className="text-xs uppercase tracking-[0.16em] text-[#f8f1e8]/50">
+                          {dog.age_years ? `${dog.age_years}y` : '—'} · <span className="capitalize">{dog.sex || '—'}</span> · {dog.weight_lbs ? `${dog.weight_lbs} lb` : '—'}
+                        </p>
+                        <span className="shrink-0 text-xs font-black uppercase tracking-[0.18em] text-[#f4b942] group-hover:underline">
+                          Review →
                         </span>
                       </div>
+                    </Link>
+                  ))}
+                </div>
 
-                      <div className="mt-6 grid grid-cols-3 gap-px bg-[#13241d]/10">
-                        {[
-                          { label: 'Age', value: dog.age_years ? `${dog.age_years}y` : '-' },
-                          { label: 'Weight', value: dog.weight_lbs ? `${dog.weight_lbs} lb` : '-' },
-                          { label: 'Sex', value: dog.sex || '-' },
-                        ].map(({ label, value }) => (
-                          <div key={label} className="bg-[#f5f0e8] p-3">
-                            <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#7a877f]">{label}</p>
-                            <p className="mt-1 text-sm font-black capitalize text-[#13241d]">{value}</p>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className="mt-5 flex items-center justify-between gap-4 border-t border-[#13241d]/10 pt-4">
-                        <div className="min-w-0">
-                          <p className="text-xs leading-5 text-[#617069]">
-                            From <span className="font-black text-[#13241d]">{dog.organizations?.name || 'Shelter partner'}</span>
-                          </p>
-                          {dog.dogsrun_id && (
-                            <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#7a877f]">{dog.dogsrun_id}</p>
-                          )}
-                        </div>
-                        <span className="shrink-0 text-xs font-black uppercase tracking-[0.18em] text-[#d95f4b]">
-                          Review
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
+                <Pagination
+                  page={page}
+                  totalPages={totalPages}
+                  getHref={(p) => baseParams({ page: String(p) })}
+                  summary={<>Page {page} of {totalPages} · {dogCount} dogs</>}
+                />
+              </>
+            ) : (
+              <div className="border border-dashed border-white/20 bg-[#122016] px-6 py-20 text-center">
+                <p className="text-sm font-black uppercase tracking-[0.24em] text-[#f4b942]">No dogs found</p>
+                <p className="mx-auto mt-4 max-w-md text-base leading-7 text-[#f8f1e8]/60">
+                  {query ? `Nothing matches "${query}". Try a different name or breed.` : 'No dogs match these filters right now.'}
+                </p>
               </div>
-
-              <Pagination
-                page={page}
-                totalPages={totalPages}
-                getHref={(p) => `/dogs?tab=dogs&page=${p}${stateFilter ? `&state=${stateFilter}` : ''}`}
-                summary={<>Page {page} of {totalPages} · {dogCount} dogs</>}
-              />
-            </>
-          ) : (
-            <div className="border border-dashed border-[#13241d]/20 bg-[#fff9ef] px-6 py-20 text-center">
-              <p className="text-sm font-bold uppercase tracking-[0.22em] text-[#436154]">No open cases</p>
-              <p className="mx-auto mt-4 max-w-md text-base leading-7 text-[#617069]">
-                {stateFilter ? `No available dogs in ${stateFilter} right now.` : 'There are no dogs currently available for rescue. New shelter cases will appear here as soon as they are published.'}
-              </p>
-            </div>
             )}
           </>
         )}
 
         {/* ── Shelters tab ── */}
         {tab === 'shelters' && (
-          <>
-            <BrowseStateFilter tab={tab} currentState={stateFilter} />
-            {shelters.length > 0 ? (
+          shelters.length > 0 ? (
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {shelters.map((shelter) => (
                 <Link
                   key={shelter.id}
-                  href={`/dogs?tab=dogs`}
-                  className="group flex flex-col bg-[#fff9ef] outline outline-1 outline-[#13241d]/10 p-6 transition hover:-translate-y-1 hover:outline-[#f4b942]"
+                  href="/dogs?tab=dogs"
+                  className="group border border-white/10 bg-[#122016] p-7 transition hover:-translate-y-1 hover:border-[#f4b942]/60"
                 >
                   <div className="flex items-start justify-between gap-4">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center bg-[#13241d] text-xl font-black text-[#f4b942]">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center bg-[#f4b942] text-2xl font-black text-[#140a08]">
                       {shelter.name?.[0] || 'S'}
                     </div>
-                    <span className="mt-1 rounded-full bg-[#dce8dd] px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#436154]">
-                      Verified Partner
+                    <span className="border border-[#f4b942]/40 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#f4b942]">
+                      Verified
                     </span>
                   </div>
-
-                  <div className="mt-4">
-                    <h2 className="text-lg font-black leading-tight text-[#13241d]">{shelter.name}</h2>
-                    {(shelter.city || shelter.state) && (
-                      <p className="mt-1 text-sm text-[#617069]">
-                        {shelter.city}{shelter.city && shelter.state ? ', ' : ''}{shelter.state}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="mt-5 border-t border-[#13241d]/10 pt-4 flex items-center justify-between">
+                  <h2 className="mt-5 text-2xl font-black tracking-tight text-white">{shelter.name}</h2>
+                  {(shelter.city || shelter.state) && (
+                    <p className="mt-1 text-sm text-[#f8f1e8]/50">
+                      {shelter.city}{shelter.city && shelter.state ? ', ' : ''}{shelter.state}
+                    </p>
+                  )}
+                  <div className="mt-6 flex items-end justify-between border-t border-white/10 pt-5">
                     <div>
-                      <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#7a877f]">Available Dogs</p>
-                      <p className="mt-0.5 text-2xl font-black text-[#13241d]">{shelter.dog_count}</p>
+                      <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#f8f1e8]/40">Dogs listed</p>
+                      <p className="mt-1 text-4xl font-black text-[#f4b942]">{shelter.dog_count}</p>
                     </div>
                     <span className="text-xs font-black uppercase tracking-[0.18em] text-[#f4b942] group-hover:underline">
-                      View Dogs →
+                      View dogs →
                     </span>
                   </div>
                 </Link>
               ))}
             </div>
           ) : (
-            <div className="border border-dashed border-[#13241d]/20 bg-[#fff9ef] px-6 py-20 text-center">
-              <p className="text-sm font-bold uppercase tracking-[0.22em] text-[#436154]">No shelter partners yet</p>
-              <p className="mx-auto mt-4 max-w-md text-base leading-7 text-[#617069]">
-                {stateFilter ? `No approved shelters in ${stateFilter}.` : "Shelters will appear here once they've been approved by the DOGSRUN team."}
+            <div className="border border-dashed border-white/20 bg-[#122016] px-6 py-20 text-center">
+              <p className="text-sm font-black uppercase tracking-[0.24em] text-[#f4b942]">No shelter partners</p>
+              <p className="mx-auto mt-4 max-w-md text-base leading-7 text-[#f8f1e8]/60">
+                {stateFilter ? `No approved shelters in ${stateFilter}.` : "Shelters appear here once approved by the DOGSRUN team."}
               </p>
             </div>
-            )}
-          </>
+          )
         )}
 
         {/* ── Rescues tab ── */}
         {tab === 'rescues' && (
-          <>
-            <BrowseStateFilter tab={tab} currentState={stateFilter} />
-            {rescues.length > 0 ? (
+          rescues.length > 0 ? (
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {rescues.map((rescue) => {
                 const breeds: string[] = rescue.criteria?.breeds || []
                 const states: string[] = rescue.criteria?.states_served || []
-                const visibleBreeds = breeds.slice(0, 3)
-                const extraBreeds = breeds.length - 3
-
                 return (
-                  <div
-                    key={rescue.id}
-                    className="flex flex-col bg-[#fff9ef] outline outline-1 outline-[#13241d]/10 p-6"
-                  >
+                  <div key={rescue.id} className="border border-white/10 bg-[#122016] p-7">
                     <div className="flex items-start justify-between gap-4">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center bg-[#f4b942] text-xl font-black text-[#13241d]">
+                      <div className="flex h-14 w-14 shrink-0 items-center justify-center bg-[#e04a3a] text-2xl font-black text-white">
                         {rescue.name?.[0] || 'R'}
                       </div>
-                      <span className="mt-1 rounded-full bg-[#f4b942]/20 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#7a4f00]">
-                        Active Rescue
+                      <span className="border border-[#e04a3a]/50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#ff8a7a]">
+                        Active rescue
                       </span>
                     </div>
-
-                    <div className="mt-4">
-                      <h2 className="text-lg font-black leading-tight text-[#13241d]">{rescue.name}</h2>
-                      {(rescue.city || rescue.state) && (
-                        <p className="mt-1 text-sm text-[#617069]">
-                          {rescue.city}{rescue.city && rescue.state ? ', ' : ''}{rescue.state}
-                        </p>
-                      )}
-                    </div>
-
+                    <h2 className="mt-5 text-2xl font-black tracking-tight text-white">{rescue.name}</h2>
+                    {(rescue.city || rescue.state) && (
+                      <p className="mt-1 text-sm text-[#f8f1e8]/50">
+                        {rescue.city}{rescue.city && rescue.state ? ', ' : ''}{rescue.state}
+                      </p>
+                    )}
                     {states.length > 0 && (
-                      <div className="mt-4">
-                        <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#7a877f] mb-2">States Served</p>
-                        <div className="flex flex-wrap gap-1">
-                          {states.slice(0, 6).map(s => (
-                            <span key={s} className="bg-[#13241d] px-2 py-0.5 text-[10px] font-black text-[#f4b942]">{s}</span>
+                      <div className="mt-5">
+                        <p className="mb-2 text-[10px] font-black uppercase tracking-[0.22em] text-[#f8f1e8]/40">Serves</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {states.slice(0, 8).map(s => (
+                            <span key={s} className="bg-[#f4b942] px-2 py-0.5 text-[10px] font-black text-[#140a08]">{s}</span>
                           ))}
-                          {states.length > 6 && (
-                            <span className="bg-[#13241d]/10 px-2 py-0.5 text-[10px] font-black text-[#617069]">+{states.length - 6}</span>
-                          )}
                         </div>
                       </div>
                     )}
-
-                    {visibleBreeds.length > 0 && (
+                    {breeds.length > 0 && (
                       <div className="mt-4">
-                        <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#7a877f] mb-2">Breed Preferences</p>
-                        <div className="flex flex-wrap gap-1">
-                          {visibleBreeds.map(b => (
-                            <span key={b} className="bg-[#f5f0e8] px-2 py-0.5 text-[10px] font-semibold text-[#436154] outline outline-1 outline-[#13241d]/10">{b}</span>
-                          ))}
-                          {extraBreeds > 0 && (
-                            <span className="bg-[#f5f0e8] px-2 py-0.5 text-[10px] font-semibold text-[#617069] outline outline-1 outline-[#13241d]/10">+{extraBreeds} more</span>
-                          )}
-                        </div>
+                        <p className="mb-2 text-[10px] font-black uppercase tracking-[0.22em] text-[#f8f1e8]/40">Breed focus</p>
+                        <p className="text-sm text-[#f8f1e8]/70">{breeds.slice(0, 4).join(', ')}{breeds.length > 4 ? ` +${breeds.length - 4}` : ''}</p>
                       </div>
-                    )}
-
-                    {!rescue.criteria && (
-                      <p className="mt-4 text-xs text-[#617069] italic">No matching criteria set yet.</p>
                     )}
                   </div>
                 )
               })}
             </div>
           ) : (
-            <div className="border border-dashed border-[#13241d]/20 bg-[#fff9ef] px-6 py-20 text-center">
-              <p className="text-sm font-bold uppercase tracking-[0.22em] text-[#436154]">No rescue partners yet</p>
-              <p className="mx-auto mt-4 max-w-md text-base leading-7 text-[#617069]">
-                {stateFilter ? `No approved rescues in ${stateFilter}.` : "Rescue organizations will appear here once they've been approved by the DOGSRUN team."}
+            <div className="border border-dashed border-white/20 bg-[#122016] px-6 py-20 text-center">
+              <p className="text-sm font-black uppercase tracking-[0.24em] text-[#f4b942]">No rescue partners</p>
+              <p className="mx-auto mt-4 max-w-md text-base leading-7 text-[#f8f1e8]/60">
+                {stateFilter ? `No approved rescues in ${stateFilter}.` : "Rescues appear here once approved by the DOGSRUN team."}
               </p>
             </div>
-            )}
-          </>
+          )
         )}
-
       </main>
     </div>
   )

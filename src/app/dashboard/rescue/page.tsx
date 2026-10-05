@@ -2,11 +2,9 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { redirect } from 'next/navigation'
 import { requireAuthContext } from '@/lib/auth-context'
-import StatusBadge from '@/components/status-badge'
-import type { DogStatus } from '@/lib/dog-status'
-import PageHeader from '@/components/ui/page-header'
 import ApprovalWall from '@/components/approval-wall'
 import AlertActions from './alert-actions'
+import { daysUntilEuthanasia, daysLeftLabel, isDogUrgent } from '@/lib/urgency'
 
 interface Alert {
   id: string
@@ -27,6 +25,13 @@ interface Alert {
   } | null
 }
 
+function shelterLine(dog: Alert['dogs']) {
+  const s = dog?.organizations
+  if (!s) return null
+  const loc = [s.city, s.state].filter(Boolean).join(', ')
+  return [s.name, loc].filter(Boolean).join(' · ')
+}
+
 export default async function RescuePortalPage() {
   const { supabase, org } = await requireAuthContext()
 
@@ -39,76 +44,223 @@ export default async function RescuePortalPage() {
     .eq('rescue_id', org.id)
     .order('sent_at', { ascending: false, nullsFirst: false })
 
-  const alerts = (alertsData || []) as unknown as Alert[]
+  const alerts = ((alertsData || []) as unknown as Alert[])
+    .map((a) => ({
+      ...a,
+      _urgent: isDogUrgent(a.dogs?.status, a.dogs?.euthanasia_date),
+      _daysLeft: daysUntilEuthanasia(a.dogs?.euthanasia_date),
+    }))
+    .sort((a, b) => {
+      // Needs-action first, urgent dogs first, newest first
+      const aOpen = a.status === 'sent' ? 0 : 1
+      const bOpen = b.status === 'sent' ? 0 : 1
+      if (aOpen !== bOpen) return aOpen - bOpen
+      if (Number(b._urgent) !== Number(a._urgent)) return Number(b._urgent) - Number(a._urgent)
+      return new Date(b.sent_at).getTime() - new Date(a.sent_at).getTime()
+    })
+
+  const open = alerts.filter((a) => a.status === 'sent')
+  const handled = alerts.filter((a) => a.status !== 'sent')
+  const hero = open[0] || null
+  const rest = open.slice(1)
+  const openUrgentCount = open.filter((a) => a._urgent).length
 
   return (
-    <div className="min-h-screen bg-[#f5f0e8]">
-      <PageHeader
-        eyebrow="Rescue Portal"
-        title={org.name}
-        sub="New dog matches based on your organization's criteria."
-      />
+    <div className="min-h-screen bg-[#0b140e] text-[#f8f1e8]">
+      <header className="border-b border-white/10 px-5 pb-10 pt-12 sm:px-10 lg:px-16">
+        <div className="mx-auto max-w-7xl">
+          <p className="flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.3em] text-[#f4b942]">
+            <span className="animate-pulse-dot h-2.5 w-2.5 rounded-full bg-[#7ddba3]" />
+            Rescue portal · {org.name}
+          </p>
+          <h1 className="mt-6 max-w-4xl text-[clamp(2.5rem,6vw,5rem)] font-black uppercase leading-[0.88] tracking-tight">
+            Dogs that need <span className="text-[#f4b942]">you.</span>
+          </h1>
+          {open.length > 0 ? (
+            <p className="mt-4 flex items-center gap-3 text-sm font-black uppercase tracking-[0.2em] text-[#ff8a7a]">
+              <span className="animate-pulse-dot h-2.5 w-2.5 rounded-full bg-[#e04a3a]" />
+              {open.length} awaiting your answer{openUrgentCount > 0 ? ` · ${openUrgentCount} urgent` : ''}
+            </p>
+          ) : (
+            <p className="mt-4 text-sm font-bold uppercase tracking-[0.2em] text-[#f8f1e8]/50">
+              All caught up — new matches land here the moment shelters list them.
+            </p>
+          )}
+        </div>
+      </header>
 
-      <main className="max-w-7xl mx-auto py-10 px-8">
-        <div className="space-y-4">
-          {alerts.length > 0 ? (
-            alerts.map((alert) => {
-              const dog = alert.dogs
-              const shelter = dog?.organizations
-              const shelterLocation = [shelter?.city, shelter?.state].filter(Boolean).join(', ')
+      <main className="mx-auto max-w-7xl px-5 py-10 sm:px-10 lg:px-16">
+        {/* ── HERO: newest match gets the spotlight ── */}
+        {hero && hero.dogs && (
+          <section className="relative mb-12 overflow-hidden border-2 border-[#f4b942]">
+            <div className="relative min-h-[46svh]">
+              {hero.dogs.photo_url ? (
+                <Image src={hero.dogs.photo_url} alt={hero.dogs.name} fill className="object-cover object-center" unoptimized priority />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center bg-[#1a2e1a] text-[10rem] font-black text-[#f4b942]">
+                  {hero.dogs.name?.[0] || 'D'}
+                </div>
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-black/20" />
+              <div className="absolute left-5 top-5 flex items-center gap-2 bg-[#f4b942] px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-[#140a08] sm:left-8 sm:top-8">
+                <span className="animate-pulse-dot h-2 w-2 rounded-full bg-[#140a08]" />
+                New match
+              </div>
+              {hero._urgent && (
+                <div className="absolute right-5 top-5 sm:right-8 sm:top-8">
+                  <div className="animate-urgent-glow flex items-center gap-2 bg-[#e04a3a] px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-white">
+                    <span className="animate-pulse-dot h-2 w-2 rounded-full bg-white" />
+                    {daysLeftLabel(hero._daysLeft) || 'Urgent'}
+                  </div>
+                </div>
+              )}
+              <div className="absolute inset-x-0 bottom-0 p-6 sm:p-10">
+                <h2 className="text-[clamp(3rem,8vw,7rem)] font-black uppercase leading-[0.85] tracking-tight text-white">
+                  {hero.dogs.name}
+                </h2>
+                <p className="mt-3 text-sm font-bold uppercase tracking-[0.22em] text-[#f4b942]">
+                  {hero.dogs.breed}{hero.dogs.age_years ? ` · ${hero.dogs.age_years}y` : ''}{hero.dogs.sex ? ` · ${hero.dogs.sex}` : ''}
+                </p>
+                {shelterLine(hero.dogs) && (
+                  <p className="mt-1 text-xs uppercase tracking-[0.2em] text-white/60">{shelterLine(hero.dogs)}</p>
+                )}
+                <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <AlertActions alertId={hero.id} currentStatus={hero.status} large />
+                  <Link
+                    href={`/dogs/${hero.dog_id}`}
+                    className="inline-flex items-center justify-center border-2 border-white/40 px-8 py-3.5 text-sm font-black uppercase tracking-[0.18em] text-white transition hover:border-white hover:bg-white hover:text-black"
+                  >
+                    View full profile
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
-              return (
-                <div key={alert.id} className="bg-[#fff9ef] outline outline-1 outline-[#13241d]/10 overflow-hidden">
-                  <div className="p-8">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                      <div className="flex items-start gap-6">
-                        <div className="w-16 h-16 bg-[#13241d] flex items-center justify-center text-2xl font-black text-[#f4b942] flex-shrink-0 overflow-hidden relative">
-                          {dog?.photo_url ? (
-                            <Image src={dog.photo_url} alt={dog.name || 'Dog photo'} fill className="object-cover" unoptimized />
-                          ) : (
-                            dog?.name?.[0] || 'D'
-                          )}
+        {/* ── NEEDS YOUR ANSWER ── */}
+        {rest.length > 0 && (
+          <section className="mb-14">
+            <p className="mb-6 border-b border-white/10 pb-4 text-xs font-black uppercase tracking-[0.28em] text-[#ff8a7a]">
+              Needs your answer
+            </p>
+            <div className="space-y-5">
+              {rest.map((alert) => {
+                const dog = alert.dogs
+                return (
+                  <div
+                    key={alert.id}
+                    className={`grid overflow-hidden border bg-[#122016] sm:grid-cols-[240px_1fr] ${
+                      alert._urgent ? 'border-2 border-[#e04a3a]' : 'border-white/10'
+                    }`}
+                  >
+                    <Link href={`/dogs/${alert.dog_id}`} className="relative block min-h-[200px] overflow-hidden sm:min-h-[240px]">
+                      {dog?.photo_url ? (
+                        <Image src={dog.photo_url} alt={dog?.name || 'Dog photo'} fill className="object-cover" unoptimized />
+                      ) : (
+                        <div className="flex h-full min-h-[200px] w-full items-center justify-center bg-[#1a2e1a] text-6xl font-black text-[#f4b942]">
+                          {dog?.name?.[0] || 'D'}
                         </div>
-                        <div>
-                          <div className="flex items-center gap-3 mb-1">
-                            <h2 className="text-xl font-black text-[#13241d]">{dog?.name || 'Unnamed Dog'}</h2>
-                            <StatusBadge status={dog?.status || 'available'} euthanasiaDate={dog?.euthanasia_date} />
-                          </div>
-                          <p className="text-sm text-[#5d6a64] mb-2">
-                            {dog?.breed || 'Unknown breed'}{dog?.age_years ? ` · ${dog.age_years}y` : ''}{dog?.sex ? ` · ${dog.sex}` : ''}
-                          </p>
-                          {(shelter?.name || shelterLocation) && (
-                            <p className="text-[10px] font-bold text-[#5d6a64] uppercase tracking-[0.24em]">
-                              Listed by{shelter?.name ? <span className="text-[#13241d]"> {shelter.name}</span> : null}{shelterLocation ? ` · ${shelterLocation}` : ''}
-                            </p>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent sm:bg-gradient-to-r" />
+                    </Link>
+                    <div className="flex flex-col justify-between p-6 sm:p-8">
+                      <div>
+                        <div className="flex flex-wrap items-center gap-3">
+                          {alert._urgent && (
+                            <span className="flex items-center gap-2 bg-[#e04a3a] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-white">
+                              <span className="animate-pulse-dot h-2 w-2 rounded-full bg-white" />
+                              {daysLeftLabel(alert._daysLeft) || 'Urgent'}
+                            </span>
                           )}
+                          <span className="text-[10px] font-black uppercase tracking-[0.22em] text-[#f8f1e8]/40">
+                            Received {alert.sent_at ? new Date(alert.sent_at).toLocaleDateString() : 'recently'}
+                          </span>
                         </div>
+                        <h3 className="mt-4 text-4xl font-black uppercase tracking-tight text-white">
+                          <Link href={`/dogs/${alert.dog_id}`} className="transition hover:text-[#f4b942]">
+                            {dog?.name || 'Unnamed Dog'}
+                          </Link>
+                        </h3>
+                        <p className="mt-2 text-sm font-bold uppercase tracking-[0.2em] text-[#f4b942]">
+                          {dog?.breed || 'Unknown breed'}{dog?.age_years ? ` · ${dog.age_years}y` : ''}{dog?.sex ? ` · ${dog.sex}` : ''}
+                        </p>
+                        {shelterLine(dog) && (
+                          <p className="mt-1 text-xs uppercase tracking-[0.2em] text-[#f8f1e8]/50">{shelterLine(dog)}</p>
+                        )}
                       </div>
-                      <div className="shrink-0">
+                      <div className="mt-6 flex flex-wrap items-center gap-3">
                         <AlertActions alertId={alert.id} currentStatus={alert.status} />
+                        <Link
+                          href={`/dogs/${alert.dog_id}`}
+                          className="text-xs font-black uppercase tracking-[0.2em] text-[#f8f1e8]/60 transition hover:text-[#f4b942]"
+                        >
+                          View profile →
+                        </Link>
                       </div>
                     </div>
                   </div>
-                  <div className="bg-[#f5f0e8] px-8 py-3 border-t border-[#13241d]/10 flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-[#5d6a64] uppercase tracking-[0.24em]">
-                      Received {alert.sent_at ? new Date(alert.sent_at).toLocaleDateString() : 'Unknown date'}
-                    </span>
-                    <Link href={`/dogs/${alert.dog_id}`} className="text-xs font-bold text-[#13241d] hover:text-[#f4b942] transition-colors uppercase tracking-[0.24em]">View Profile</Link>
-                  </div>
-                </div>
-              )
-            })
-          ) : (
-            <div className="py-20 bg-[#fff9ef] outline outline-1 outline-[#13241d]/10 text-center">
-              <p className="text-xs uppercase tracking-[0.24em] font-bold text-[#5d6a64] mb-4">No Alerts Yet</p>
-              <h3 className="text-2xl font-black text-[#13241d] mb-3">No dog matches yet</h3>
-              <p className="text-[#5d6a64] max-w-sm mx-auto mb-8 text-sm">Make sure your matching criteria are set up to start receiving dog matches.</p>
-              <Link href="/dashboard/criteria" className="inline-block bg-[#13241d] text-[#f4b942] text-xs uppercase tracking-[0.24em] font-bold px-8 py-3 hover:bg-[#1a2e1a] transition-colors">
-                Manage Criteria
-              </Link>
+                )
+              })}
             </div>
-          )}
-        </div>
+          </section>
+        )}
+
+        {/* ── HANDLED: quiet, informational ── */}
+        {handled.length > 0 && (
+          <section>
+            <p className="mb-6 border-b border-white/10 pb-4 text-xs font-black uppercase tracking-[0.28em] text-[#f8f1e8]/40">
+              Already handled
+            </p>
+            <div className="divide-y divide-white/10 border-y border-white/10">
+              {handled.map((alert) => {
+                const dog = alert.dogs
+                return (
+                  <div key={alert.id} className="flex items-center gap-5 py-4 opacity-70 transition hover:opacity-100">
+                    <div className="relative h-14 w-14 shrink-0 overflow-hidden bg-[#1a2e1a]">
+                      {dog?.photo_url ? (
+                        <Image src={dog.photo_url} alt={dog?.name || 'Dog photo'} fill className="object-cover" unoptimized />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-xl font-black text-[#f4b942]">
+                          {dog?.name?.[0] || 'D'}
+                        </div>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <Link href={`/dogs/${alert.dog_id}`} className="block truncate text-lg font-black text-white hover:text-[#f4b942]">
+                        {dog?.name || 'Unnamed Dog'}
+                      </Link>
+                      <p className="truncate text-xs uppercase tracking-[0.18em] text-[#f8f1e8]/45">
+                        {dog?.breed || 'Unknown breed'}
+                      </p>
+                    </div>
+                    <span className={`shrink-0 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] ${
+                      alert.status === 'responded' ? 'bg-[#7ddba3]/15 text-[#7ddba3]' : 'bg-white/10 text-[#f8f1e8]/45'
+                    }`}>
+                      {alert.status === 'responded' ? 'Interested' : 'Passed'}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+          </section>
+        )}
+
+        {alerts.length === 0 && (
+          <div className="border border-dashed border-white/20 bg-[#122016] px-6 py-20 text-center">
+            <p className="text-[11px] font-black uppercase tracking-[0.3em] text-[#f4b942]">No matches yet</p>
+            <h3 className="mt-4 text-4xl font-black uppercase tracking-tight">The next dog is coming.</h3>
+            <p className="mx-auto mt-4 max-w-sm text-sm leading-7 text-[#f8f1e8]/55">
+              Make sure your matching criteria are set so urgent cases reach you first.
+            </p>
+            <Link
+              href="/dashboard/criteria"
+              className="mt-8 inline-flex bg-[#f4b942] px-8 py-4 text-sm font-black uppercase tracking-[0.18em] text-[#140a08] transition hover:bg-[#ffd86a]"
+            >
+              Set matching criteria
+            </Link>
+          </div>
+        )}
       </main>
     </div>
   )
