@@ -17,3 +17,204 @@ body {
   color: #111111;
   font-family: Arial, Helvetica, sans-serif;
 }
+
+
+/* ── DOGSRUN v2 motion + utility layer ── */
+
+@keyframes dr-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: dr-marquee 45s linear infinite;
+}
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+@keyframes dr-pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.7); }
+}
+.animate-pulse-dot {
+  animation: dr-pulse-dot 1.6s ease-in-out infinite;
+}
+
+@keyframes dr-urgent-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(168, 88, 63, 0.55); }
+  50% { box-shadow: 0 0 0 12px rgba(168, 88, 63, 0); }
+}
+.animate-urgent-glow {
+  animation: dr-urgent-glow 2.2s ease-out infinite;
+}
+
+/* Outlined display type */
+.text-outline {
+  color: transparent;
+  -webkit-text-stroke: 2px #f8f1e8;
+}
+@media (min-width: 640px) {
+  .text-outline {
+    -webkit-text-stroke-width: 3px;
+  }
+}
+
+/* Hide scrollbars on horizontal chip rails */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+::selection {
+  background: #c08a3e;
+  color: #140a08;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   DOGSRUN v2.1 — CRAFT LAYER
+   Texture, photography treatment, editorial details.
+   The difference between designed and generated.
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Film grain: fixed full-viewport overlay ── */
+.grain-veil {
+  position: fixed;
+  inset: -50%;
+  z-index: 90;
+  pointer-events: none;
+  opacity: 0.055;
+  background-image: url(data:image/svg+xml,%3Csvg xmlns=http://www.w3.org/2000/svg width=240 height=240%3E%3Cfilter id=n%3E%3CfeTurbulence type=fractalNoise baseFrequency=0.85 numOctaves=2 stitchTiles=stitch/%3E%3C/filter%3E%3Crect width=240 height=240 filter=url(%23n)/%3E%3C/svg%3E);
+  animation: grain-shift 0.9s steps(4) infinite;
+}
+@keyframes grain-shift {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-2%, 1%); }
+  50% { transform: translate(1%, -2%); }
+  75% { transform: translate(-1%, -1%); }
+  100% { transform: translate(0, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .grain-veil { animation: none; }
+}
+
+/* ── Cinematic photo treatment: apply to the relative wrapper ──
+   around next/image. Warm duotone + grain + vignette. */
+.cine { isolation: isolate; }
+.cine:not(.absolute):not(.relative):not(.fixed) { position: relative; }
+.cine > img {
+  filter: sepia(0.28) saturate(1.12) contrast(1.07) brightness(0.94);
+}
+.cine::after {
+  content: ;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.16;
+  mix-blend-mode: overlay;
+  background-image: url(data:image/svg+xml,%3Csvg xmlns=http://www.w3.org/2000/svg width=180 height=180%3E%3Cfilter id=n%3E%3CfeTurbulence type=fractalNoise baseFrequency=0.9 numOctaves=2 stitchTiles=stitch/%3E%3C/filter%3E%3Crect width=180 height=180 filter=url(%23n)/%3E%3C/svg%3E);
+}
+.cine::before {
+  content: ;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  /* warm amber wash from top-left, deep green shadow bottom-right */
+  background:
+    radial-gradient(120% 90% at 15% 0%, rgba(192, 138, 62, 0.14), transparent 55%),
+    radial-gradient(120% 100% at 100% 100%, rgba(11, 20, 14, 0.5), transparent 60%);
+  mix-blend-mode: multiply;
+}
+/* vignette edge for large hero photos */
+.cine-vignette::after {
+  box-shadow: inset 0 0 18vmax rgba(5, 8, 6, 0.55);
+}
+
+/* ── Crafted card: layered depth, not flat ── */
+.card-craft {
+  position: relative;
+  background-color: #122016;
+  background-image: url(data:image/svg+xml,%3Csvg xmlns=http://www.w3.org/2000/svg width=200 height=200%3E%3Cfilter id=n%3E%3CfeTurbulence type=fractalNoise baseFrequency=0.8 numOctaves=2 stitchTiles=stitch/%3E%3C/filter%3E%3Crect width=200 height=200 filter=url(%23n) opacity=0.5/%3E%3C/svg%3E);
+  background-blend-mode: overlay;
+  border: 1px solid rgba(248, 241, 232, 0.09);
+  box-shadow:
+    inset 0 1px 0 rgba(248, 241, 232, 0.05),
+    0 24px 48px -24px rgba(0, 0, 0, 0.65),
+    0 4px 12px -4px rgba(0, 0, 0, 0.4);
+}
+.card-craft-deep {
+  box-shadow:
+    inset 0 1px 0 rgba(248, 241, 232, 0.06),
+    0 32px 64px -24px rgba(0, 0, 0, 0.75),
+    0 8px 20px -8px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Editorial rules ── */
+.rule-double {
+  border-top: 1px solid rgba(248, 241, 232, 0.14);
+  position: relative;
+}
+.rule-double::after {
+  content: ;
+  position: absolute;
+  top: 3px; left: 0; right: 0;
+  border-top: 1px solid rgba(248, 241, 232, 0.07);
+}
+/* small diamond tick used as a section marker */
+.tick-diamond {
+  display: inline-block;
+  width: 7px; height: 7px;
+  transform: rotate(45deg);
+  background: #c08a3e;
+  flex-shrink: 0;
+}
+
+/* ── Quiet type: for contrast against the shouting ── */
+.type-quiet {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(248, 241, 232, 0.42);
+}
+.serif-pull {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+/* ── Physical hover: lift + press, not just color ── */
+.hover-lift {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    inset 0 1px 0 rgba(248, 241, 232, 0.06),
+    0 32px 56px -20px rgba(0, 0, 0, 0.7),
+    0 8px 20px -8px rgba(0, 0, 0, 0.5);
+}
+.hover-press:active { transform: translateY(1px) scale(0.995); }
+
+/* ── Underline link that draws itself ── */
+.link-draw {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 2px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 0.4s cubic-bezier(0.22, 1, 0.36, 1), color 0.3s ease;
+  padding-bottom: 2px;
+}
+.link-draw:hover { background-size: 100% 2px; }
+
+/* ── Numbered ghost numerals with texture ── */
+.ghost-num {
+  -webkit-text-stroke: 1px rgba(248, 241, 232, 0.16);
+  color: transparent;
+  user-select: none;
+}

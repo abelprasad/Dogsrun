@@ -37,8 +37,8 @@ export default function DashboardNav({ orgName, orgType, isAdmin }: DashboardNav
               href={link.href}
               className={`text-xs font-bold uppercase tracking-[0.24em] transition-colors ${
                 isActive(link.href, link.exact)
-                  ? 'text-[#f4b942]'
-                  : 'text-[#f5f0e8]/40 hover:text-[#f4b942]'
+                  ? 'text-[#c08a3e]'
+                  : 'text-[#f5f0e8]/40 hover:text-[#c08a3e]'
               }`}
             >
               {link.label}
@@ -47,7 +47,7 @@ export default function DashboardNav({ orgName, orgType, isAdmin }: DashboardNav
           {isAdmin && (
             <Link
               href="/admin"
-              className="text-xs font-bold text-[#f5f0e8]/40 hover:text-[#f4b942] uppercase tracking-[0.24em] transition-colors"
+              className="text-xs font-bold text-[#f5f0e8]/40 hover:text-[#c08a3e] uppercase tracking-[0.24em] transition-colors"
             >
               Admin
             </Link>

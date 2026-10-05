@@ -12,9 +12,9 @@ interface PaginationProps {
 }
 
 const pageButton =
-  "border border-[#13241d]/20 bg-[#fff9ef] px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-[#13241d] transition hover:bg-[#13241d] hover:text-[#f4b942]";
+  "border border-[#13241d]/20 bg-[#fff9ef] px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-[#13241d] transition hover:bg-[#13241d] hover:text-[#c08a3e]";
 const activePage =
-  "px-4 py-2 text-xs font-black uppercase tracking-[0.16em] transition bg-[#f4b942] text-[#13241d]";
+  "px-4 py-2 text-xs font-black uppercase tracking-[0.16em] transition bg-[#c08a3e] text-[#13241d]";
 
 // Prev / next + page numbers. Renders nothing when there is a single page.
 export default function Pagination({

@@ -31,12 +31,12 @@ export default async function EditDogPage({ params }: { params: Promise<{ id: st
 
   return (
     <div className="min-h-screen bg-[#f8f1e8]">
-      <div className="bg-[#13241d] border-t border-[#f4b942]/20 py-2 px-8">
+      <div className="bg-[#13241d] border-t border-[#c08a3e]/20 py-2 px-8">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex gap-6">
             <Link href="/dashboard" className="text-xs font-bold text-[#d8cfc2] hover:text-[#f8f1e8] uppercase tracking-widest transition-colors">Dashboard</Link>
             <Link href="/dashboard/dogs" className="text-xs font-bold text-[#d8cfc2] hover:text-[#f8f1e8] uppercase tracking-widest transition-colors">My Dogs</Link>
-            <span className="text-xs font-bold text-[#f4b942] uppercase tracking-widest">{dog.name}</span>
+            <span className="text-xs font-bold text-[#c08a3e] uppercase tracking-widest">{dog.name}</span>
           </div>
           <div className="flex items-center gap-4">
             <span className="text-xs font-bold text-[#d8cfc2] uppercase tracking-widest">{org.name}</span>
@@ -45,7 +45,7 @@ export default async function EditDogPage({ params }: { params: Promise<{ id: st
         </div>
       </div>
 
-      <header className="bg-[#13241d] border-b border-[#f4b942]/30 py-8 px-8 text-[#f8f1e8]">
+      <header className="bg-[#13241d] border-b border-[#c08a3e]/30 py-8 px-8 text-[#f8f1e8]">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl md:text-4xl font-[900] tracking-tight mb-1">{dog.name}</h1>
@@ -65,7 +65,7 @@ export default async function EditDogPage({ params }: { params: Promise<{ id: st
             <div className="bg-[#fffaf2] rounded-lg border border-[#13241d]/15 overflow-hidden">
               <div className="px-5 py-4 border-b border-[#13241d]/10 flex items-center justify-between">
                 <h3 className="text-sm font-[900] text-[#13241d] uppercase tracking-widest">Rescue Alerts</h3>
-                <span className="text-[10px] font-bold bg-[#13241d] text-[#f4b942] px-2 py-1 border border-[#13241d]/10">
+                <span className="text-[10px] font-bold bg-[#13241d] text-[#c08a3e] px-2 py-1 border border-[#13241d]/10">
                   {alerts?.length || 0} sent
                 </span>
               </div>
@@ -79,7 +79,7 @@ export default async function EditDogPage({ params }: { params: Promise<{ id: st
                         <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded ${
                           alert.status === 'responded' ? 'bg-green-100 text-green-700' :
                           alert.status === 'declined' ? 'bg-[#efe7dc] text-[#5d6a64]' :
-                          'bg-[#13241d] text-[#f4b942]'
+                          'bg-[#13241d] text-[#c08a3e]'
                         }`}>
                           {alert.status === 'responded' ? 'Interested' : alert.status === 'declined' ? 'Passed' : 'Sent'}
                         </span>

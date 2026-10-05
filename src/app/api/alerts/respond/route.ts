@@ -50,13 +50,13 @@ export async function POST(req: NextRequest) {
         subject: `${rescue.name} is interested in ${dog.name}`,
         html: `
           <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px;border:1px solid #eee;border-radius:10px;">
-            <h2 style="color:#f59e0b;">Great news!</h2>
+            <h2 style="color:#c08a3e;">Great news!</h2>
             <p><strong>${safeRescueName}</strong> has expressed interest in <strong>${safeDogName}</strong>.</p>
             <div style="background:#f9f9f9;padding:15px;border-radius:8px;margin:20px 0;">
               <p style="margin:0;"><strong>Rescue:</strong> ${safeRescueName}</p>
               <p style="margin:5px 0 0;"><strong>Email:</strong> <a href="mailto:${safeRescueEmail}">${safeRescueEmail}</a></p>
             </div>
-            <a href="https://dogsrun.org/dashboard" style="display:inline-block;background:#f59e0b;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:bold;">Go to Dashboard</a>
+            <a href="https://dogsrun.org/dashboard" style="display:inline-block;background:#c08a3e;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:bold;">Go to Dashboard</a>
           </div>
         `,
       })

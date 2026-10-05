@@ -4,11 +4,19 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/toaster'
 
-export default function AlertActions({ alertId, currentStatus }: { alertId: string; currentStatus: string }) {
+interface AlertActionsProps {
+  alertId: string
+  currentStatus: string
+  large?: boolean
+}
+
+export default function AlertActions({ alertId, currentStatus, large = false }: AlertActionsProps) {
   const [status, setStatus] = useState(currentStatus)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const toast = useToast()
+
+  const btnSize = large ? 'px-10 py-4 text-base' : 'px-7 py-3 text-sm'
 
   async function updateStatus(newStatus: string) {
     setLoading(true)
@@ -28,7 +36,7 @@ export default function AlertActions({ alertId, currentStatus }: { alertId: stri
 
   if (status === 'responded') {
     return (
-      <div className="flex items-center gap-2 border border-green-200 bg-green-50 px-4 py-2.5 text-sm font-black text-green-700">
+      <div className={`flex items-center gap-2 border border-[#7ddba3]/50 bg-[#7ddba3]/10 ${btnSize} text-sm font-black uppercase tracking-[0.16em] text-[#7ddba3]`}>
         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
           <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
         </svg>
@@ -40,11 +48,11 @@ export default function AlertActions({ alertId, currentStatus }: { alertId: stri
   if (status === 'declined') {
     return (
       <div className="flex items-center gap-3">
-        <span className="text-sm font-bold text-gray-400 uppercase tracking-[0.12em]">Passed</span>
+        <span className="text-sm font-black uppercase tracking-[0.16em] text-[#f8f1e8]/40">Passed</span>
         <button
           onClick={() => updateStatus('sent')}
           disabled={loading}
-          className="border border-gray-300 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-gray-500 transition hover:border-[#13241d] hover:text-[#13241d] disabled:opacity-50"
+          className="border border-white/25 px-5 py-2 text-xs font-black uppercase tracking-[0.16em] text-[#f8f1e8]/70 transition hover:border-[#c08a3e] hover:text-[#c08a3e] disabled:opacity-50"
         >
           {loading ? '...' : 'Undo'}
         </button>
@@ -56,9 +64,9 @@ export default function AlertActions({ alertId, currentStatus }: { alertId: stri
     <button
       onClick={() => updateStatus('responded')}
       disabled={loading}
-      className="bg-[#f4b942] px-6 py-2.5 text-sm font-black uppercase tracking-[0.16em] text-[#1a2e1a] transition hover:bg-[#ffd86a] disabled:opacity-50"
+      className={`bg-[#c08a3e] font-black uppercase tracking-[0.16em] text-[#140a08] transition hover:bg-[#d4a050] disabled:opacity-50 ${btnSize}`}
     >
-      {loading ? '...' : 'Interested?'}
+      {loading ? '...' : "I'm interested"}
     </button>
   )
 }

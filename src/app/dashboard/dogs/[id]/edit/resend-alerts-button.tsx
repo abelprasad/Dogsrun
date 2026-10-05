@@ -28,7 +28,7 @@ export default function ResendAlertsButton({ dogId }: { dogId: string }) {
       <button
         onClick={handleResend}
         disabled={loading}
-        className="w-full bg-[#13241d] text-[#f4b942] text-xs font-black uppercase tracking-[0.18em] py-2.5 hover:bg-[#1a2e1a] transition-colors disabled:opacity-50"
+        className="w-full bg-[#13241d] text-[#c08a3e] text-xs font-black uppercase tracking-[0.18em] py-2.5 hover:bg-[#1a2e1a] transition-colors disabled:opacity-50"
       >
         {loading ? 'Sending...' : 'Resend Alerts'}
       </button>

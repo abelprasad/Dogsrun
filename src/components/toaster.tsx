@@ -32,7 +32,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             key={t.id}
             role="status"
             className={`border-l-4 px-4 py-3 text-sm font-semibold shadow-lg ${t.kind === 'success'
-              ? 'border-[#f4b942] bg-[#13241d] text-[#f4b942]'
+              ? 'border-[#c08a3e] bg-[#13241d] text-[#c08a3e]'
               : 'border-red-400 bg-[#7f1d1d] text-white'}`}
           >
             {t.message}

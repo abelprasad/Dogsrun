@@ -1,11 +1,10 @@
 import Image from 'next/image'
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { requireAuthContext } from '@/lib/auth-context'
-import StatusBadge from '@/components/status-badge'
-import ApprovalWall from '@/components/approval-wall'
 import { supabaseAdmin } from '@/lib/supabase-server'
-import PageHeader from '@/components/ui/page-header'
-import Button from '@/components/ui/button'
+import ApprovalWall from '@/components/approval-wall'
+import { daysUntilEuthanasia, daysLeftLabel, isDogUrgent } from '@/lib/urgency'
 
 export default async function DashboardPage() {
   const { org, isAdmin } = await requireAuthContext()
@@ -17,7 +16,6 @@ export default async function DashboardPage() {
   if (org.type === 'rescue') redirect('/dashboard/rescue')
   if (org.approval_status !== 'approved') return <ApprovalWall org={org} />
 
-
   const [{ count: total }, { count: available }, { count: urgent }, { count: placed }] = await Promise.all([
     supabaseAdmin.from('dogs').select('*', { count: 'exact', head: true }).eq('shelter_id', org.id),
     supabaseAdmin.from('dogs').select('*', { count: 'exact', head: true }).eq('shelter_id', org.id).in('status', ['available', null as unknown as string]),
@@ -25,7 +23,6 @@ export default async function DashboardPage() {
     supabaseAdmin.from('dogs').select('*', { count: 'exact', head: true }).eq('shelter_id', org.id).in('status', ['placed', 'adopted']),
   ])
 
-  // REVIEW: the 4 count queries above could be one select('status') counted in JS.
   const { data: recentDogs } = await supabaseAdmin
     .from('dogs')
     .select('*, alerts(status)')
@@ -33,77 +30,145 @@ export default async function DashboardPage() {
     .order('created_at', { ascending: false })
     .limit(6)
 
-  return (
-    <div className="min-h-screen bg-[#f5f0e8] text-[#13241d]">
-      <PageHeader
-        title={org.name}
-        sub="Manage your dogs and track rescue interest."
-        className="bg-[#13241d] px-5 py-14 sm:px-8 lg:px-12"
-        titleClassName="text-4xl font-black leading-tight tracking-tight text-[#f4b942] sm:text-5xl"
-        subClassName="mt-2 text-[#c8d3ce]"
-      />
+  const stats = [
+    { label: 'Total dogs', value: total ?? 0, tone: 'text-white', sub: 'in your care' },
+    { label: 'Available', value: available ?? 0, tone: 'text-[#c08a3e]', sub: 'waiting for matches' },
+    { label: 'Urgent', value: urgent ?? 0, tone: 'text-[#c98a7a]', sub: 'need action now', hot: true },
+    { label: 'Placed', value: placed ?? 0, tone: 'text-[#7ddba3]', sub: 'second runs started' },
+  ]
 
-      <main className="mx-auto max-w-7xl px-5 py-10 sm:px-8 lg:px-12">
-        {/* Stat cards */}
-        <div className="mb-10 grid grid-cols-2 gap-px bg-[#13241d]/15 md:grid-cols-4">
-          {[
-            { label: 'Total Dogs', value: total ?? 0, color: 'bg-[#fff9ef]', textColor: 'text-[#13241d]', labelColor: 'text-[#7a877f]' },
-            { label: 'Available', value: available ?? 0, color: 'bg-[#fff9ef]', textColor: 'text-[#13241d]', labelColor: 'text-[#7a877f]' },
-            { label: 'Urgent', value: urgent ?? 0, color: 'bg-red-50', textColor: 'text-red-600', labelColor: 'text-red-400' },
-            { label: 'Placed / Adopted', value: placed ?? 0, color: 'bg-[#dcfce7]', textColor: 'text-green-700', labelColor: 'text-green-600' },
-          ].map(({ label, value, color, textColor, labelColor }) => (
-            <div key={label} className={`${color} p-6`}>
-              <p className={`text-[10px] font-bold uppercase tracking-[0.22em] mb-2 ${labelColor}`}>{label}</p>
-              <p className={`text-3xl font-black ${textColor}`}>{value}</p>
+  return (
+    <div className="min-h-screen bg-[#0b140e] text-[#f8f1e8]">
+      {/* ── MISSION CONTROL HEADER ── */}
+      <header className="border-b border-white/10 px-5 pb-10 pt-12 sm:px-10 lg:px-16">
+        <div className="mx-auto max-w-7xl">
+          <p className="flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.3em] text-[#c08a3e]">
+            <span className="animate-pulse-dot h-2.5 w-2.5 rounded-full bg-[#7ddba3]" />
+            Mission control · {org.name}
+          </p>
+          <div className="mt-6 flex flex-wrap items-end justify-between gap-8">
+            <h1 className="max-w-3xl text-[clamp(2.5rem,6vw,5rem)] font-black uppercase leading-[0.88] tracking-tight">
+              Move dogs.<br /><span className="text-[#c08a3e]">Beat the clock.</span>
+            </h1>
+            {/* Quick actions: bold, obvious */}
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Link
+                href="/dashboard/dogs/new"
+                className="inline-flex items-center justify-center gap-2 bg-[#c08a3e] px-8 py-4 text-sm font-black uppercase tracking-[0.18em] text-[#140a08] transition hover:bg-[#d4a050]"
+              >
+                <span className="text-lg leading-none">+</span> List a dog
+              </Link>
+              <Link
+                href="/dashboard/dogs"
+                className="inline-flex items-center justify-center border-2 border-white/20 px-8 py-4 text-sm font-black uppercase tracking-[0.18em] text-white transition hover:border-[#c08a3e] hover:text-[#c08a3e]"
+              >
+                Manage dogs
+              </Link>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-7xl px-5 py-10 sm:px-10 lg:px-16">
+        {/* ── BIG NUMBER STAT BAND ── */}
+        <div className="grid grid-cols-2 gap-px bg-white/10 lg:grid-cols-4">
+          {stats.map((s) => (
+            <div key={s.label} className={`card-craft p-7 sm:p-9 ${s.hot && s.value > 0 ? 'bg-[#a8583f]/15' : ''}`}>
+              <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#f8f1e8]/45">{s.label}</p>
+              <p className={`mt-3 text-6xl font-black tracking-tight sm:text-7xl ${s.tone}`}>
+                {s.value}
+              </p>
+              <p className="mt-2 text-xs font-bold uppercase tracking-[0.18em] text-[#f8f1e8]/40">{s.sub}</p>
             </div>
           ))}
         </div>
 
-        {/* Recent dogs */}
-        <div className="mb-6 flex items-center justify-between border-y border-[#13241d]/10 py-4">
-          <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#436154]">Recent Dogs</p>
-          <Button variant="ghost" href="/dashboard/dogs" className="text-xs font-bold uppercase tracking-[0.18em]">
-            Manage all dogs →
-          </Button>
+        {(urgent ?? 0) > 0 && (
+          <Link
+            href="/dashboard/dogs"
+            className="mt-6 flex items-center gap-4 border-2 border-[#a8583f] bg-[#a8583f]/10 px-6 py-5 transition hover:bg-[#a8583f]/20"
+          >
+            <span className="animate-pulse-dot h-3 w-3 shrink-0 rounded-full bg-[#a8583f]" />
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-[#c98a7a]">
+              {urgent} urgent dog{urgent === 1 ? '' : 's'} need{urgent === 1 ? 's' : ''} attention — review cases →
+            </p>
+          </Link>
+        )}
+
+        {/* ── DOG ROSTER: photo-forward with status overlays ── */}
+        <div className="mb-8 mt-14 flex items-center justify-between border-b border-white/10 pb-4">
+          <p className="text-xs font-black uppercase tracking-[0.28em] text-[#f8f1e8]/50">Latest cases</p>
+          <Link href="/dashboard/dogs" className="text-xs font-black uppercase tracking-[0.2em] text-[#c08a3e] hover:underline">
+            All dogs →
+          </Link>
         </div>
 
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {recentDogs && recentDogs.length > 0 ? (
-            recentDogs.map((dog) => (
-              <div key={dog.id} className="flex flex-col overflow-hidden bg-[#fff9ef] outline outline-1 outline-[#13241d]/10">
-                <div className="relative h-36 bg-[#dce8dd] overflow-hidden">
-                  {dog.photo_url ? (
-                    <Image src={dog.photo_url} alt={dog.name} fill className="object-cover" unoptimized />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-3xl font-black text-[#f4b942]">
-                      {dog.name?.[0]}
+        {recentDogs && recentDogs.length > 0 ? (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {recentDogs.map((dog) => {
+              const dogUrgent = isDogUrgent(dog.status, dog.euthanasia_date)
+              const daysLeft = daysUntilEuthanasia(dog.euthanasia_date)
+              const interested = ((dog.alerts || []) as { status: string }[]).filter((a) => a.status === 'responded').length
+              return (
+                <Link
+                  key={dog.id}
+                  href={`/dashboard/dogs/${dog.id}`}
+                  className={`group relative block overflow-hidden border bg-[#122016] transition hover:-translate-y-1 ${
+                    dogUrgent ? 'border border-[#a8583f]/60' : 'border-white/10 hover:border-[#c08a3e]/60'
+                  }`}
+                >
+                  <div className="relative aspect-[16/10] overflow-hidden">
+                    {dog.photo_url ? (
+                      <Image src={dog.photo_url} alt={dog.name} fill className="object-cover transition duration-700 group-hover:scale-105" unoptimized />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-[#1a2e1a] text-6xl font-black text-[#c08a3e]">
+                        {dog.name?.[0]}
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                    {/* Status overlay ribbon */}
+                    <div className="absolute left-0 top-4">
+                      {dogUrgent ? (
+                        <span className="flex items-center gap-2 bg-[#a8583f] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-white">
+                          <span className="animate-pulse-dot h-2 w-2 rounded-full bg-white" />
+                          {daysLeftLabel(daysLeft) || 'Urgent'}
+                        </span>
+                      ) : (
+                        <span className="bg-[#c08a3e] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-[#140a08]">
+                          {dog.status || 'Available'}
+                        </span>
+                      )}
                     </div>
-                  )}
-                </div>
-                <div className="flex flex-1 flex-col p-5">
-                  <div className="flex items-start justify-between mb-1">
-                    <h2 className="text-base font-black text-[#13241d]">{dog.name}</h2>
-                    <StatusBadge status={dog.status || 'available'} euthanasiaDate={dog.euthanasia_date} />
+                    {interested > 0 && (
+                      <div className="absolute right-4 top-4 bg-[#7ddba3] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-[#0b140e]">
+                        {interested} interested
+                      </div>
+                    )}
+                    <div className="absolute inset-x-0 bottom-0 p-5">
+                      <h2 className="text-3xl font-black uppercase tracking-tight text-white">{dog.name}</h2>
+                      <p className="mt-1 text-xs font-bold uppercase tracking-[0.2em] text-[#c08a3e]">
+                        {dog.breed || 'Unknown breed'}{dog.age_years ? ` · ${dog.age_years}y` : ''}
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-xs text-[#5d6a64] mb-2">{dog.breed || 'Unknown breed'}{dog.age_years ? ` · ${dog.age_years}y` : ''}</p>
-                  {(() => {
-                    const interested = (dog.alerts || []).filter((a: { status: string }) => a.status === 'responded').length
-                    return interested > 0 ? (
-                      <p className="text-xs font-black text-green-600">{interested} rescue{interested !== 1 ? 's' : ''} interested</p>
-                    ) : null
-                  })()}
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="col-span-full border border-dashed border-[#13241d]/20 bg-[#fff9ef] px-6 py-20 text-center">
-              <p className="text-[#5d6a64] mb-4">No dogs listed yet.</p>
-              <Button variant="ghost" href="/dashboard/dogs/new" className="text-sm font-black uppercase tracking-widest">
-                Add your first dog
-              </Button>
-            </div>
-          )}
-        </div>
+                </Link>
+              )
+            })}
+          </div>
+        ) : (
+          <div className="border border-dashed border-white/20 bg-[#122016] px-6 py-20 text-center">
+            <p className="text-4xl font-black uppercase tracking-tight">No dogs yet.</p>
+            <p className="mx-auto mt-3 max-w-sm text-sm leading-7 text-[#f8f1e8]/55">
+              List your first case and it starts matching against rescue criteria immediately.
+            </p>
+            <Link
+              href="/dashboard/dogs/new"
+              className="mt-8 inline-flex bg-[#c08a3e] px-8 py-4 text-sm font-black uppercase tracking-[0.18em] text-[#140a08] transition hover:bg-[#d4a050]"
+            >
+              + List your first dog
+            </Link>
+          </div>
+        )}
       </main>
     </div>
   )

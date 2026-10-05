@@ -42,7 +42,7 @@ export default function DogRowActions({ dogId, currentStatus }: { dogId: string;
         disabled={statusLoading}
         onChange={(e) => setPendingStatus(e.target.value)}
         className={`text-xs font-semibold border px-3 py-2 bg-[#fffaf2] text-[#13241d] outline-none transition-all disabled:opacity-50 cursor-pointer ${
-          isDirty ? 'border-[#f4b942] ring-1 ring-[#f4b942]' : 'border-[#13241d]/20'
+          isDirty ? 'border-[#c08a3e] ring-1 ring-[#c08a3e]' : 'border-[#13241d]/20'
         }`}
       >
         {DOG_STATUSES.map((value) => (
@@ -55,7 +55,7 @@ export default function DogRowActions({ dogId, currentStatus }: { dogId: string;
         <button
           onClick={handleApplyStatus}
           disabled={statusLoading}
-          className="text-xs font-bold px-3 py-2 bg-[#13241d] text-[#f4b942] hover:bg-[#1f332a] transition-colors whitespace-nowrap disabled:opacity-50"
+          className="text-xs font-bold px-3 py-2 bg-[#13241d] text-[#c08a3e] hover:bg-[#1f332a] transition-colors whitespace-nowrap disabled:opacity-50"
         >
           {statusLoading ? 'Saving...' : 'Apply'}
         </button>

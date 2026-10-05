@@ -29,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-white">
+        <div aria-hidden className="grain-veil" />
         <Navbar />
         <div className="flex-1">
           <ToastProvider>
@@ -48,7 +49,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 />
                 <div>
                   <span className="font-semibold tracking-wider text-white text-sm uppercase block">DOGSRUN</span>
-                  <span className="text-[10px] font-bold text-[#f59e0b] uppercase tracking-widest">Loyalty Repaid</span>
+                  <span className="text-[10px] font-bold text-[#c08a3e] uppercase tracking-widest">Loyalty Repaid</span>
                 </div>
               </div>
               <div className="flex items-center gap-8">

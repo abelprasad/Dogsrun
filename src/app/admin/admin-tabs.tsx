@@ -15,7 +15,7 @@ export default function AdminTabs({ tabs }: { tabs: AdminTab[] }) {
 
   return (
     <div className="space-y-6">
-      <div className="border-b border-[#13241d]/10">
+      <div className="border-b border-white/10">
         <div className="flex flex-wrap gap-1">
           {tabs.map(tab => (
             <button
@@ -24,8 +24,8 @@ export default function AdminTabs({ tabs }: { tabs: AdminTab[] }) {
               onClick={() => setActiveTab(tab.id)}
               className={`px-5 py-3 text-xs font-black uppercase tracking-[0.2em] transition-colors ${
                 active?.id === tab.id
-                  ? 'bg-[#13241d] text-[#f4b942]'
-                  : 'bg-[#fff9ef] text-[#5d6a64] hover:bg-[#13241d]/10 hover:text-[#13241d]'
+                  ? 'bg-[#c08a3e] text-[#140a08]'
+                  : 'text-[#f8f1e8]/50 hover:bg-white/5 hover:text-[#f8f1e8]'
               }`}
             >
               {tab.label}

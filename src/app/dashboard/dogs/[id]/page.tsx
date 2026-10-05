@@ -68,25 +68,25 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
 
   return (
     <div className="min-h-screen bg-[#f8f1e8]">
-      <div className="bg-[#13241d] border-t border-[#f4b942]/20 py-2 px-8">
+      <div className="bg-[#13241d] border-t border-[#c08a3e]/20 py-2 px-8">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex gap-6">
             <Link href={backLink} className="text-xs font-bold text-[#d8cfc2] hover:text-[#f8f1e8] uppercase tracking-widest transition-colors">
               {org?.type === 'rescue' ? 'Alerts' : 'My Dogs'}
             </Link>
-            <span className="text-xs font-bold text-[#f4b942] uppercase tracking-widest">{dog.name}</span>
+            <span className="text-xs font-bold text-[#c08a3e] uppercase tracking-widest">{dog.name}</span>
           </div>
           <SignOutButton />
         </div>
       </div>
 
-      <header className="bg-[#13241d] border-b border-[#f4b942]/30 py-12 px-8 text-[#f8f1e8]">
+      <header className="bg-[#13241d] border-b border-[#c08a3e]/30 py-12 px-8 text-[#f8f1e8]">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <h1 className="text-4xl md:text-5xl font-[900] tracking-tight mb-2">{dog.name}</h1>
             <p className="text-[#d8cfc2] font-bold">{dog.breed}{dog.mix ? ' mix' : ''}</p>
             {dog.dogsrun_id && (
-              <p className="mt-1 text-xs font-bold uppercase tracking-[0.2em] text-[#f4b942]/60">{dog.dogsrun_id}</p>
+              <p className="mt-1 text-xs font-bold uppercase tracking-[0.2em] text-[#c08a3e]/60">{dog.dogsrun_id}</p>
             )}
           </div>
           <StatusBadge status={(dog.status as DogStatus) || 'available'} euthanasiaDate={dog.euthanasia_date} />
@@ -102,7 +102,7 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
                   {dog.photo_url ? (
                     <Image src={dog.photo_url} alt={dog.name} fill className="object-cover" unoptimized />
                   ) : (
-                    <div className="text-8xl font-[900] text-[#f4b942]">{dog.name?.[0] || 'D'}</div>
+                    <div className="text-8xl font-[900] text-[#c08a3e]">{dog.name?.[0] || 'D'}</div>
                   )}
                 </div>
                 <div className="p-8 space-y-8">

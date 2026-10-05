@@ -22,9 +22,9 @@ export default function PageHeader({
   actions,
   className = "bg-[#13241d] pb-12 px-8 pt-8 border-t border-white/5",
   innerClassName = "max-w-7xl mx-auto",
-  titleClassName = "text-4xl md:text-5xl font-black tracking-tight text-[#f4b942]",
+  titleClassName = "text-4xl md:text-5xl font-black tracking-tight text-[#c08a3e]",
   subClassName = "text-[#f5f0e8]/50 mt-2 text-sm",
-  eyebrowClassName = "text-xs uppercase tracking-[0.24em] text-[#f4b942]/70 mb-3 font-bold",
+  eyebrowClassName = "text-xs uppercase tracking-[0.24em] text-[#c08a3e]/70 mb-3 font-bold",
 }: PageHeaderProps) {
   return (
     <header className={className}>

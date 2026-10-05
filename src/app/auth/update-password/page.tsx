@@ -4,6 +4,15 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
+import { Button } from '@/components/ui'
+import AuthShell, {
+  authInputClass,
+  authLabelClass,
+  authErrorClass,
+} from '@/components/auth-shell'
+
+const UPDATE_IMAGE =
+  'https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=1600&q=85'
 
 export default function UpdatePasswordPage() {
   const [password, setPassword] = useState('')
@@ -57,82 +66,90 @@ export default function UpdatePasswordPage() {
 
   if (!ready) {
     return (
-      <div className="min-h-screen bg-[#f5f0e8]">
-        <header className="bg-[#13241d] py-12 px-8">
-          <div className="max-w-7xl mx-auto text-center">
-            <p className="text-xs uppercase tracking-[0.24em] text-[#f4b942]/70 mb-3 font-bold">DOGSRUN</p>
-            <h1 className="text-4xl md:text-5xl font-black tracking-tight text-[#f4b942]">Set New Password</h1>
+      <AuthShell
+        image={UPDATE_IMAGE}
+        imageAlt="Rescue dog looking up"
+        eyebrow="Verifying reset link"
+        headline={
+          <>
+            <span className="block text-[#f8f1e8]">One</span>
+            <span className="text-outline block">moment.</span>
+          </>
+        }
+        copy="Checking your reset link so you can get back to the dogs."
+      >
+        <div className="border border-white/10 bg-white/[0.03] p-10 text-center">
+          <div className="mb-6 flex items-center justify-center gap-3">
+            <span className="animate-pulse-dot h-2.5 w-2.5 rounded-full bg-[#c08a3e]" />
+            <span className="animate-pulse-dot h-2.5 w-2.5 rounded-full bg-[#c08a3e]" style={{ animationDelay: '0.2s' }} />
+            <span className="animate-pulse-dot h-2.5 w-2.5 rounded-full bg-[#c08a3e]" style={{ animationDelay: '0.4s' }} />
           </div>
-        </header>
-        <main className="py-16 px-8 flex items-center justify-center">
-          <div className="max-w-md w-full bg-[#fff9ef] outline outline-1 outline-[#13241d]/10 p-10 text-center">
-            <p className="text-[#5d6a64] text-sm">Verifying your reset link...</p>
-          </div>
-        </main>
-      </div>
+          <p className="text-sm font-semibold text-[#f8f1e8]/70">Verifying your reset link...</p>
+        </div>
+      </AuthShell>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f0e8]">
-      <header className="bg-[#13241d] py-12 px-8">
-        <div className="max-w-7xl mx-auto text-center">
-          <p className="text-xs uppercase tracking-[0.24em] text-[#f4b942]/70 mb-3 font-bold">DOGSRUN</p>
-          <h1 className="text-4xl md:text-5xl font-black tracking-tight text-[#f4b942]">Set New Password</h1>
-          <p className="text-[#f5f0e8]/60 mt-3 text-sm">Choose a new password for your account</p>
+    <AuthShell
+      image={UPDATE_IMAGE}
+      imageAlt="Rescue dog looking up"
+      eyebrow="Account recovery"
+      headline={
+        <>
+          <span className="block text-[#f8f1e8]">New password,</span>
+          <span className="block text-[#c08a3e]">same mission.</span>
+        </>
+      }
+      copy="Lock it in and get back to work. Urgent dogs don't wait for anyone."
+    >
+      <h2 className="text-3xl font-black uppercase tracking-tight text-[#f8f1e8] sm:text-4xl">
+        Set new password
+      </h2>
+      <p className="mt-2 text-sm text-[#f8f1e8]/60">
+        Choose a strong password for your account.
+      </p>
+
+      {error && <div className={`${authErrorClass} mt-6`}>{error}</div>}
+
+      <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+        <div>
+          <label className={authLabelClass}>New Password</label>
+          <input
+            type="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            placeholder="••••••••"
+            required
+            minLength={6}
+            className={authInputClass}
+          />
         </div>
-      </header>
-      <main className="py-16 px-8 flex items-center justify-center">
-        <div className="max-w-md w-full">
-          <div className="bg-[#fff9ef] outline outline-1 outline-[#13241d]/10 p-10">
-            {error && (
-              <div className="p-4 bg-red-50 text-red-700 text-sm border border-red-200 mb-6">{error}</div>
-            )}
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div>
-                <label className="block text-xs uppercase tracking-[0.24em] font-bold text-[#13241d] mb-2">
-                  New Password
-                </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  minLength={6}
-                  className="w-full px-4 py-3 border border-[#13241d]/20 bg-white focus:border-[#13241d] focus:ring-0 outline-none transition-colors text-[#13241d] placeholder-[#5d6a64]/40 text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-xs uppercase tracking-[0.24em] font-bold text-[#13241d] mb-2">
-                  Confirm Password
-                </label>
-                <input
-                  type="password"
-                  value={confirm}
-                  onChange={e => setConfirm(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  minLength={6}
-                  className="w-full px-4 py-3 border border-[#13241d]/20 bg-white focus:border-[#13241d] focus:ring-0 outline-none transition-all text-[#13241d] placeholder-[#5d6a64]/40 text-sm"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3 bg-[#13241d] text-[#f4b942] text-xs uppercase tracking-[0.24em] font-bold hover:bg-[#1a2e1a] transition-colors disabled:opacity-50"
-              >
-                {loading ? 'Updating...' : 'Update Password'}
-              </button>
-            </form>
-          </div>
-          <p className="text-center mt-8">
-            <Link href="/auth/login" className="text-xs uppercase tracking-[0.24em] font-bold text-[#13241d] hover:text-[#f4b942] transition-colors">
-              ← Back to Login
-            </Link>
-          </p>
+        <div>
+          <label className={authLabelClass}>Confirm Password</label>
+          <input
+            type="password"
+            value={confirm}
+            onChange={e => setConfirm(e.target.value)}
+            placeholder="••••••••"
+            required
+            minLength={6}
+            className={authInputClass}
+          />
         </div>
-      </main>
-    </div>
+        <Button type="submit" disabled={loading} className="w-full">
+          {loading ? 'Updating...' : 'Update Password'}
+        </Button>
+      </form>
+
+      <p className="mt-10 border-t border-white/10 pt-6 text-center">
+        <Link
+          href="/auth/login"
+          className="text-xs font-bold uppercase tracking-[0.2em] text-[#f8f1e8]/50 transition hover:text-[#c08a3e]"
+        >
+          Back to Login
+        </Link>
+      </p>
+    </AuthShell>
   )
 }

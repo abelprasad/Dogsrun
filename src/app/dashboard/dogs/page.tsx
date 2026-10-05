@@ -49,7 +49,7 @@ export default async function MyDogsPage({ searchParams }: { searchParams: Promi
                   {dog.photo_url ? (
                     <Image src={dog.photo_url} alt={dog.name} fill className="object-cover" unoptimized />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-2xl font-black text-[#f4b942]">
+                    <div className="w-full h-full flex items-center justify-center text-2xl font-black text-[#c08a3e]">
                       {dog.name?.[0]}
                     </div>
                   )}
@@ -79,7 +79,7 @@ export default async function MyDogsPage({ searchParams }: { searchParams: Promi
         ) : (
           <div className="py-24 bg-[#fff9ef] outline outline-1 outline-[#13241d]/10 text-center">
             <p className="text-xs uppercase tracking-[0.24em] font-bold text-[#5d6a64] mb-4">No Dogs Yet</p>
-            <Link href="/dashboard/dogs/new" className="text-xs uppercase tracking-[0.24em] font-bold text-[#13241d] hover:text-[#f4b942] transition-colors">Add your first dog →</Link>
+            <Link href="/dashboard/dogs/new" className="text-xs uppercase tracking-[0.24em] font-bold text-[#13241d] hover:text-[#c08a3e] transition-colors">Add your first dog →</Link>
           </div>
         )}
 

@@ -38,8 +38,8 @@ export default function EuthanasiaCountdown({ euthanasiaDate }: { euthanasiaDate
   }
 
   return (
-    <div className={`rounded-lg border px-4 py-3 ${isCritical ? 'bg-red-50 border-red-200' : 'bg-[#13241d] border-[#f4b942]/30'}`}>
-      <p className={`text-[10px] font-black uppercase tracking-widest mb-2 ${isCritical ? 'text-red-500' : 'text-[#f4b942]'}`}>
+    <div className={`rounded-lg border px-4 py-3 ${isCritical ? 'bg-red-50 border-red-200' : 'bg-[#13241d] border-[#c08a3e]/30'}`}>
+      <p className={`text-[10px] font-black uppercase tracking-widest mb-2 ${isCritical ? 'text-red-500' : 'text-[#c08a3e]'}`}>
         {isCritical ? 'Critical - Time Running Out' : 'At Risk - Euthanasia Scheduled'}
       </p>
       <div className="flex items-end gap-3">

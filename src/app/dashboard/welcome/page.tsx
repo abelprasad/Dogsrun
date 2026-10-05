@@ -37,9 +37,9 @@ export default async function WelcomePage() {
 
   return (
     <div className="min-h-screen bg-[#f8f1e8]">
-      <header className="bg-[#13241d] border-b border-[#f4b942]/30 py-12 px-8 text-[#f8f1e8]">
+      <header className="bg-[#13241d] border-b border-[#c08a3e]/30 py-12 px-8 text-[#f8f1e8]">
         <div className="max-w-7xl mx-auto">
-          <p className="text-xs font-bold text-[#f4b942] uppercase tracking-widest mb-3">Getting started</p>
+          <p className="text-xs font-bold text-[#c08a3e] uppercase tracking-widest mb-3">Getting started</p>
           <h1 className="text-4xl md:text-5xl font-[900] tracking-tight mb-2">Welcome to DOGSRUN</h1>
           <p className="text-[#d8cfc2]">Follow the steps below to get your organization set up.</p>
         </div>

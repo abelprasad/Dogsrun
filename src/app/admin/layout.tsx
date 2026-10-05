@@ -15,7 +15,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-6">
             <Link href="/admin">
-              <span className="text-xs font-bold text-[#f4b942] uppercase tracking-[0.24em]">Admin Panel</span>
+              <span className="text-xs font-bold text-[#c08a3e] uppercase tracking-[0.24em]">Admin Panel</span>
             </Link>
             <Link
               href={dashboardHref}
