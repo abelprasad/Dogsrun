@@ -14,19 +14,19 @@ const steps = [
     n: "01",
     title: "Intake",
     copy: "Shelters publish the essential context: behavior notes, timeline, size, medical flags, and transfer constraints.",
-    accent: "text-[#c08a3e]",
+    accent: "text-[#8a5f1e]",
   },
   {
     n: "02",
     title: "Match",
     copy: "DOGSRUN compares each case against active rescue criteria and highlights the organizations most likely to say yes.",
-    accent: "text-[#a8583f]",
+    accent: "text-[#8a4a35]",
   },
   {
     n: "03",
     title: "Move",
     copy: "Rescues receive a focused alert with one-click response links so urgent dogs can get out faster.",
-    accent: "text-[#f8f1e8]",
+    accent: "text-[#5a5a5a]",
   },
 ];
 
@@ -162,7 +162,7 @@ export default async function Home() {
             {steps.map((step, i) => (
               <div
                 key={step.n}
-                className={`card-craft hover-lift relative overflow-hidden p-8 sm:p-10 ${
+                className={`hover-lift relative overflow-hidden rounded-sm bg-[#f5f0e4] p-8 shadow-[0_24px_48px_-24px_rgba(0,0,0,0.5)] sm:p-10 ${
                   i === 0
                     ? "lg:col-span-5"
                     : i === 1
@@ -172,13 +172,13 @@ export default async function Home() {
               >
                 <span
                   aria-hidden
-                  className="ghost-num pointer-events-none absolute -right-3 -top-6 select-none text-[8rem] font-black leading-none sm:text-[10rem]"
+                  className="pointer-events-none absolute -right-3 -top-6 select-none text-[8rem] font-black leading-none text-[#140a08]/10 sm:text-[10rem]"
                 >
                   {step.n}
                 </span>
                 <p className={`text-sm font-black uppercase tracking-[0.3em] ${step.accent}`}>Step {step.n}</p>
-                <h3 className="mt-4 text-4xl font-black uppercase tracking-tight sm:text-5xl">{step.title}</h3>
-                <p className="mt-5 max-w-md text-base leading-8 text-[#f8f1e8]/70">{step.copy}</p>
+                <h3 className="mt-4 text-4xl font-black uppercase tracking-tight text-[#140a08] sm:text-5xl">{step.title}</h3>
+                <p className="mt-5 max-w-md text-base leading-8 text-[#140a08]/70">{step.copy}</p>
               </div>
             ))}
           </div>
