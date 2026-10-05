@@ -73,7 +73,7 @@ export default function ResetPasswordPage() {
       headline={
         <>
           <span className="block text-[#f8f1e8]">Locked out?</span>
-          <span className="block text-[#c08a3e]">Don't wait.</span>
+          <span className="block text-[#c08a3e]">Don&apos;t wait.</span>
           <span className="text-outline block">Get back in.</span>
         </>
       }

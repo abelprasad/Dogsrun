@@ -31,7 +31,7 @@ export default function UrgentTicker({ dogs }: { dogs: TickerDog[] }) {
             <span className="animate-pulse-dot inline-block h-2.5 w-2.5 rounded-full bg-[#a8583f]" />
             <span>{dog.name || 'Unnamed dog'}</span>
             {dog.daysLeft && <span className="text-[#f8f1e8]/70">— {dog.daysLeft}</span>}
-            <span className="ml-6 text-[#a8583f]/50">///</span>
+            <span className="ml-6 text-[#a8583f]/50">{'///'}</span>
           </Link>
         ))}
       </div>
