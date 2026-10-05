@@ -1,8 +1,10 @@
+import { CONTACT_EMAIL, SITE_URL } from '@/lib/constants'
 import { Resend } from 'resend'
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient, supabaseAdmin } from '@/lib/supabase-server'
-import { escapeHtml, escapeHtmlOrDash } from '@/lib/html'
+import { escapeHtml, escapeHtmlOrDash, sanitizeSubject } from '@/lib/html'
 import { dogMatchesCriteria } from '@/lib/matching'
+import { alertsRatelimit, getClientIp } from '@/lib/ratelimit'
 
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
@@ -40,6 +42,10 @@ interface Match {
 
 
 export async function POST(req: NextRequest) {
+  const alertsRatelimit_result = await alertsRatelimit.limit(getClientIp(req))
+  if (!alertsRatelimit_result.success) {
+    return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 })
+  }
   // Auth check — only logged-in shelter users or admins can trigger alert matching
   const supabaseAuth = await createSupabaseServerClient()
   const { data: { user } } = await supabaseAuth.auth.getUser()
@@ -186,9 +192,9 @@ export async function POST(req: NextRequest) {
 
       try {
         await resend.emails.send({
-        from: 'DOGSRUN Alerts <alerts@dogsrun.org>',
+        from: `DOGSRUN Alerts <${CONTACT_EMAIL}>`,
         to: org.email,
-        subject: `New dog match: ${dog.name ?? 'Unnamed'} (${dog.breed ?? 'Unknown breed'})`,
+        subject: `New dog match: ${sanitizeSubject(dog.name ?? 'Unnamed')} (${sanitizeSubject(dog.breed ?? 'Unknown breed')})`,
         html: `
           <div style="background-color: #f9fafb; padding: 32px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;">
             <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">

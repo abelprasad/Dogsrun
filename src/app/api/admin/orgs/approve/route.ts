@@ -1,9 +1,11 @@
+import { CONTACT_EMAIL, SITE_URL } from '@/lib/constants'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { escapeHtml } from '@/lib/html'
 import { dogMatchesCriteria } from '@/lib/matching'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { adminEmailRatelimit, getClientIp } from '@/lib/ratelimit'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
@@ -25,6 +27,10 @@ interface Dog {
 }
 
 export async function POST(req: NextRequest) {
+  const adminEmailRatelimit_result = await adminEmailRatelimit.limit(getClientIp(req))
+  if (!adminEmailRatelimit_result.success) {
+    return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 })
+  }
   const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -48,12 +54,18 @@ export async function POST(req: NextRequest) {
   // Don't approve a deactivated org — check before the update below
   const { data: existingOrg } = await supabaseAdmin
     .from('organizations')
-    .select('is_active')
+    .select('is_active, approval_status')
     .eq('id', org_id)
     .maybeSingle()
 
   if (action === 'approve' && existingOrg?.is_active === false) {
     return NextResponse.json({ error: 'Cannot approve a deactivated org' }, { status: 400 })
+  }
+
+  // Idempotency (M-D4): skip if already at the target status — prevents
+  // duplicate "You're Approved!" + digest emails on double-click/retry.
+  if (existingOrg?.approval_status === newStatus) {
+    return NextResponse.json({ success: true, message: 'Already at target status', skipped: true })
   }
 
   const { data: org, error: updateError } = await supabaseAdmin
@@ -110,7 +122,7 @@ export async function POST(req: NextRequest) {
   `
 
   await resend.emails.send({
-    from: 'DOGSRUN <alerts@dogsrun.org>',
+    from: `DOGSRUN <${CONTACT_EMAIL}>`,
     to: org.email,
     subject,
     html,
@@ -128,8 +140,12 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ success: true, approval_status: newStatus })
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function sendRescueApprovalDigest(supabaseAdmin: any, rescueId: string, rescueName: string, rescueEmail: string) {
+async function sendRescueApprovalDigest(
+  supabaseAdmin: typeof import('@/lib/supabase-server').supabaseAdmin,
+  rescueId: string,
+  rescueName: string,
+  rescueEmail: string
+) {
   const { data: criteria } = await supabaseAdmin
     .from('rescue_criteria')
     .select('*')
@@ -230,7 +246,7 @@ async function sendRescueApprovalDigest(supabaseAdmin: any, rescueId: string, re
   `
 
   await resend.emails.send({
-    from: 'DOGSRUN Alerts <alerts@dogsrun.org>',
+    from: `DOGSRUN Alerts <${CONTACT_EMAIL}>`,
     to: rescueEmail,
     subject: `${matches.length} dog${matches.length === 1 ? '' : 's'} matching your criteria on DOGSRUN`,
     html: digestHtml,

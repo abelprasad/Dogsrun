@@ -1,5 +1,6 @@
 'use client'
 
+import { parseLocalDate } from '@/lib/date-utils'
 import { useCallback, useEffect, useState } from 'react'
 import Button from '@/components/ui/button'
 import PaginationControls from './pagination-controls'
@@ -196,7 +197,7 @@ export default function AdminDogsTable() {
                     ) : (
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-[#f8f1e8]/55">
-                          {dog.euthanasia_date ? new Date(dog.euthanasia_date).toLocaleDateString() : '—'}
+                          {dog.euthanasia_date ? parseLocalDate(dog.euthanasia_date).toLocaleDateString() : '—'}
                         </span>
                         <button
                           onClick={() => { setEditingDate(dog.id); setDateValue(dog.euthanasia_date?.split('T')[0] ?? '') }}

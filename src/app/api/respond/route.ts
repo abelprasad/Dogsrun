@@ -1,7 +1,9 @@
+import { CONTACT_EMAIL, SITE_URL } from '@/lib/constants'
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
-import { escapeHtml } from '@/lib/html'
+import { escapeHtml, sanitizeSubject } from '@/lib/html'
 import { createSupabaseServerClient, supabaseAdmin } from '@/lib/supabase-server'
+import { respondRatelimit, getClientIp } from '@/lib/ratelimit'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
@@ -9,6 +11,10 @@ const resend = new Resend(process.env.RESEND_API_KEY!)
 // with no login; email link scanners or prefetch could mark a rescue as
 // interested. Responses now go through POST with the rescue's session.
 export async function POST(req: NextRequest) {
+  const respondRatelimit_result = await respondRatelimit.limit(getClientIp(req))
+  if (!respondRatelimit_result.success) {
+    return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 })
+  }
   const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -81,9 +87,9 @@ export async function POST(req: NextRequest) {
       const safeDogName = escapeHtml(dog.name)
 
       await resend.emails.send({
-        from: 'DOGSRUN <alerts@dogsrun.org>',
+        from: `DOGSRUN <${CONTACT_EMAIL}>`,
         to: shelter.email,
-        subject: `${rescue.name} is interested in ${dog.name}`,
+        subject: `${sanitizeSubject(rescue.name)} is interested in ${sanitizeSubject(dog.name)}`,
         html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
         <h2 style="color: #c08a3e;">Great news!</h2>

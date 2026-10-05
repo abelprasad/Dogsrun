@@ -1,17 +1,30 @@
+import { CONTACT_EMAIL, SITE_URL } from '@/lib/constants'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
-import { escapeHtml } from '@/lib/html'
+import { escapeHtml, sanitizeSubject } from '@/lib/html'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { respondRatelimit, getClientIp } from '@/lib/ratelimit'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
 export async function POST(req: NextRequest) {
+  const respondRatelimit_result = await respondRatelimit.limit(getClientIp(req))
+  if (!respondRatelimit_result.success) {
+    return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 })
+  }
   const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { alert_id, status } = await req.json()
+  let alert_id: string, status: string
+  try {
+    const body = await req.json()
+    alert_id = body.alert_id
+    status = body.status
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
+  }
   if (!alert_id || !['responded', 'declined', 'sent'].includes(status)) {
     return NextResponse.json({ error: 'alert_id and valid status required' }, { status: 400 })
   }
@@ -26,11 +39,13 @@ export async function POST(req: NextRequest) {
 
   if (!alert) return NextResponse.json({ error: 'Alert not found' }, { status: 404 })
 
+  const wasResponded = alert.status === 'responded'
+
   await supabaseAdmin.from('alerts').update({ status }).eq('id', alert_id)
 
-  // REVIEW: same shelter email as api/respond/route.ts; extract one notifyShelter(alert).
-  // Notify shelter when rescue is interested
-  if (status === 'responded') {
+  // Idempotency (M-D2): only notify the shelter on transition into 'responded',
+  // not on repeat POSTs or the dashboard Undo -> Interested flow.
+  if (status === 'responded' && !wasResponded) {
     const dog = alert.dogs
     const rescue = alert.organizations
     const { data: shelter } = await supabaseAdmin
@@ -45,9 +60,9 @@ export async function POST(req: NextRequest) {
       const safeDogName = escapeHtml(dog.name)
 
       await resend.emails.send({
-        from: 'DOGSRUN <alerts@dogsrun.org>',
+        from: `DOGSRUN <${CONTACT_EMAIL}>`,
         to: shelter.email,
-        subject: `${rescue.name} is interested in ${dog.name}`,
+        subject: `${sanitizeSubject(rescue.name)} is interested in ${sanitizeSubject(dog.name)}`,
         html: `
           <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px;border:1px solid #eee;border-radius:10px;">
             <h2 style="color:#c08a3e;">Great news!</h2>

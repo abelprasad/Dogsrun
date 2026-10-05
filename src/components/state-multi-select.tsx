@@ -54,7 +54,7 @@ export default function StateMultiSelect({ selected, onChange, label = 'States S
           {selected.map(state => (
             <span key={state} className="flex items-center gap-1 border border-[#13241d]/15 bg-[#f5f0e8] px-2 py-1 text-xs font-black text-[#13241d]">
               {state}
-              <button type="button" onClick={() => remove(state)} className="text-[#5d6a64] hover:text-red-500 leading-none">x</button>
+              <button type="button" onClick={() => remove(state)} aria-label={`Remove ${state}`} className="text-[#5d6a64] hover:text-red-500 leading-none">x</button>
             </span>
           ))}
         </div>

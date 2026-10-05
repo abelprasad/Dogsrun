@@ -117,7 +117,7 @@ export default function LoginPage() {
         Sign in to your shelter or rescue account.
       </p>
 
-      {error && <div className={`${authErrorClass} mt-6`}>{error}</div>}
+      {error && <div role="alert" className={`${authErrorClass} mt-6`}>{error}</div>}
 
       <form onSubmit={handleLogin} className="mt-8 space-y-5">
         <div>

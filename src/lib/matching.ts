@@ -52,7 +52,7 @@ export function dogMatchesCriteria(dog: MatchDog, criteria: MatchCriteria): bool
 
   const colorMatch = !criteria.colors || criteria.colors.length === 0 ||
     !dog.color || dog.color.length === 0 ||
-    dog.color.some(c => criteria.colors!.some(cc => cc.toLowerCase() === c.toLowerCase()))
+    dog.color.some(c => (criteria.colors ?? []).some(cc => cc.toLowerCase() === c.toLowerCase()))
 
   const ageMatch = !criteria.age_ranges || criteria.age_ranges.length === 0 ||
     !dog.age_years || criteria.age_ranges.includes(dogAgeRange(dog.age_years))

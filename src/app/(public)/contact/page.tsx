@@ -103,7 +103,7 @@ export default function ContactPage() {
             ) : (
               <div className="border border-white/10 bg-[#122016] p-6 sm:p-10">
                 {error && (
-                  <div className="mb-6 border border-[#a8583f]/40 bg-[#a8583f]/10 p-4 text-sm font-bold text-[#c98a7a]">
+                  <div role="alert" className="mb-6 border border-[#a8583f]/40 bg-[#a8583f]/10 p-4 text-sm font-bold text-[#c98a7a]">
                     {error}
                   </div>
                 )}
