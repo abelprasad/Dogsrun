@@ -1,10 +1,11 @@
-import Link from 'next/link'
 import Image from 'next/image'
 import { redirect } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
 import { requireAuthContext } from '@/lib/auth-context'
 import StatusBadge from '@/components/status-badge'
 import ApprovalWall from '@/components/approval-wall'
+import PageHeader from '@/components/ui/page-header'
+import Button from '@/components/ui/button'
 
 export default async function DashboardPage() {
   const { org, isAdmin } = await requireAuthContext()
@@ -28,7 +29,7 @@ export default async function DashboardPage() {
     serviceClient.from('dogs').select('*', { count: 'exact', head: true }).eq('shelter_id', org.id).in('status', ['placed', 'adopted']),
   ])
 
-  // REVIEW: the 4 count queries above could be one select('status') counted in JS. The green header below repeats in ~9 pages; extract a <PageHeader eyebrow title sub>.
+  // REVIEW: the 4 count queries above could be one select('status') counted in JS.
   const { data: recentDogs } = await serviceClient
     .from('dogs')
     .select('*, alerts(status)')
@@ -38,13 +39,13 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#f5f0e8] text-[#13241d]">
-      {/* Header */}
-      <header className="bg-[#13241d] px-5 py-14 sm:px-8 lg:px-12">
-        <div className="mx-auto max-w-7xl">
-          <h1 className="text-4xl font-black leading-tight tracking-tight text-[#f4b942] sm:text-5xl">{org.name}</h1>
-          <p className="mt-2 text-[#c8d3ce]">Manage your dogs and track rescue interest.</p>
-        </div>
-      </header>
+      <PageHeader
+        title={org.name}
+        sub="Manage your dogs and track rescue interest."
+        className="bg-[#13241d] px-5 py-14 sm:px-8 lg:px-12"
+        titleClassName="text-4xl font-black leading-tight tracking-tight text-[#f4b942] sm:text-5xl"
+        subClassName="mt-2 text-[#c8d3ce]"
+      />
 
       <main className="mx-auto max-w-7xl px-5 py-10 sm:px-8 lg:px-12">
         {/* Stat cards */}
@@ -65,9 +66,9 @@ export default async function DashboardPage() {
         {/* Recent dogs */}
         <div className="mb-6 flex items-center justify-between border-y border-[#13241d]/10 py-4">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#436154]">Recent Dogs</p>
-          <Link href="/dashboard/dogs" className="text-xs font-bold uppercase tracking-[0.18em] text-[#d95f4b] hover:underline">
+          <Button variant="ghost" href="/dashboard/dogs" className="text-xs font-bold uppercase tracking-[0.18em]">
             Manage all dogs →
-          </Link>
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -101,9 +102,9 @@ export default async function DashboardPage() {
           ) : (
             <div className="col-span-full border border-dashed border-[#13241d]/20 bg-[#fff9ef] px-6 py-20 text-center">
               <p className="text-[#5d6a64] mb-4">No dogs listed yet.</p>
-              <Link href="/dashboard/dogs/new" className="text-sm font-black uppercase tracking-widest text-[#d95f4b] hover:underline">
+              <Button variant="ghost" href="/dashboard/dogs/new" className="text-sm font-black uppercase tracking-widest">
                 Add your first dog
-              </Link>
+              </Button>
             </div>
           )}
         </div>

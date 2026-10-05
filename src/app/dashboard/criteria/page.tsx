@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { requireAuthContext } from '@/lib/auth-context'
 import CriteriaForm from './criteria-form'
+import PageHeader from '@/components/ui/page-header'
 
 export default async function CriteriaPage() {
   const { supabase, org } = await requireAuthContext()
@@ -17,13 +18,11 @@ export default async function CriteriaPage() {
   return (
     <div className="min-h-screen bg-[#f5f0e8]">
       {/* Header */}
-      <header className="bg-[#13241d] pb-12 px-8 pt-8 border-t border-white/5">
-        <div className="max-w-7xl mx-auto">
-          <p className="text-xs uppercase tracking-[0.24em] text-[#f4b942]/70 mb-3 font-bold">Rescue Portal</p>
-          <h1 className="text-4xl md:text-5xl font-black tracking-tight text-[#f4b942]">Matching Criteria</h1>
-          <p className="text-[#f5f0e8]/50 mt-2 text-sm">Define which dogs your rescue organization can support.</p>
-        </div>
-      </header>
+      <PageHeader
+        eyebrow="Rescue Portal"
+        title="Matching Criteria"
+        sub="Define which dogs your rescue organization can support."
+      />
 
       <main className="max-w-4xl mx-auto py-10 px-8">
         <CriteriaForm rescueId={org.id} initialCriteria={criteria} />

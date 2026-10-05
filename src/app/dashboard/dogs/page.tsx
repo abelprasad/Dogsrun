@@ -2,8 +2,11 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { redirect } from 'next/navigation'
 import { requireAuthContext } from '@/lib/auth-context'
-import StatusBadge, { DogStatus } from '@/components/status-badge'
+import StatusBadge from '@/components/status-badge'
 import DogRowActions from './dog-row-actions'
+import PageHeader from '@/components/ui/page-header'
+import Button from '@/components/ui/button'
+import Pagination from '@/components/ui/pagination'
 
 const PAGE_SIZE = 10
 
@@ -28,19 +31,13 @@ export default async function MyDogsPage({ searchParams }: { searchParams: Promi
 
   return (
     <div className="min-h-screen bg-[#f5f0e8]">
-      {/* Header */}
-      <header className="bg-[#13241d] pb-12 px-8 pt-8 border-t border-white/5">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-[#f4b942]/70 mb-3 font-bold">Shelter</p>
-            <h1 className="text-4xl md:text-5xl font-black tracking-tight text-[#f4b942]">My Dogs</h1>
-            <p className="text-[#f5f0e8]/50 mt-2 text-sm">{count || 0} dog{count !== 1 ? 's' : ''} listed</p>
-          </div>
-          <Link href="/dashboard/dogs/new" className="inline-block bg-[#f4b942] text-[#13241d] font-black text-xs uppercase tracking-[0.24em] px-6 py-3 hover:bg-[#f4b942]/90 transition-colors">
-            + Add a Dog
-          </Link>
-        </div>
-      </header>
+      <PageHeader
+        eyebrow="Shelter"
+        title="My Dogs"
+        sub={<>{count || 0} dog{count !== 1 ? 's' : ''} listed</>}
+        innerClassName="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-4"
+        actions={<Button href="/dashboard/dogs/new">+ Add a Dog</Button>}
+      />
 
       <main className="max-w-7xl mx-auto py-10 px-8">
         {dogs && dogs.length > 0 ? (
@@ -59,7 +56,7 @@ export default async function MyDogsPage({ searchParams }: { searchParams: Promi
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-1">
                     <h2 className="font-black text-[#13241d] text-base">{dog.name}</h2>
-                    <StatusBadge status={(dog.status as DogStatus) || 'available'} euthanasiaDate={dog.euthanasia_date} />
+                    <StatusBadge status={dog.status || 'available'} euthanasiaDate={dog.euthanasia_date} />
                     {(dog.parvo || dog.tripod || dog.blind || dog.other_issues) && (
                       <span className="text-[10px] font-black uppercase tracking-[0.24em] text-[#d95f4b] bg-red-50 px-2 py-0.5">Special Needs</span>
                     )}
@@ -85,24 +82,13 @@ export default async function MyDogsPage({ searchParams }: { searchParams: Promi
           </div>
         )}
 
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between mt-8 pt-6 border-t border-[#13241d]/10">
-            <p className="text-xs text-[#5d6a64] font-semibold uppercase tracking-[0.24em]">Page {page} of {totalPages} · {count} dogs</p>
-            <div className="flex gap-2">
-              {page > 1 && (
-                <Link href={`/dashboard/dogs?page=${page - 1}`} className="px-4 py-2 text-xs font-bold border border-[#13241d]/20 text-[#13241d] hover:bg-[#13241d] hover:text-[#f4b942] transition-colors uppercase tracking-[0.24em]">← Prev</Link>
-              )}
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                <Link key={p} href={`/dashboard/dogs?page=${p}`} className={`px-4 py-2 text-xs font-bold uppercase tracking-[0.24em] transition-colors ${p === page ? 'bg-[#13241d] text-[#f4b942]' : 'border border-[#13241d]/20 text-[#13241d] hover:bg-[#13241d] hover:text-[#f4b942]'}`}>
-                  {p}
-                </Link>
-              ))}
-              {page < totalPages && (
-                <Link href={`/dashboard/dogs?page=${page + 1}`} className="px-4 py-2 text-xs font-bold border border-[#13241d]/20 text-[#13241d] hover:bg-[#13241d] hover:text-[#f4b942] transition-colors uppercase tracking-[0.24em]">Next →</Link>
-              )}
-            </div>
-          </div>
-        )}
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          getHref={(p) => `/dashboard/dogs?page=${p}`}
+          summary={<>Page {page} of {totalPages} · {count} dogs</>}
+          className="flex items-center justify-between mt-8 pt-6 border-t border-[#13241d]/10"
+        />
       </main>
     </div>
   )

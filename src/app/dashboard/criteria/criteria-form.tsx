@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import BreedSelect from '@/components/breed-select';
 import ColorPicker from '@/components/color-picker';
 import StateMultiSelect from '@/components/state-multi-select';
+import Button from '@/components/ui/button';
 
 interface RescueCriteria {
   id?: string;
@@ -124,9 +125,9 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
             <div className="h-2 w-2 rounded-full bg-green-500" />
             <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#7a877f]">Active</span>
           </div>
-          <button onClick={() => setIsEditing(true)} className="text-xs font-black uppercase tracking-[0.18em] text-[#d95f4b] hover:underline">
+          <Button variant="ghost" onClick={() => setIsEditing(true)} className="text-xs font-black uppercase tracking-[0.18em]">
             Edit Criteria
-          </button>
+          </Button>
         </div>
 
         <div className="grid grid-cols-2 divide-x divide-y divide-[#13241d]/10 md:grid-cols-4">
@@ -298,13 +299,13 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
 
       {/* Actions */}
       <div className="flex gap-3 border-t border-[#13241d]/10 pt-6">
-        <button type="submit" disabled={loading} className="flex-1 bg-[#f4b942] py-3 text-sm font-black uppercase tracking-[0.16em] text-[#1a2e1a] transition hover:bg-[#ffd86a] disabled:opacity-50">
+        <Button type="submit" disabled={loading} className="flex-1">
           {loading ? 'Saving...' : 'Save criteria'}
-        </button>
+        </Button>
         {initialCriteria && (
-          <button type="button" onClick={() => setIsEditing(false)} className="border border-[#13241d]/20 bg-[#f5f0e8] px-8 py-3 text-sm font-black uppercase tracking-[0.16em] text-[#13241d] transition hover:bg-[#13241d] hover:text-[#f4b942]">
+          <Button variant="secondary" type="button" onClick={() => setIsEditing(false)}>
             Cancel
-          </button>
+          </Button>
         )}
       </div>
     </form>

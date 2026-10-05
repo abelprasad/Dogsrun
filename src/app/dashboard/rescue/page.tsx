@@ -2,7 +2,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { redirect } from 'next/navigation'
 import { requireAuthContext } from '@/lib/auth-context'
-import StatusBadge, { DogStatus } from '@/components/status-badge'
+import StatusBadge from '@/components/status-badge'
+import PageHeader from '@/components/ui/page-header'
 import ApprovalWall from '@/components/approval-wall'
 import AlertActions from './alert-actions'
 
@@ -41,13 +42,11 @@ export default async function RescuePortalPage() {
 
   return (
     <div className="min-h-screen bg-[#f5f0e8]">
-      <header className="bg-[#13241d] pb-12 px-8 pt-8 border-t border-white/5">
-        <div className="max-w-7xl mx-auto">
-          <p className="text-xs uppercase tracking-[0.24em] text-[#f4b942]/70 mb-3 font-bold">Rescue Portal</p>
-          <h1 className="text-4xl md:text-5xl font-black tracking-tight text-[#f4b942]">{org.name}</h1>
-          <p className="text-[#f5f0e8]/50 mt-2 text-sm">New dog matches based on your organization&apos;s criteria.</p>
-        </div>
-      </header>
+      <PageHeader
+        eyebrow="Rescue Portal"
+        title={org.name}
+        sub="New dog matches based on your organization's criteria."
+      />
 
       <main className="max-w-7xl mx-auto py-10 px-8">
         <div className="space-y-4">
@@ -72,7 +71,7 @@ export default async function RescuePortalPage() {
                         <div>
                           <div className="flex items-center gap-3 mb-1">
                             <h2 className="text-xl font-black text-[#13241d]">{dog?.name || 'Unnamed Dog'}</h2>
-                            <StatusBadge status={(dog?.status as DogStatus) || 'available'} euthanasiaDate={dog?.euthanasia_date} />
+                            <StatusBadge status={dog?.status || 'available'} euthanasiaDate={dog?.euthanasia_date} />
                           </div>
                           <p className="text-sm text-[#5d6a64] mb-2">
                             {dog?.breed || 'Unknown breed'}{dog?.age_years ? ` · ${dog.age_years}y` : ''}{dog?.sex ? ` · ${dog.sex}` : ''}

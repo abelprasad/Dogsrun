@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
 import StatusBadge from '@/components/status-badge'
 import BrowseStateFilter from '@/components/browse-state-filter'
+import Pagination from '@/components/ui/pagination'
+import Badge from '@/components/ui/badge'
 
 const serviceClient = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -171,10 +173,10 @@ export default async function BrowsePage({
       {/* Hero */}
       <header className="bg-[#13241d] px-5 pb-0 pt-16 sm:px-8 lg:px-12">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-6 inline-flex items-center gap-3 border-y border-[#f4b942]/30 py-3 text-[11px] font-bold uppercase tracking-[0.28em] text-[#f4b942]">
+          <Badge variant="eyebrow" className="mb-6">
             <span className="h-2 w-2 rounded-full bg-[#d95f4b]" />
             DOGSRUN Network
-          </div>
+          </Badge>
           <h1 className="max-w-4xl text-5xl font-black leading-[0.9] tracking-tight text-[#f4b942] sm:text-6xl lg:text-7xl">
             {hero.heading}
           </h1>
@@ -285,37 +287,12 @@ export default async function BrowsePage({
                 ))}
               </div>
 
-              {totalPages > 1 && (
-                <div className="mt-12 flex items-center justify-between border-t border-[#13241d]/10 pt-8">
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#7a877f]">
-                    Page {page} of {totalPages} · {dogCount} dogs
-                  </p>
-                  <div className="flex gap-2">
-                    {page > 1 && (
-                      <Link href={`/dogs?tab=dogs&page=${page - 1}${stateFilter ? `&state=${stateFilter}` : ''}`}
-                        className="border border-[#13241d]/20 bg-[#fff9ef] px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-[#13241d] transition hover:bg-[#13241d] hover:text-[#f4b942]">
-                        ← Prev
-                      </Link>
-                    )}
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                      <Link key={p} href={`/dogs?tab=dogs&page=${p}${stateFilter ? `&state=${stateFilter}` : ''}`}
-                        className={`px-4 py-2 text-xs font-black uppercase tracking-[0.16em] transition ${
-                          p === page
-                            ? 'bg-[#f4b942] text-[#13241d]'
-                            : 'border border-[#13241d]/20 bg-[#fff9ef] text-[#13241d] hover:bg-[#13241d] hover:text-[#f4b942]'
-                        }`}>
-                        {p}
-                      </Link>
-                    ))}
-                    {page < totalPages && (
-                      <Link href={`/dogs?tab=dogs&page=${page + 1}${stateFilter ? `&state=${stateFilter}` : ''}`}
-                        className="border border-[#13241d]/20 bg-[#fff9ef] px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-[#13241d] transition hover:bg-[#13241d] hover:text-[#f4b942]">
-                        Next →
-                      </Link>
-                    )}
-                  </div>
-                </div>
-              )}
+              <Pagination
+                page={page}
+                totalPages={totalPages}
+                getHref={(p) => `/dogs?tab=dogs&page=${p}${stateFilter ? `&state=${stateFilter}` : ''}`}
+                summary={<>Page {page} of {totalPages} · {dogCount} dogs</>}
+              />
             </>
           ) : (
             <div className="border border-dashed border-[#13241d]/20 bg-[#fff9ef] px-6 py-20 text-center">

@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import Button from '@/components/ui/button';
 // REVIEW: dog status list lives in 4 places; one DOG_STATUSES in lib.
 const STATUSES = [
   { value: 'available', label: 'Available' },
@@ -70,12 +70,13 @@ export default function DogRowActions({ dogId, currentStatus }: { dogId: string;
       )}
 
       {/* Edit */}
-      <Link
+      <Button
         href={`/dashboard/dogs/${dogId}/edit`}
-        className="text-xs font-semibold px-3 py-2 bg-[#f4b942] text-[#13241d] hover:bg-[#e3a72c] transition-colors whitespace-nowrap"
+        size="sm"
+        className="whitespace-nowrap"
       >
         Edit
-      </Link>
+      </Button>
     </div>
   );
 }
