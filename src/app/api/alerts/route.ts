@@ -226,9 +226,9 @@ export async function POST(req: NextRequest) {
                   </tr>
                 </table>
                 <div style="text-align: center; margin-bottom: 32px;">
-                  <a href="https://dogsrun.org/api/respond?alert_id=${encodeURIComponent(alertData.id)}&amp;action=interested"
+                  <a href="https://dogsrun.org/dashboard/rescue"
                      style="background-color: #f59e0b; color: #ffffff; padding: 16px 32px; border-radius: 12px; text-decoration: none; display: inline-block; font-weight: 700; font-size: 16px;">
-                    Interested
+                    View Match &amp; Respond
                   </a>
                 </div>
                 <div style="text-align: center;">

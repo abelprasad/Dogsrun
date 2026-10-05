@@ -1,16 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { escapeHtml } from '@/lib/html'
-import { supabaseAdmin } from '@/lib/supabase-server'
-
+import { createSupabaseServerClient, supabaseAdmin } from '@/lib/supabase-server'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
-// REVIEW(bug): state-changing GET with no login; email link scanners or prefetch can mark a rescue as interested.
-export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url)
-  const alert_id = searchParams.get('alert_id')
-  const action = searchParams.get('action')
+// Authenticated response endpoint for rescues. Previously a state-changing GET
+// with no login; email link scanners or prefetch could mark a rescue as
+// interested. Responses now go through POST with the rescue's session.
+export async function POST(req: NextRequest) {
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  let alert_id: string
+  let action: string
+  try {
+    const body = await req.json()
+    alert_id = body.alert_id
+    action = body.action
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
+  }
 
   if (!alert_id || !action) {
     return NextResponse.json({ error: 'Missing params' }, { status: 400 })
@@ -22,25 +33,39 @@ export async function GET(req: NextRequest) {
 
   const status = action === 'interested' ? 'responded' : 'declined'
 
-  // Update alert status
-  const { data: alert, error: updateError } = await supabaseAdmin
+  // Fetch first so we can verify ownership and current status before mutating
+  const { data: alert, error: fetchError } = await supabaseAdmin
     .from('alerts')
-    .update({ status })
-    .eq('id', alert_id)
     .select(`
         *,
         dogs (*),
         organizations!alerts_rescue_id_fkey (*)
       `)
+    .eq('id', alert_id)
     .single()
 
-  if (updateError || !alert) {
-    return NextResponse.json({ error: 'Alert not found or update failed' }, { status: 404 })
+  if (fetchError || !alert) {
+    return NextResponse.json({ error: 'Alert not found' }, { status: 404 })
   }
 
-  // REVIEW: same shelter email as api/alerts/respond/route.ts; extract one notifyShelter(alert).
-  // If interested, notify shelter
-  if (action === 'interested') {
+  if (alert.rescue_id !== user.id) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  const wasResponded = alert.status === 'responded'
+
+  const { error: updateError } = await supabaseAdmin
+    .from('alerts')
+    .update({ status })
+    .eq('id', alert_id)
+
+  if (updateError) {
+    return NextResponse.json({ error: 'Alert update failed' }, { status: 500 })
+  }
+
+  // Idempotency: only notify the shelter when transitioning from a
+  // non-responded status to responded — not on repeat clicks.
+  if (action === 'interested' && !wasResponded) {
     const dog = alert.dogs
     const rescue = alert.organizations
 
@@ -76,6 +101,5 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // Redirect to thank you page
-  return NextResponse.redirect(new URL('/responded', req.url))
+  return NextResponse.json({ success: true, status })
 }

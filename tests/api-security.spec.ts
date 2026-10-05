@@ -197,11 +197,11 @@ test.describe('API security', () => {
     }
   })
 
-  test('email response endpoint rejects invalid action values', async ({ request }) => {
-    const response = await request.get(`/api/respond?alert_id=${randomUUID()}&action=delete`)
+  test('email response endpoint requires authentication', async ({ request }) => {
+    const response = await request.post('/api/respond', { data: { alert_id: randomUUID(), action: 'interested' } })
 
-    expect(response.status()).toBe(400)
-    expectJsonError(await response.json(), /invalid action/)
+    expect(response.status()).toBe(401)
+    expectJsonError(await response.json(), /unauthorized/)
   })
 
   test('public dog profiles hide closed dogs', async ({ request }) => {
