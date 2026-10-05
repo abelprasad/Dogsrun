@@ -45,7 +45,14 @@ export async function POST(req: NextRequest) {
 
   const newStatus = action === 'approve' ? 'approved' : 'rejected'
 
-  if (action === 'approve' && org.is_active === false) {
+  // Don't approve a deactivated org — check before the update below
+  const { data: existingOrg } = await supabaseAdmin
+    .from('organizations')
+    .select('is_active')
+    .eq('id', org_id)
+    .maybeSingle()
+
+  if (action === 'approve' && existingOrg?.is_active === false) {
     return NextResponse.json({ error: 'Cannot approve a deactivated org' }, { status: 400 })
   }
 
