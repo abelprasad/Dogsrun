@@ -112,6 +112,63 @@ npm run lint
 npx tsc --noEmit
 ```
 
+## Continuous Scraping (Phase 0–1 — unmerged, unpushed)
+
+> Status: work in progress in the detached worktree
+> `/home/abel/dogsrun-scrape`. **Not merged to `main`, not pushed, not
+> deployed.** Full plan: [docs/continuous-scraping-plan.md](./docs/continuous-scraping-plan.md).
+
+DOGSRUN keeps its dog list fresh without hand entry by scraping the
+shelters that hold dogs in kennels (Steven's direction: scrape shelters,
+not rescues). The pilot source is ACCT Philly via its Shelterluv embed.
+New dogs land in an approval queue (`import_queue`) for a human to
+approve; nothing is auto-imported and fuzzy duplicates are never
+auto-merged.
+
+### What exists in this phase
+
+- `src/lib/scraping/types.ts` — normalized `ScrapedDog` + `ShelterAdapter`
+  interface (`listDogs()` / `fetchDog()`).
+- `src/lib/scraping/normalize.ts` — age/sex/breed/weight/description
+  normalization (unit-tested, incl. Shelterluv `5Y/8M/1W` ages).
+- `src/lib/scraping/adapters/acct.ts` — Playwright adapter for ACCT
+  Philly. It loads the Shelterluv embed in a real headless browser and
+  reads the embed's own available-animals endpoint in-page, with a
+  paginated rendered-DOM fallback. Polite delay ≥ 1s between pages, max
+  ~50 pages per run. Stops (no retry, never solves CAPTCHAs) on HTTP
+  403 / 429 / CAPTCHA / bot challenge, and treats zero dogs as a failed
+  run, not an empty shelter.
+- `src/lib/scraping/dedup.ts` — exact dedup on `(source, source_id)` plus
+  human-only fuzzy candidates (same shelter + name + breed + sex + age
+  within 0.5 years).
+- `supabase/migrations/20261111_scraping_import_queue.sql` — migration
+  file **only** for `import_queue` + `sync_runs` (never run against live
+  Supabase in this phase).
+- `scripts/scrape-acct.ts` — CLI (see below).
+
+### How to run it (dry-run)
+
+```bash
+# Dry run (default): prints what would be imported, imports nothing
+npx tsx scripts/scrape-acct.ts
+
+# Full list, still writes NOTHING to Supabase in this phase
+npx tsx scripts/scrape-acct.ts --live
+
+# Options: --max-pages N (default 5 dry-run, 50 live),
+# --limit N (default 25, 0 = all), --json
+npx tsx scripts/scrape-acct.ts --max-pages 5 --limit 10 --json
+```
+
+Exit codes: `0` ok, `2` blocked/failed run, `1` unexpected error.
+
+### Still to come (Phase 1+)
+
+Approval-queue UI + API routes (`/admin/import-queue`), PSPCA adapter,
+Petfinder API feed (needs a key), Resend digest, 6-hour sync, and the
+stale/adopted lifecycle. The euthanasia date is not exposed by the
+Shelterluv embed, so urgent-dog timestamps need another source.
+
 ## Deployment
 
 Production deploys automatically from `main` via Vercel. Every push to `main` triggers a build; CI runs lint, type check, and unit tests first.
