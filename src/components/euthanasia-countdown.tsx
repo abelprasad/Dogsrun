@@ -1,7 +1,7 @@
 'use client';
 
 import { parseLocalDate } from '@/lib/date-utils'
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { getRiskLevel } from '@/lib/dog-status';
 
 function getCountdown(euthanasiaDate: string) {
@@ -16,24 +16,32 @@ function getCountdown(euthanasiaDate: string) {
   return { diffMs, diffHours, diffDays, diffHoursRemainder, diffMins };
 }
 
+// No-op subscribe: the snapshot never changes on its own; hydration flips it.
+const subscribeNoop = () => () => {};
+
 export default function EuthanasiaCountdown({ euthanasiaDate }: { euthanasiaDate: string }) {
-  const [countdown, setCountdown] = useState<ReturnType<typeof getCountdown> | null>(null); // M-F9: client-only to avoid hydration mismatch
+  // M-F9: client-only to avoid hydration mismatch. The countdown is computed
+  // during render once mounted (no setState in the effect body, which CI's
+  // react-hooks/set-state-in-effect rule now rejects); the effect only owns
+  // the 60s interval, whose callback bumps a tick to re-render.
+  const mounted = useSyncExternalStore(subscribeNoop, () => true, () => false);
+  const [, setTick] = useState(0);
 
   useEffect(() => {
-    setCountdown(getCountdown(euthanasiaDate));
     const interval = setInterval(() => {
-      setCountdown(getCountdown(euthanasiaDate));
+      setTick((t) => t + 1);
     }, 60000); // update every minute
     return () => clearInterval(interval);
   }, [euthanasiaDate]);
 
-  if (!countdown) {
+  if (!mounted) {
     return (
       <div className="flex items-center gap-2 px-3 py-2 bg-[#1a2e1a] rounded-lg animate-pulse">
         <span className="text-xs font-black text-[#c08a3e]/60 uppercase tracking-widest">Loading…</span>
       </div>
     );
   }
+  const countdown = getCountdown(euthanasiaDate);
   const { diffMs, diffDays, diffHoursRemainder, diffMins } = countdown;
   const risk = getRiskLevel(euthanasiaDate);
   const isCritical = risk === 'past-due' || risk === 'critical';

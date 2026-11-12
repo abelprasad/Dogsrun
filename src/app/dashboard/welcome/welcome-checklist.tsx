@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
@@ -24,6 +24,9 @@ interface Props {
 
 const DISMISS_KEY = (orgId: string) => `dogsrun_welcome_dismissed_${orgId}`
 
+// No-op subscribe: the snapshots never change on their own; hydration flips them.
+const subscribeNoop = () => () => {}
+
 export default function WelcomeChecklist({
   orgType,
   orgId,
@@ -34,16 +37,23 @@ export default function WelcomeChecklist({
 }: Props) {
   const router = useRouter()
   const [dismissed, setDismissed] = useState(false)
-  // L-15: gate render until localStorage check completes to avoid checklist flash
-  const [checked, setChecked] = useState(false)
+  // L-15: gate render until localStorage check completes to avoid checklist flash.
+  // Mounted + dismissed are read via useSyncExternalStore (no setState in an
+  // effect), which keeps CI's react-hooks/set-state-in-effect rule green.
+  // The effect below only syncs with the router (an external system), which
+  // the rule allows.
+  const mounted = useSyncExternalStore(subscribeNoop, () => true, () => false)
+  const dismissedStored = useSyncExternalStore(
+    subscribeNoop,
+    () => localStorage.getItem(DISMISS_KEY(orgId)) === 'true',
+    () => false,
+  )
 
   useEffect(() => {
-    if (localStorage.getItem(DISMISS_KEY(orgId)) === 'true') {
+    if (mounted && dismissedStored) {
       router.replace(dashboardHref)
-    } else {
-      setChecked(true)
     }
-  }, [orgId, dashboardHref, router])
+  }, [mounted, dismissedStored, dashboardHref, router])
 
   function dismiss() {
     localStorage.setItem(DISMISS_KEY(orgId), 'true')
@@ -51,7 +61,7 @@ export default function WelcomeChecklist({
     router.replace(dashboardHref)
   }
 
-  if (!checked && !dismissed) return null
+  if (!mounted || dismissedStored) return null
 
   const shelterSteps: Step[] = [
     {

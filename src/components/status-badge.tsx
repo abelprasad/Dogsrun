@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import Badge, { type BadgeVariant } from "@/components/ui/badge";
 import { dogStatusLabel, getRiskLevel } from '@/lib/dog-status';
 
@@ -12,10 +12,15 @@ interface StatusBadgeProps {
   euthanasiaDate?: string | null;
 }
 
+// No-op subscribe: the snapshot never changes on its own; hydration flips it.
+const subscribeNoop = () => () => {};
+
 export default function StatusBadge({ status, euthanasiaDate }: StatusBadgeProps) {
-  // M-F9: gate time-sensitive render on mount to avoid hydration mismatch
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  // M-F9: gate time-sensitive render on mount to avoid hydration mismatch.
+  // useSyncExternalStore (false on the server, true after hydration) replaces
+  // the old useEffect(() => setMounted(true)) pattern, which CI's
+  // react-hooks/set-state-in-effect rule now rejects as an error.
+  const mounted = useSyncExternalStore(subscribeNoop, () => true, () => false);
   if (!mounted) {
     return <Badge variant={status as BadgeVariant}>{dogStatusLabel(status)}</Badge>;
   }
