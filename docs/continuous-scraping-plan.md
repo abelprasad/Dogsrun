@@ -1,7 +1,7 @@
 # DOGSRUN Continuous Scraping Plan
 
-> Status: Phase 0–1 implementation in progress in detached worktree
-> `/home/abel/dogsrun-scrape` (do NOT merge to main, do NOT deploy yet).
+> Status: Phase 0-1 MERGED to main Nov 11, 2026 (commit 424e79e, pushed). Sources registry: docs/scraping-sources.md.
+> Worktree /home/abel/dogsrun-scrape removed after merge.
 > Scope note (Abel, Nov 11, 2026): legality is out of scope for this plan.
 > Focus is the technical agent-scraping route.
 
