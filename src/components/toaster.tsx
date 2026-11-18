@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 
 type ToastKind = 'success' | 'error'
 interface Toast { id: number; kind: ToastKind; message: string }
@@ -16,11 +16,17 @@ export function useToast() {
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([])
   const idRef = useRef(0)
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([])
+
+  useEffect(() => {
+    const pending = timers.current
+    return () => pending.forEach(clearTimeout)
+  }, [])
 
   const push = useCallback((kind: ToastKind, message: string) => {
     const id = ++idRef.current
     setToasts(prev => [...prev.slice(-2), { id, kind, message }])
-    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000)
+    timers.current.push(setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000))
   }, [])
 
   // Stable identity so consumers can list `toast` in hook deps without refetch loops.

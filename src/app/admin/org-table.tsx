@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import PaginationControls from './pagination-controls'
 import { useToast } from '@/components/toaster'
 import { reportError } from '@/lib/friendly-error'
@@ -51,6 +51,12 @@ export default function AdminOrgTable() {
   const [loading, setLoading] = useState<string | null>(null)
   const [digestStatus, setDigestStatus] = useState<Record<string, 'sending' | 'sent' | 'error'>>({})
   const toast = useToast()
+  const digestResetTimers = useRef<ReturnType<typeof setTimeout>[]>([])
+
+  useEffect(() => {
+    const timers = digestResetTimers.current
+    return () => timers.forEach(clearTimeout)
+  }, [])
 
   const fetchPage = useCallback(async (p: number, f: TypeFilter) => {
     setTableLoading(true)
@@ -151,7 +157,9 @@ export default function AdminOrgTable() {
       setDigestStatus(prev => ({ ...prev, [orgId]: 'error' }))
       toast.error(reportError(err, "Couldn't send digest — try again."))
     } finally {
-      setTimeout(() => setDigestStatus(prev => { const next = { ...prev }; delete next[orgId]; return next }), 3000)
+      digestResetTimers.current.push(
+        setTimeout(() => setDigestStatus(prev => { const next = { ...prev }; delete next[orgId]; return next }), 3000),
+      )
     }
   }
 
