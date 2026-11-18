@@ -123,12 +123,12 @@ export async function POST(req: NextRequest) {
   const matches: Match[] = []
 
   for (const criteria of rescueCriteria) {
+    // Embedded filter (no !inner) nulls inactive orgs instead of dropping the row.
     const org = criteria.organizations
     if (!org) continue
 
     if (org.id === dog.shelter_id) continue
     if (org.approval_status !== 'approved') continue
-    if (org.is_active === false) continue  // Deactivated orgs never receive alerts
     if (org.is_test) continue  // Don't send real alerts to test rescue orgs
     if (alreadyAlerted.has(org.id)) continue
 
