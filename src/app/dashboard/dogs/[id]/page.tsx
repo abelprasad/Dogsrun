@@ -7,7 +7,6 @@ import EuthanasiaCountdown from '@/components/euthanasia-countdown'
 import { fetchDogWithShelter, rescueWasAlertedAboutDog } from '@/lib/data/dog-profile'
 import { hasSpecialNeeds } from '@/lib/special-needs'
 
-// REVIEW(bug): color is string[] in the DB but typed string here; renders as "BlackWhite".
 interface Dog {
   id: string
   dogsrun_id: string | null
@@ -17,7 +16,7 @@ interface Dog {
   age_years: number
   weight_lbs: number
   sex: string
-  color: string
+  color: string[] | null
   description: string
   photo_url: string
   status: string
@@ -86,7 +85,7 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
                       { label: 'Age', value: dog.age_years ? `${dog.age_years}y` : '—' },
                       { label: 'Sex', value: dog.sex || '—', capitalize: true },
                       { label: 'Weight', value: dog.weight_lbs ? `${dog.weight_lbs} lbs` : '—' },
-                      { label: 'Color', value: dog.color || '—', capitalize: true },
+                      { label: 'Color', value: dog.color?.length ? dog.color.join(', ') : '—', capitalize: true },
                     ].map(({ label, value, capitalize }) => (
                       <div key={label}>
                         <p className="text-[10px] font-bold text-[#5d6a64] uppercase tracking-widest mb-1">{label}</p>
