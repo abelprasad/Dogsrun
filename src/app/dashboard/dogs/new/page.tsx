@@ -16,7 +16,7 @@ export default async function NewDogPage() {
           <p className="text-[#f5f0e8]/50 mt-2 text-sm">Help this dog find the perfect rescue match.</p>
         </div>
       </header>
-      <NewDogForm />
+      <NewDogForm shelterId={org.id} />
     </div>
   )
 }

@@ -13,7 +13,7 @@ import { uploadDogPhoto } from '@/lib/upload-photo'
 import { normalizedOptionalFields, validateDogForm, type DogFormValues } from '@/lib/dog-form'
 import { SPECIAL_NEEDS } from '@/lib/special-needs'
 
-export default function NewDogForm() {
+export default function NewDogForm({ shelterId }: { shelterId: string }) {
   const router = useRouter()
   const toast = useToast()
   const [loading, setLoading] = useState(false)
@@ -41,9 +41,6 @@ export default function NewDogForm() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return router.push('/auth/login')
 
-    const { data: org } = await supabase.from('organizations').select('id, name').eq('id', user.id).single()
-    if (!org) { toast.error('No organization found. Contact support.'); setLoading(false); return }
-
     let photo_url = null
     if (photo) {
       const { url, error: uploadError } = await uploadDogPhoto(supabase, photo)
@@ -59,7 +56,7 @@ export default function NewDogForm() {
       parvo: form.parvo, tripod: form.tripod, blind: form.blind,
       other_issues: form.other_issues, other_issues_notes: form.other_issues_notes,
       ...normalizedOptionalFields(form),
-      shelter_id: org.id, status: 'available', photo_url,
+      shelter_id: shelterId, status: 'available', photo_url,
     }).select().single()
 
     if (error) {
