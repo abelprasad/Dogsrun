@@ -1,48 +1,61 @@
 #!/bin/bash
-# .husky/pre-commit — Lazy ladder enforcement for Dogsrun
+# .husky/pre-commit — lightweight checks on staged changes for Dogsrun
 
 set -e
 
-echo "🔍 Lazy pre-commit check..."
+echo "Pre-commit checks..."
 
-# Check 1: No new production dependencies without justification
-if git diff --cached package.json | grep -q '"dependencies"'; then
-  echo "⚠️  Dependencies changed. Climbing the ladder?"
-  echo "   Did you:"
-  echo "   1. Check if this already exists in the codebase?"
-  echo "   2. Check if Node stdlib handles it?"
-  echo "   3. Check if it's already a dependency?"
-  echo "   If yes to any, remove the new dep."
-  exit 1
-fi
+STAGED_CODE=$(git diff --cached --name-only --diff-filter=ACMR -- '*.ts' '*.tsx' '*.js' '*.jsx' '*.mjs')
 
-# Check 2: No console.logs in staged code
-if git diff --cached -- '*.ts' '*.tsx' '*.js' '*.jsx' | grep -E '^\+.*console\.(log|error|warn|debug)' | grep -v '// TODO' | grep -v '//' > /dev/null; then
-  echo "❌ console.log detected in staged code. Remove it."
-  git diff --cached -- '*.ts' '*.tsx' '*.js' '*.jsx' | grep -E '^\+.*console\.(log|error|warn|debug)' | grep -v '//'
-  exit 1
-fi
-
-# Check 3: No debugger statements
-if git diff --cached -- '*.ts' '*.tsx' '*.js' '*.jsx' | grep -E '^\+.*debugger' > /dev/null; then
-  echo "❌ debugger statement found. Remove it."
-  exit 1
-fi
-
-# Check 4: No commented-out code blocks
-if git diff --cached -- '*.ts' '*.tsx' '*.js' '*.jsx' | grep -E '^\+\s*(//|/\*)' | wc -l | grep -qv '^0'; then
-  echo "⚠️  Commented-out code detected. If it's needed, uncomment it. If not, delete it."
-fi
-
-# REVIEW: never runs: eslint.config.mjs isn't matched and --staged isn't an ESLint flag. Check 4 above warns on every comment line.
-# Check 5: ESLint (if project uses it)
-if [ -f "eslint.config.js" ] || [ -f ".eslintrc" ] || [ -f ".eslintrc.json" ]; then
-  echo "🔧 Running ESLint..."
-  if ! npx eslint --staged 2>/dev/null; then
-    echo "❌ ESLint failed. Fix the errors above."
+# Check 1: new production dependencies need a deliberate decision.
+# Compares the "dependencies" keys in HEAD vs the staged package.json, so
+# devDependencies edits and version bumps don't trip it.
+if git diff --cached --name-only | grep -qx 'package.json'; then
+  NEW_DEPS=$(node -e '
+    const { execSync } = require("child_process")
+    const read = (ref) => {
+      try { return JSON.parse(execSync(`git show ${ref}:package.json`, { stdio: ["ignore", "pipe", "ignore"] }).toString()).dependencies ?? {} }
+      catch { return {} }
+    }
+    const before = read("HEAD")
+    const after = read("")
+    console.log(Object.keys(after).filter((k) => !(k in before)).join(" "))
+  ')
+  if [ -n "$NEW_DEPS" ] && [ "${ALLOW_NEW_DEPS:-0}" != "1" ]; then
+    echo "New production dependencies: $NEW_DEPS"
+    echo "  Check the codebase and Node stdlib first. If it is justified, re-run with ALLOW_NEW_DEPS=1."
     exit 1
   fi
 fi
 
-echo "✅ Lazy check passed. Ship it."
-exit 0
+# Added lines only, minus pure comment lines.
+ADDED=$(git diff --cached -U0 -- '*.ts' '*.tsx' '*.js' '*.jsx' '*.mjs' | grep -E '^\+' | grep -vE '^\+\+\+' | grep -vE '^\+\s*(//|/?\*)' || true)
+
+# Check 2: no console.log/console.debug (console.error/warn are the server logging convention)
+if echo "$ADDED" | grep -E 'console\.(log|debug)\('; then
+  echo "console.log/console.debug found in staged code. Remove it (console.error/console.warn are fine)."
+  exit 1
+fi
+
+# Check 3: no debugger statements
+if echo "$ADDED" | grep -E '(^|[^A-Za-z_])debugger;?\s*$'; then
+  echo "debugger statement found. Remove it."
+  exit 1
+fi
+
+# Check 4: ESLint and tsc on the staged code
+if [ -n "$STAGED_CODE" ]; then
+  echo "Running ESLint on staged files..."
+  # shellcheck disable=SC2086
+  if ! npx eslint --no-warn-ignored $STAGED_CODE; then
+    echo "ESLint failed. Fix the errors above."
+    exit 1
+  fi
+  echo "Running tsc..."
+  if ! npx tsc --noEmit; then
+    echo "Type check failed."
+    exit 1
+  fi
+fi
+
+echo "Pre-commit checks passed."
