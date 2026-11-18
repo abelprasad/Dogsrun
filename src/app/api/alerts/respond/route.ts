@@ -1,12 +1,8 @@
-import { CONTACT_EMAIL, SITE_URL } from '@/lib/constants'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
-import { Resend } from 'resend'
-import { escapeHtml, sanitizeSubject } from '@/lib/html'
+import { notifyShelterOfInterest } from '@/lib/notify-shelter'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { respondRatelimit, getClientIp } from '@/lib/ratelimit'
-
-const resend = new Resend(process.env.RESEND_API_KEY!)
 
 export async function POST(req: NextRequest) {
   const respondRatelimit_result = await respondRatelimit.limit(getClientIp(req))
@@ -46,36 +42,7 @@ export async function POST(req: NextRequest) {
   // Idempotency (M-D2): only notify the shelter on transition into 'responded',
   // not on repeat POSTs or the dashboard Undo -> Interested flow.
   if (status === 'responded' && !wasResponded) {
-    const dog = alert.dogs
-    const rescue = alert.organizations
-    const { data: shelter } = await supabaseAdmin
-      .from('organizations')
-      .select('name, email')
-      .eq('id', dog.shelter_id)
-      .single()
-
-    if (shelter) {
-      const safeRescueName = escapeHtml(rescue.name)
-      const safeRescueEmail = escapeHtml(rescue.email)
-      const safeDogName = escapeHtml(dog.name)
-
-      await resend.emails.send({
-        from: `DOGSRUN <${CONTACT_EMAIL}>`,
-        to: shelter.email,
-        subject: `${sanitizeSubject(rescue.name)} is interested in ${sanitizeSubject(dog.name)}`,
-        html: `
-          <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px;border:1px solid #eee;border-radius:10px;">
-            <h2 style="color:#c08a3e;">Great news!</h2>
-            <p><strong>${safeRescueName}</strong> has expressed interest in <strong>${safeDogName}</strong>.</p>
-            <div style="background:#f9f9f9;padding:15px;border-radius:8px;margin:20px 0;">
-              <p style="margin:0;"><strong>Rescue:</strong> ${safeRescueName}</p>
-              <p style="margin:5px 0 0;"><strong>Email:</strong> <a href="mailto:${safeRescueEmail}">${safeRescueEmail}</a></p>
-            </div>
-            <a href="https://dogsrun.org/dashboard" style="display:inline-block;background:#c08a3e;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:bold;">Go to Dashboard</a>
-          </div>
-        `,
-      })
-    }
+    await notifyShelterOfInterest(alert)
   }
 
   return NextResponse.json({ success: true, status })
