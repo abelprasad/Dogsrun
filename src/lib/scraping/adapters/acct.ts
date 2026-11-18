@@ -32,7 +32,7 @@
  *   failed sync (AdapterBlockedError), not an empty import.
  * - Zero dogs is also a failed run, never an empty import.
  */
-import { chromium, type Page } from '@playwright/test'
+import { chromium, type Page } from 'playwright-core'
 import {
   AdapterBlockedError,
   type BlockReason,
