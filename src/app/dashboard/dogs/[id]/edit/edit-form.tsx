@@ -13,6 +13,7 @@ import ColorPicker from '@/components/color-picker';
 import StateSelect from '@/components/state-select';
 import { uploadDogPhoto } from '@/lib/upload-photo';
 import { normalizedOptionalFields, validateDogForm, type DogFormValues } from '@/lib/dog-form';
+import { SPECIAL_NEEDS } from '@/lib/special-needs';
 
 interface Dog {
   id: string;
@@ -213,12 +214,7 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
       <div className="space-y-4">
         <h3 className="text-lg font-bold text-[#13241d]">Special Needs</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {[
-            { key: 'parvo', label: 'Parvo' },
-            { key: 'tripod', label: 'Tripod / Amputee' },
-            { key: 'blind', label: 'Blind / Vision Impaired' },
-            { key: 'other_issues', label: 'Other Issues' },
-          ].map(({ key, label }) => (
+          {SPECIAL_NEEDS.map(({ key, label }) => (
             <label key={key} className="flex items-center gap-3 p-3 border border-[#13241d]/10 rounded-lg cursor-pointer hover:bg-[#f8f1e8] transition-colors">
               <input type="checkbox" checked={form[key as keyof DogFormValues] as boolean}
                 onChange={e => setForm(f => ({

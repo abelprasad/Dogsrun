@@ -7,6 +7,7 @@ import type { DogStatus } from '@/lib/dog-status'
 import SignOutButton from '../../sign-out-button'
 import EuthanasiaCountdown from '@/components/euthanasia-countdown'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { hasSpecialNeeds } from '@/lib/special-needs'
 
 // REVIEW(bug): color is string[] in the DB but typed string here; renders as "BlackWhite".
 interface Dog {
@@ -64,7 +65,7 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
 
   // REVIEW: the second nav bar with SignOutButton below duplicates DashboardNav from the layout; delete it.
   const backLink = org?.type === 'rescue' ? '/dashboard/rescue' : '/dashboard/dogs'
-  const hasSpecialNeeds = dog.parvo || dog.tripod || dog.blind || dog.other_issues
+  const dogHasSpecialNeeds = hasSpecialNeeds(dog)
 
   return (
     <div className="min-h-screen bg-[#f8f1e8]">
@@ -124,7 +125,7 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
                     <p className="text-sm text-[#5d6a64] leading-relaxed italic">
                       &quot;{dog.description || 'No additional notes provided.'}&quot;
                     </p>
-                    {hasSpecialNeeds && (
+                    {dogHasSpecialNeeds && (
                       <div className="pt-6 border-t border-[#13241d]/10 mt-6">
                         <h3 className="text-[10px] font-bold text-[#5d6a64] uppercase tracking-widest mb-3">Special Needs</h3>
                         <div className="flex flex-wrap gap-2">

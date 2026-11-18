@@ -10,6 +10,7 @@ import ColorPicker from '@/components/color-picker';
 import StateMultiSelect from '@/components/state-multi-select';
 import Button from '@/components/ui/button';
 import { AGE_BANDS, SIZE_BANDS, bandOptions } from '@/lib/matching';
+import { SPECIAL_NEEDS } from '@/lib/special-needs';
 
 interface RescueCriteria {
   id?: string;
@@ -271,12 +272,7 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
       <div>
         <label id="criteria-special-needs-label" className={labelClass}>Special needs we accept</label>
         <div role="group" aria-labelledby="criteria-special-needs-label" className="grid grid-cols-2 gap-3">
-          {[
-            { key: 'accepts_parvo', label: 'Parvo' },
-            { key: 'accepts_tripod', label: 'Tripod / Amputee' },
-            { key: 'accepts_blind', label: 'Blind / Vision Impaired' },
-            { key: 'accepts_other', label: 'Other Issues' },
-          ].map(({ key, label }) => (
+          {SPECIAL_NEEDS.map(({ acceptsKey: key, label }) => (
             <label key={key} className={`flex cursor-pointer items-center gap-3 border p-4 transition-all ${form[key as keyof typeof form] ? 'border-[#c08a3e] bg-[#c08a3e]/10' : 'border-[#13241d]/10 bg-[#f5f0e8] hover:border-[#c08a3e]/50'}`}>
               <input
                 type="checkbox"

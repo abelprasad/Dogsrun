@@ -11,6 +11,7 @@ import { useToast } from '@/components/toaster'
 import { reportError } from '@/lib/friendly-error'
 import { uploadDogPhoto } from '@/lib/upload-photo'
 import { normalizedOptionalFields, validateDogForm, type DogFormValues } from '@/lib/dog-form'
+import { SPECIAL_NEEDS } from '@/lib/special-needs'
 
 export default function NewDogForm() {
   const router = useRouter()
@@ -216,12 +217,7 @@ export default function NewDogForm() {
             {showSpecialNeeds && (
               <div className="space-y-4 pl-6 border-l-2 border-[#13241d]/20">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {[
-                    { key: 'parvo', label: 'Parvo' },
-                    { key: 'tripod', label: 'Tripod / Amputee' },
-                    { key: 'blind', label: 'Blind / Vision Impaired' },
-                    { key: 'other_issues', label: 'Other Issues' },
-                  ].map(({ key, label }) => (
+                  {SPECIAL_NEEDS.map(({ key, label }) => (
                     <label key={key} className="flex items-center gap-3 p-3 border border-[#13241d]/10 bg-[#f5f0e8] cursor-pointer">
                       <input type="checkbox" checked={form[key as keyof DogFormValues] as boolean}
                         onChange={e => setForm(f => ({ ...f, [key]: e.target.checked, ...(key === 'other_issues' && !e.target.checked ? { other_issues_notes: '' } : {}) }))}

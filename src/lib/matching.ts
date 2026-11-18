@@ -1,3 +1,5 @@
+import { violatesSpecialNeeds } from './special-needs'
+
 interface Band {
   value: string
   label: string
@@ -75,10 +77,7 @@ export interface MatchCriteria {
 }
 
 export function dogMatchesCriteria(dog: MatchDog, criteria: MatchCriteria): boolean {
-  if (dog.parvo && !criteria.accepts_parvo) return false
-  if (dog.tripod && !criteria.accepts_tripod) return false
-  if (dog.blind && !criteria.accepts_blind) return false
-  if (dog.other_issues && !criteria.accepts_other) return false
+  if (violatesSpecialNeeds(dog, criteria)) return false
 
   const breedMatch = !criteria.breeds || criteria.breeds.length === 0 ||
     criteria.breeds.some(b => dog.breed?.toLowerCase().includes(b.toLowerCase()))

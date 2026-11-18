@@ -9,6 +9,7 @@ import PageHeader from '@/components/ui/page-header'
 import Button from '@/components/ui/button'
 import Pagination from '@/components/ui/pagination'
 import { parsePageParam } from '@/lib/pagination'
+import { hasSpecialNeeds } from '@/lib/special-needs'
 
 const PAGE_SIZE = 10
 
@@ -59,7 +60,7 @@ export default async function MyDogsPage({ searchParams }: { searchParams: Promi
                   <div className="flex items-center gap-3 mb-1">
                     <h2 className="font-black text-[#13241d] text-base">{dog.name}</h2>
                     <StatusBadge status={dog.status || 'available'} euthanasiaDate={dog.euthanasia_date} />
-                    {(dog.parvo || dog.tripod || dog.blind || dog.other_issues) && (
+                    {hasSpecialNeeds(dog) && (
                       <span className="text-[10px] font-black uppercase tracking-[0.24em] text-[#d95f4b] bg-red-50 px-2 py-0.5">Special Needs</span>
                     )}
                   </div>
