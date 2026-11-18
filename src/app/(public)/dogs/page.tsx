@@ -5,6 +5,7 @@ import { daysUntilEuthanasia, daysLeftLabel, isDogUrgent } from '@/lib/urgency'
 import Pagination from '@/components/ui/pagination'
 import BrowseFilters, { type UrgencyFilter } from '@/components/browse-filters'
 import { PUBLIC_VISIBLE_STATUSES } from '@/lib/dog-status'
+import { parsePageParam } from '@/lib/pagination'
 
 const PAGE_SIZE = 12
 
@@ -65,11 +66,6 @@ const HERO: Record<Tab, { heading: string; sub: string }> = {
     heading: 'Rescues in the network.',
     sub: "Active rescue organizations and the dogs they're ready to take.",
   },
-}
-
-function parsePageParam(value: string | undefined): number {
-  const parsed = Number.parseInt(value || '1', 10)
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1
 }
 
 function sanitizeQuery(q: string | undefined): string {

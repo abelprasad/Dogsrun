@@ -2,6 +2,7 @@ import { supabaseAdmin } from '@/lib/supabase-server'
 import { getAdminUser } from '@/lib/auth-context'
 import { VALID_DOG_STATUSES } from '@/lib/dog-status'
 import { NextRequest, NextResponse } from 'next/server'
+import { parsePageParam, parsePageSizeParam } from '@/lib/pagination'
 
 export async function PATCH(req: NextRequest) {
   const { user, isAdmin } = await getAdminUser()
@@ -35,20 +36,6 @@ export async function DELETE(req: NextRequest) {
   const { error } = await supabaseAdmin.from('dogs').delete().eq('id', dog_id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ success: true })
-}
-
-const DEFAULT_PAGE_SIZE = 25
-const MAX_PAGE_SIZE = 100
-
-function parsePageParam(value: string | null): number {
-  const parsed = Number.parseInt(value || '1', 10)
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1
-}
-
-function parsePageSizeParam(value: string | null): number {
-  const parsed = Number.parseInt(value || String(DEFAULT_PAGE_SIZE), 10)
-  if (!Number.isFinite(parsed) || parsed < 1) return DEFAULT_PAGE_SIZE
-  return Math.min(parsed, MAX_PAGE_SIZE)
 }
 
 export async function GET(req: NextRequest) {

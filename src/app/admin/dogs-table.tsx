@@ -8,6 +8,7 @@ import { useToast } from '@/components/toaster'
 import { reportError } from '@/lib/friendly-error'
 
 import { DOG_STATUSES, DOG_STATUS_LABELS, getRiskLevel } from '@/lib/dog-status'
+import { DEFAULT_PAGE_SIZE } from '@/lib/pagination'
 
 interface Dog {
   id: string
@@ -23,7 +24,6 @@ interface Dog {
 
 type DogFilter = 'all' | 'at_risk' | 'urgent'
 
-const PAGE_SIZE = 25
 
 export default function AdminDogsTable() {
   const [dogs, setDogs] = useState<Dog[]>([])
@@ -48,7 +48,7 @@ export default function AdminDogsTable() {
   const fetchPage = useCallback(async (p: number, f: DogFilter) => {
     setTableLoading(true)
     try {
-      const params = new URLSearchParams({ page: String(p), pageSize: String(PAGE_SIZE), filter: f })
+      const params = new URLSearchParams({ page: String(p), pageSize: String(DEFAULT_PAGE_SIZE), filter: f })
       const res = await fetch(`/api/admin/dogs?${params.toString()}`)
       if (res.ok) {
         const data = await res.json()
@@ -122,7 +122,7 @@ export default function AdminDogsTable() {
     return null
   }
 
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
+  const totalPages = Math.max(1, Math.ceil(total / DEFAULT_PAGE_SIZE))
 
   return (
     <div className="space-y-4">
@@ -264,7 +264,7 @@ export default function AdminDogsTable() {
         page={page}
         totalPages={totalPages}
         total={total}
-        pageSize={PAGE_SIZE}
+        pageSize={DEFAULT_PAGE_SIZE}
         onPageChange={setPage}
       />
     </div>

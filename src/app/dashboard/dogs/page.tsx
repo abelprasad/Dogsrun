@@ -8,12 +8,13 @@ import DogRowActions from './dog-row-actions'
 import PageHeader from '@/components/ui/page-header'
 import Button from '@/components/ui/button'
 import Pagination from '@/components/ui/pagination'
+import { parsePageParam } from '@/lib/pagination'
 
 const PAGE_SIZE = 10
 
 export default async function MyDogsPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
   const { page: pageParam } = await searchParams
-  const page = Math.max(1, parseInt(pageParam || '1', 10))
+  const page = parsePageParam(pageParam)
   const from = (page - 1) * PAGE_SIZE
   const to = from + PAGE_SIZE - 1
 

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import PaginationControls from './pagination-controls'
 import { useToast } from '@/components/toaster'
 import { reportError } from '@/lib/friendly-error'
+import { DEFAULT_PAGE_SIZE } from '@/lib/pagination'
 
 interface Org {
   id: string
@@ -25,7 +26,6 @@ interface AlertStats {
 
 type TypeFilter = 'all' | 'shelter' | 'rescue'
 
-const PAGE_SIZE = 25
 
 const typeChip = (type: string) =>
   type === 'shelter'
@@ -55,7 +55,7 @@ export default function AdminOrgTable() {
   const fetchPage = useCallback(async (p: number, f: TypeFilter) => {
     setTableLoading(true)
     try {
-      const params = new URLSearchParams({ page: String(p), pageSize: String(PAGE_SIZE) })
+      const params = new URLSearchParams({ page: String(p), pageSize: String(DEFAULT_PAGE_SIZE) })
       if (f !== 'all') params.set('type', f)
       const res = await fetch(`/api/admin/orgs?${params.toString()}`)
       if (res.ok) {
@@ -164,7 +164,7 @@ export default function AdminOrgTable() {
     }
   }
 
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
+  const totalPages = Math.max(1, Math.ceil(total / DEFAULT_PAGE_SIZE))
 
   return (
     <div className="space-y-10">
@@ -336,7 +336,7 @@ export default function AdminOrgTable() {
           page={page}
           totalPages={totalPages}
           total={total}
-          pageSize={PAGE_SIZE}
+          pageSize={DEFAULT_PAGE_SIZE}
           onPageChange={setPage}
         />
       </div>
