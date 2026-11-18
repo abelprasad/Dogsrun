@@ -6,7 +6,7 @@ import StatusBadge from '@/components/status-badge'
 import type { DogStatus } from '@/lib/dog-status'
 import SignOutButton from '../../sign-out-button'
 import EuthanasiaCountdown from '@/components/euthanasia-countdown'
-import { supabaseAdmin } from '@/lib/supabase-server'
+import { fetchDogWithShelter, rescueWasAlertedAboutDog } from '@/lib/data/dog-profile'
 import { hasSpecialNeeds } from '@/lib/special-needs'
 
 // REVIEW(bug): color is string[] in the DB but typed string here; renders as "BlackWhite".
@@ -38,11 +38,7 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
   const { org, isAdmin } = await requireAuthContext()
 
 
-  const { data: dogData } = await supabaseAdmin
-    .from('dogs')
-    .select('*, organizations(*)')
-    .eq('id', id)
-    .single()
+  const { data: dogData } = await fetchDogWithShelter(id)
 
   if (!dogData) notFound()
   const dog = dogData as unknown as Dog
@@ -52,13 +48,7 @@ export default async function DogProfilePage({ params }: { params: Promise<{ id:
   let canViewDog = isAdmin || (org?.type === 'shelter' && org.id === dog.shelter_id)
 
   if (!canViewDog && org?.type === 'rescue') {
-    const { data: alert } = await supabaseAdmin
-      .from('alerts')
-      .select('id')
-      .eq('dog_id', dog.id)
-      .eq('rescue_id', org.id)
-      .maybeSingle()
-    canViewDog = Boolean(alert)
+    canViewDog = await rescueWasAlertedAboutDog(dog.id, org.id)
   }
 
   if (!canViewDog) notFound()

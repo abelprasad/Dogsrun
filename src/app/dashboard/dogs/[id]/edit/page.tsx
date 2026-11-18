@@ -6,7 +6,7 @@ import EditDogForm from './edit-form'
 import ResendAlertsButton from './resend-alerts-button'
 import EuthanasiaCountdown from '@/components/euthanasia-countdown'
 import StatusBadge from '@/components/status-badge'
-import { supabaseAdmin } from '@/lib/supabase-server'
+import { fetchDog, fetchDogAlertsWithRescue } from '@/lib/data/dog-profile'
 import { ALERT_STATUS, alertStatusLabel } from '@/lib/alert-status'
 
 export default async function EditDogPage({ params }: { params: Promise<{ id: string }> }) {
@@ -14,21 +14,13 @@ export default async function EditDogPage({ params }: { params: Promise<{ id: st
   const { org } = await requireAuthContext()
 
 
-  const { data: dog } = await supabaseAdmin
-    .from('dogs')
-    .select('*')
-    .eq('id', id)
-    .single()
+  const { data: dog } = await fetchDog(id)
 
   if (!dog) notFound()
   if (!org || org.type !== 'shelter' || org.id !== dog.shelter_id) redirect('/dashboard')
 
   // REVIEW: the second nav bar with SignOutButton below duplicates DashboardNav from the layout; delete it.
-  const { data: alerts } = await supabaseAdmin
-    .from('alerts')
-    .select('*, organizations(name, email, city, state)')
-    .eq('dog_id', id)
-    .order('sent_at', { ascending: false })
+  const { data: alerts } = await fetchDogAlertsWithRescue(id)
 
   return (
     <div className="min-h-screen bg-[#f8f1e8]">
