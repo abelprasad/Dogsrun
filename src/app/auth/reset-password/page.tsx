@@ -4,14 +4,14 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 import { Button } from '@/components/ui'
+import { rescuePhoto } from '@/lib/site-content'
 import AuthShell, {
   authInputClass,
   authLabelClass,
   authErrorClass,
 } from '@/components/auth-shell'
 
-const RESET_IMAGE =
-  'https://images.unsplash.com/photo-1561037404-61cd46aa615b?auto=format&fit=crop&w=1600&q=85'
+const RESET_IMAGE = rescuePhoto(1600)
 
 export default function ResetPasswordPage() {
   const [email, setEmail] = useState('')

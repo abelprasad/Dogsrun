@@ -3,10 +3,11 @@ import Link from "next/link";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { daysUntilEuthanasia, daysLeftLabel } from "@/lib/urgency";
 import UrgentTicker from "@/components/urgent-ticker";
+import { heroPhoto, rescuePhoto, NETWORK_STATS } from "@/lib/site-content";
 
 const dogPhotos = {
-  hero: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=2000&q=85",
-  rescue: "https://images.unsplash.com/photo-1561037404-61cd46aa615b?auto=format&fit=crop&w=1600&q=85",
+  hero: heroPhoto(2000),
+  rescue: rescuePhoto(1600),
 };
 
 const steps = [
@@ -128,11 +129,7 @@ export default async function Home() {
             </footer>
           </blockquote>
           <div className="mt-10 flex flex-wrap gap-x-12 gap-y-6">
-            {[
-              ["50+", "states in the network"],
-              ["24/7", "matching, always on"],
-              ["1-click", "rescue response"],
-            ].map(([big, small]) => (
+            {NETWORK_STATS.map(([big, small]) => (
               <div key={small}>
                 <p className="text-5xl font-black tracking-tight text-[#c08a3e]">{big}</p>
                 <p className="mt-1 text-xs font-bold uppercase tracking-[0.22em] text-[#f8f1e8]/50">{small}</p>

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { supabaseAdmin } from "@/lib/supabase-server";
+import { ORG } from "@/lib/site-content";
 
 const heroPhoto =
   "https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg?auto=compress&cs=tinysrgb&w=1600";
@@ -42,10 +43,10 @@ const steps = [
 ];
 
 const orgFacts: [string, string[]][] = [
-  ["Organization", ["Dog Shelter & Rescue Unification Network, LLC", "501(c)(3) Public Charity"]],
-  ["Nonprofit ID", ["EIN 993286395"]],
-  ["Mailing Address", ["221 W 9th St #896", "Wilmington, DE 19801"]],
-  ["Phone", ["(904) 923-4441"]],
+  ["Organization", [ORG.legalName, "501(c)(3) Public Charity"]],
+  ["Nonprofit ID", [`EIN ${ORG.ein}`]],
+  ["Mailing Address", [...ORG.addressLines]],
+  ["Phone", [ORG.phone]],
 ];
 
 const tickerPhrases = ["Every second counts", "Shelter to rescue", "One click to respond"];

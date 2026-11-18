@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import ContactForm from './contact-form';
 import { ADMIN_EMAIL } from '@/lib/constants'
+import { ORG } from '@/lib/site-content'
 
 // M-F10: server component for static hero + info rail; interactive form is a client island.
 export default function ContactPage() {
@@ -44,21 +45,22 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="mb-2 text-[10px] font-black uppercase tracking-[0.24em] text-[#c08a3e]">Phone</h3>
-                  <a href="tel:+19049234441" className="text-lg font-black text-[#f8f1e8] hover:text-[#c08a3e]">
-                    (904) 923-4441
+                  <a href={ORG.phoneHref} className="text-lg font-black text-[#f8f1e8] hover:text-[#c08a3e]">
+                    {ORG.phone}
                   </a>
                 </div>
                 <div>
                   <h3 className="mb-2 text-[10px] font-black uppercase tracking-[0.24em] text-[#c08a3e]">Mailing address</h3>
                   <div className="text-sm leading-7 text-[#f8f1e8]/60">
-                    <p className="font-black text-[#f8f1e8]">Dog Shelter &amp; Rescue Unification Network, LLC</p>
-                    <p>221 W 9th St #896</p>
-                    <p>Wilmington, DE 19801</p>
+                    <p className="font-black text-[#f8f1e8]">{ORG.legalName}</p>
+                    {ORG.addressLines.map((line) => (
+                      <p key={line}>{line}</p>
+                    ))}
                   </div>
                 </div>
                 <div className="border-t border-white/10 pt-6">
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#f8f1e8]/40">
-                    501(c)(3) nonprofit · EIN 993286395
+                    501(c)(3) nonprofit · EIN {ORG.ein}
                   </p>
                 </div>
               </div>

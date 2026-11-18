@@ -5,14 +5,14 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 import { Button } from '@/components/ui'
+import { heroPhoto } from '@/lib/site-content'
 import AuthShell, {
   authInputClass,
   authLabelClass,
   authErrorClass,
 } from '@/components/auth-shell'
 
-const UPDATE_IMAGE =
-  'https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=1600&q=85'
+const UPDATE_IMAGE = heroPhoto(1600)
 
 export default function UpdatePasswordPage() {
   const [password, setPassword] = useState('')

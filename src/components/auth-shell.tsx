@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { NETWORK_STATS } from "@/lib/site-content";
 
 interface AuthShellProps {
   image: string;
@@ -23,11 +24,7 @@ export const authLabelClass =
 export const authErrorClass =
   "p-4 bg-[#a8583f]/10 border border-[#a8583f]/40 text-[#c98a7a] text-sm font-semibold mb-6";
 
-const networkStats: Array<[string, string]> = [
-  ["1-click", "rescue response"],
-  ["24/7", "matching, always on"],
-  ["50+", "states in the network"],
-];
+const networkStats = [...NETWORK_STATS].reverse();
 
 // Split layout for auth pages: mission panel (imagery + massive type) on one
 // side, the form on the other. Collapses to a compact banner + form on mobile.
