@@ -37,6 +37,6 @@ export default function Badge({ variant = "available", className, children }: Ba
   const classes =
     variant === "eyebrow"
       ? eyebrowClasses
-      : `${base} ${statusColors[variant] ?? statusColors.available}`;
+      : `${base} ${statusColors[variant]}`;
   return <span className={className ? `${classes} ${className}` : classes}>{children}</span>;
 }

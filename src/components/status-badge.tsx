@@ -1,12 +1,17 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import Badge, { type BadgeVariant } from "@/components/ui/badge";
-import { dogStatusLabel, getRiskLevel } from '@/lib/dog-status';
+import Badge from "@/components/ui/badge";
+import { dogStatusLabel, getRiskLevel, VALID_DOG_STATUSES, type DogStatus } from '@/lib/dog-status';
 
 interface StatusBadgeProps {
   status: string;
   euthanasiaDate?: string | null;
+}
+
+// Unrecognised statuses render with the neutral "available" styling.
+function toDogStatus(status: string): DogStatus {
+  return VALID_DOG_STATUSES.has(status) ? (status as DogStatus) : 'available';
 }
 
 // No-op subscribe: the snapshot never changes on its own; hydration flips it.
@@ -19,7 +24,7 @@ export default function StatusBadge({ status, euthanasiaDate }: StatusBadgeProps
   // react-hooks/set-state-in-effect rule now rejects as an error.
   const mounted = useSyncExternalStore(subscribeNoop, () => true, () => false);
   if (!mounted) {
-    return <Badge variant={status as BadgeVariant}>{dogStatusLabel(status)}</Badge>;
+    return <Badge variant={toDogStatus(status)}>{dogStatusLabel(status)}</Badge>;
   }
   // Euthanasia date overrides status color
   if (euthanasiaDate) {
@@ -35,6 +40,6 @@ export default function StatusBadge({ status, euthanasiaDate }: StatusBadgeProps
   }
 
   return (
-    <Badge variant={status as BadgeVariant}>{dogStatusLabel(status)}</Badge>
+    <Badge variant={toDogStatus(status)}>{dogStatusLabel(status)}</Badge>
   );
 }
