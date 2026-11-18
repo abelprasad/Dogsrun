@@ -64,7 +64,11 @@ function makeLimiter(maxRequests: number, window: LimiterWindow, prefix: string)
   return new MemoryRatelimit(num, ms)
 }
 
-// M-S4: take the LAST XFF entry (appended by trusted edge), not the first.
+// M-S4: take the LAST XFF entry, not the first.
+// Trusted-proxy assumption: this app is deployed on Vercel, whose edge sets
+// X-Forwarded-For itself (a client-supplied value cannot be the last entry).
+// Behind a different proxy chain, or with no proxy, XFF is client-controlled and
+// this must be revisited (e.g. count N trusted hops from the right).
 export function getClientIp(req: NextRequest): string {
   const xff = req.headers.get('x-forwarded-for')
   if (xff) {
