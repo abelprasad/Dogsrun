@@ -45,7 +45,7 @@ export default async function WelcomePage() {
         <WelcomeChecklist
           orgType={org.type}
           orgId={org.id}
-          approvalStatus={org.approval_status ?? 'approved'}
+          approvalStatus={org.approval_status}
           hasDogs={hasDogs}
           hasCriteria={hasCriteria}
           dashboardHref={dashboardHref}
