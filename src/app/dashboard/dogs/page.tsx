@@ -10,6 +10,7 @@ import Button from '@/components/ui/button'
 import Pagination from '@/components/ui/pagination'
 import { parsePageParam } from '@/lib/pagination'
 import { hasSpecialNeeds } from '@/lib/special-needs'
+import { ALERT_STATUS } from '@/lib/alert-status'
 
 const PAGE_SIZE = 10
 
@@ -68,7 +69,7 @@ export default async function MyDogsPage({ searchParams }: { searchParams: Promi
                     {dog.breed || 'Unknown breed'}{dog.mix ? ' mix' : ''}{dog.age_years ? ` · ${dog.age_years}y` : ''}{dog.sex ? ` · ${dog.sex}` : ''}{dog.weight_lbs ? ` · ${dog.weight_lbs} lbs` : ''}
                   </p>
                   {(() => {
-                    const interested = (dog.alerts || []).filter((a: {status: string}) => a.status === 'responded').length
+                    const interested = (dog.alerts || []).filter((a: {status: string}) => a.status === ALERT_STATUS.RESPONDED).length
                     return interested > 0 ? (
                       <p className="text-xs font-bold text-green-700 mt-0.5">{interested} rescue{interested !== 1 ? 's' : ''} interested</p>
                     ) : null

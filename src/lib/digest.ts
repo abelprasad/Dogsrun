@@ -4,6 +4,7 @@ import { escapeHtml } from '@/lib/html'
 import { brandedEmail, emailButton } from '@/lib/email'
 import { dogMatchesCriteria, type MatchCriteria, type MatchDog } from '@/lib/matching'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { ALERT_STATUS } from '@/lib/alert-status'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
@@ -48,7 +49,7 @@ export async function recordDigestAlerts(matches: DigestDog[], rescueId: string,
       dog_id: dog.id,
       rescue_id: rescueId,
       criteria_id: criteriaId,
-      status: 'sent',
+      status: ALERT_STATUS.SENT,
       sent_at: new Date().toISOString(),
     }, { onConflict: 'dog_id,rescue_id', ignoreDuplicates: true })
   }

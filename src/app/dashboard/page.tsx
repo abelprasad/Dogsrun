@@ -6,6 +6,7 @@ import ApprovalWall from '@/components/approval-wall'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import PageHeader from '@/components/ui/page-header'
 import Button from '@/components/ui/button'
+import { ALERT_STATUS } from '@/lib/alert-status'
 
 export default async function DashboardPage() {
   const { org, isAdmin } = await requireAuthContext()
@@ -87,7 +88,7 @@ export default async function DashboardPage() {
                   </div>
                   <p className="text-xs text-[#5d6a64] mb-2">{dog.breed || 'Unknown breed'}{dog.age_years ? ` · ${dog.age_years}y` : ''}</p>
                   {(() => {
-                    const interested = (dog.alerts || []).filter((a: { status: string }) => a.status === 'responded').length
+                    const interested = (dog.alerts || []).filter((a: { status: string }) => a.status === ALERT_STATUS.RESPONDED).length
                     return interested > 0 ? (
                       <p className="text-xs font-black text-green-600">{interested} rescue{interested !== 1 ? 's' : ''} interested</p>
                     ) : null

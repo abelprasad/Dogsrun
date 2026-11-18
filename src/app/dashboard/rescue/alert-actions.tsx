@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/toaster'
+import { ALERT_STATUS } from '@/lib/alert-status'
 
 interface AlertActionsProps {
   alertId: string
@@ -34,7 +35,7 @@ export default function AlertActions({ alertId, currentStatus, large = false }: 
     setLoading(false)
   }
 
-  if (status === 'responded') {
+  if (status === ALERT_STATUS.RESPONDED) {
     return (
       <div className={`flex items-center gap-2 border border-[#7ddba3]/50 bg-[#7ddba3]/10 ${btnSize} text-sm font-black uppercase tracking-[0.16em] text-[#7ddba3]`}>
         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -45,12 +46,12 @@ export default function AlertActions({ alertId, currentStatus, large = false }: 
     )
   }
 
-  if (status === 'declined') {
+  if (status === ALERT_STATUS.DECLINED) {
     return (
       <div className="flex items-center gap-3">
         <span className="text-sm font-black uppercase tracking-[0.16em] text-[#f8f1e8]/40">Passed</span>
         <button
-          onClick={() => updateStatus('sent')}
+          onClick={() => updateStatus(ALERT_STATUS.SENT)}
           disabled={loading}
           className="border border-white/25 px-5 py-2 text-xs font-black uppercase tracking-[0.16em] text-[#f8f1e8]/70 transition hover:border-[#c08a3e] hover:text-[#c08a3e] disabled:opacity-50"
         >
@@ -62,7 +63,7 @@ export default function AlertActions({ alertId, currentStatus, large = false }: 
 
   return (
     <button
-      onClick={() => updateStatus('responded')}
+      onClick={() => updateStatus(ALERT_STATUS.RESPONDED)}
       disabled={loading}
       className={`bg-[#c08a3e] font-black uppercase tracking-[0.16em] text-[#140a08] transition hover:bg-[#d4a050] disabled:opacity-50 ${btnSize}`}
     >

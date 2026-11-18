@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { notifyShelterOfInterest } from '@/lib/notify-shelter'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { respondRatelimit, getClientIp } from '@/lib/ratelimit'
+import { ALERT_STATUS, RESPONSE_STATUSES } from '@/lib/alert-status'
 
 export async function POST(req: NextRequest) {
   const respondRatelimit_result = await respondRatelimit.limit(getClientIp(req))
@@ -21,7 +22,7 @@ export async function POST(req: NextRequest) {
   } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
-  if (!alert_id || !['responded', 'declined', 'sent'].includes(status)) {
+  if (!alert_id || !(RESPONSE_STATUSES as readonly string[]).includes(status)) {
     return NextResponse.json({ error: 'alert_id and valid status required' }, { status: 400 })
   }
 
@@ -35,13 +36,13 @@ export async function POST(req: NextRequest) {
 
   if (!alert) return NextResponse.json({ error: 'Alert not found' }, { status: 404 })
 
-  const wasResponded = alert.status === 'responded'
+  const wasResponded = alert.status === ALERT_STATUS.RESPONDED
 
   await supabaseAdmin.from('alerts').update({ status }).eq('id', alert_id)
 
   // Idempotency (M-D2): only notify the shelter on transition into 'responded',
   // not on repeat POSTs or the dashboard Undo -> Interested flow.
-  if (status === 'responded' && !wasResponded) {
+  if (status === ALERT_STATUS.RESPONDED && !wasResponded) {
     await notifyShelterOfInterest(alert)
   }
 

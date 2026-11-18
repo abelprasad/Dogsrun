@@ -2,6 +2,7 @@ import { getAdminUser } from '@/lib/auth-context'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { parsePageParam, parsePageSizeParam } from '@/lib/pagination'
+import { ALERT_STATUS } from '@/lib/alert-status'
 
 export async function PATCH(req: NextRequest) {
   const { user, isAdmin } = await getAdminUser()
@@ -57,7 +58,7 @@ export async function GET(req: NextRequest) {
     for (const alert of alerts ?? []) {
       if (!alertStats[alert.rescue_id]) alertStats[alert.rescue_id] = { sent: 0, responded: 0 }
       alertStats[alert.rescue_id].sent++
-      if (alert.status === 'responded') alertStats[alert.rescue_id].responded++
+      if (alert.status === ALERT_STATUS.RESPONDED) alertStats[alert.rescue_id].responded++
     }
   }
 

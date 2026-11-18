@@ -7,6 +7,7 @@ import ResendAlertsButton from './resend-alerts-button'
 import EuthanasiaCountdown from '@/components/euthanasia-countdown'
 import StatusBadge from '@/components/status-badge'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { ALERT_STATUS, alertStatusLabel } from '@/lib/alert-status'
 
 export default async function EditDogPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -77,11 +78,11 @@ export default async function EditDogPage({ params }: { params: Promise<{ id: st
                       <div className="flex items-center justify-between mb-1">
                         <p className="font-bold text-[#13241d] text-sm">{alert.organizations?.name}</p>
                         <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded ${
-                          alert.status === 'responded' ? 'bg-green-100 text-green-700' :
-                          alert.status === 'declined' ? 'bg-[#efe7dc] text-[#5d6a64]' :
+                          alert.status === ALERT_STATUS.RESPONDED ? 'bg-green-100 text-green-700' :
+                          alert.status === ALERT_STATUS.DECLINED ? 'bg-[#efe7dc] text-[#5d6a64]' :
                           'bg-[#13241d] text-[#c08a3e]'
                         }`}>
-                          {alert.status === 'responded' ? 'Interested' : alert.status === 'declined' ? 'Passed' : 'Sent'}
+                          {alertStatusLabel(alert.status)}
                         </span>
                       </div>
                       <p className="text-xs text-[#5d6a64]">

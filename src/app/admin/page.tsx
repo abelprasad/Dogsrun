@@ -2,6 +2,7 @@ import AdminOrgTable from './org-table'
 import AdminDogsTable from './dogs-table'
 import AdminTabs from './admin-tabs'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { ALERT_STATUS, alertStatusLabel } from '@/lib/alert-status'
 
 export default async function AdminPage() {
   // Head-only counts for the stats cards (dashboard style); tables paginate their own data.
@@ -17,7 +18,7 @@ export default async function AdminPage() {
     supabaseAdmin.from('organizations').select('*', { count: 'exact', head: true }).eq('approval_status', 'pending'),
     supabaseAdmin.from('dogs').select('*', { count: 'exact', head: true }),
     supabaseAdmin.from('alerts').select('*', { count: 'exact', head: true }),
-    supabaseAdmin.from('alerts').select('*', { count: 'exact', head: true }).eq('status', 'responded'),
+    supabaseAdmin.from('alerts').select('*', { count: 'exact', head: true }).eq('status', ALERT_STATUS.RESPONDED),
     supabaseAdmin.from('alerts')
       .select('*, dogs(name, breed), organizations!alerts_rescue_id_fkey(name)')
       .order('sent_at', { ascending: false })
@@ -120,11 +121,11 @@ export default async function AdminPage() {
                           <td className="px-4 py-3 text-[#f8f1e8]/60">{alert.organizations?.name ?? '—'}</td>
                           <td className="px-4 py-3">
                             <span className={`inline-block border px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.14em] ${
-                              alert.status === 'responded' ? 'border-[#7ddba3]/50 text-[#7ddba3]' :
-                              alert.status === 'declined' ? 'border-white/15 text-[#f8f1e8]/40' :
+                              alert.status === ALERT_STATUS.RESPONDED ? 'border-[#7ddba3]/50 text-[#7ddba3]' :
+                              alert.status === ALERT_STATUS.DECLINED ? 'border-white/15 text-[#f8f1e8]/40' :
                               'border-[#c08a3e]/40 text-[#c08a3e]'
                             }`}>
-                              {alert.status === 'responded' ? 'Interested' : alert.status === 'declined' ? 'Passed' : 'Sent'}
+                              {alertStatusLabel(alert.status)}
                             </span>
                           </td>
                           <td className="whitespace-nowrap px-4 py-3 text-xs text-[#f8f1e8]/45">

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { notifyShelterOfInterest } from '@/lib/notify-shelter'
 import { createSupabaseServerClient, supabaseAdmin } from '@/lib/supabase-server'
 import { respondRatelimit, getClientIp } from '@/lib/ratelimit'
+import { ALERT_STATUS } from '@/lib/alert-status'
 
 // Authenticated response endpoint for rescues. Previously a state-changing GET
 // with no login; email link scanners or prefetch could mark a rescue as
@@ -33,7 +34,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
   }
 
-  const status = action === 'interested' ? 'responded' : 'declined'
+  const status = action === 'interested' ? ALERT_STATUS.RESPONDED : ALERT_STATUS.DECLINED
 
   // Fetch first so we can verify ownership and current status before mutating
   const { data: alert, error: fetchError } = await supabaseAdmin
@@ -54,7 +55,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  const wasResponded = alert.status === 'responded'
+  const wasResponded = alert.status === ALERT_STATUS.RESPONDED
 
   const { error: updateError } = await supabaseAdmin
     .from('alerts')

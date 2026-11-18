@@ -5,6 +5,7 @@ import { createSupabaseServerClient, supabaseAdmin } from '@/lib/supabase-server
 import { escapeHtml, escapeHtmlOrDash, sanitizeSubject } from '@/lib/html'
 import { dogMatchesCriteria, type MatchCriteria } from '@/lib/matching'
 import { alertsRatelimit, getClientIp } from '@/lib/ratelimit'
+import { ALERT_STATUS } from '@/lib/alert-status'
 
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
@@ -117,7 +118,7 @@ export async function POST(req: NextRequest) {
     .from('alerts')
     .select('rescue_id, status')
     .eq('dog_id', dog_id)
-    .neq('status', 'failed')
+    .neq('status', ALERT_STATUS.FAILED)
 
   const alreadyAlerted = new Set((existingAlerts || []).map((a: { rescue_id: string; status: string }) => a.rescue_id))
 
@@ -181,7 +182,7 @@ export async function POST(req: NextRequest) {
         dog_id: dog.id,
         rescue_id: org.id,
         criteria_id: criteria.id,
-        status: 'sending',
+        status: ALERT_STATUS.SENDING,
         sent_at: new Date().toISOString(),
       }, { onConflict: 'dog_id,rescue_id' }).select().single()
 
@@ -260,9 +261,9 @@ export async function POST(req: NextRequest) {
         `,
         })
 
-        await supabaseAdmin.from('alerts').update({ status: 'sent' }).eq('id', alertData.id)
+        await supabaseAdmin.from('alerts').update({ status: ALERT_STATUS.SENT }).eq('id', alertData.id)
       } catch (sendError) {
-        await supabaseAdmin.from('alerts').update({ status: 'failed' }).eq('id', alertData.id)
+        await supabaseAdmin.from('alerts').update({ status: ALERT_STATUS.FAILED }).eq('id', alertData.id)
         throw sendError
       }
     })

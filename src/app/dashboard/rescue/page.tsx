@@ -5,6 +5,7 @@ import { requireAuthContext } from '@/lib/auth-context'
 import ApprovalWall from '@/components/approval-wall'
 import AlertActions from './alert-actions'
 import { daysUntilEuthanasia, daysLeftLabel, isDogUrgent } from '@/lib/urgency'
+import { ALERT_STATUS } from '@/lib/alert-status'
 
 interface Alert {
   id: string
@@ -52,15 +53,15 @@ export default async function RescuePortalPage() {
     }))
     .sort((a, b) => {
       // Needs-action first, urgent dogs first, newest first
-      const aOpen = a.status === 'sent' ? 0 : 1
-      const bOpen = b.status === 'sent' ? 0 : 1
+      const aOpen = a.status === ALERT_STATUS.SENT ? 0 : 1
+      const bOpen = b.status === ALERT_STATUS.SENT ? 0 : 1
       if (aOpen !== bOpen) return aOpen - bOpen
       if (Number(b._urgent) !== Number(a._urgent)) return Number(b._urgent) - Number(a._urgent)
       return new Date(b.sent_at).getTime() - new Date(a.sent_at).getTime()
     })
 
-  const open = alerts.filter((a) => a.status === 'sent')
-  const handled = alerts.filter((a) => a.status !== 'sent')
+  const open = alerts.filter((a) => a.status === ALERT_STATUS.SENT)
+  const handled = alerts.filter((a) => a.status !== ALERT_STATUS.SENT)
   const hero = open[0] || null
   const rest = open.slice(1)
   const openUrgentCount = open.filter((a) => a._urgent).length
@@ -235,9 +236,9 @@ export default async function RescuePortalPage() {
                       </p>
                     </div>
                     <span className={`shrink-0 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] ${
-                      alert.status === 'responded' ? 'bg-[#7ddba3]/15 text-[#7ddba3]' : 'bg-white/10 text-[#f8f1e8]/45'
+                      alert.status === ALERT_STATUS.RESPONDED ? 'bg-[#7ddba3]/15 text-[#7ddba3]' : 'bg-white/10 text-[#f8f1e8]/45'
                     }`}>
-                      {alert.status === 'responded' ? 'Interested' : 'Passed'}
+                      {alert.status === ALERT_STATUS.RESPONDED ? 'Interested' : 'Passed'}
                     </span>
                   </div>
                 )
