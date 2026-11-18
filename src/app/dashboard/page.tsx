@@ -39,9 +39,7 @@ export default async function DashboardPage() {
       <PageHeader
         title={org.name}
         sub="Manage your dogs and track rescue interest."
-        className="bg-[#13241d] px-5 py-14 sm:px-8 lg:px-12"
-        titleClassName="text-4xl font-black leading-tight tracking-tight text-[#f4b942] sm:text-5xl"
-        subClassName="mt-2 text-[#c8d3ce]"
+        variant="overview"
       />
 
       <main className="mx-auto max-w-7xl px-5 py-10 sm:px-8 lg:px-12">

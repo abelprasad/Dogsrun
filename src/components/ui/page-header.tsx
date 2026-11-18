@@ -5,14 +5,24 @@ interface PageHeaderProps {
   title: ReactNode;
   sub?: ReactNode;
   actions?: ReactNode;
-  /** Override the default dashboard green-header shell. */
-  className?: string;
-  /** Override the default inner container (e.g. to add a flex row for actions). */
-  innerClassName?: string;
-  titleClassName?: string;
-  subClassName?: string;
-  eyebrowClassName?: string;
+  /** "overview" is the larger dashboard-home header; "default" is used by sub-pages. */
+  variant?: "default" | "overview";
 }
+
+const STYLES = {
+  default: {
+    shell: "bg-[#13241d] pb-12 px-8 pt-8 border-t border-white/5",
+    title: "text-4xl md:text-5xl font-black tracking-tight text-[#c08a3e]",
+    sub: "text-[#f5f0e8]/50 mt-2 text-sm",
+  },
+  overview: {
+    shell: "bg-[#13241d] px-5 py-14 sm:px-8 lg:px-12",
+    title: "text-4xl font-black leading-tight tracking-tight text-[#f4b942] sm:text-5xl",
+    sub: "mt-2 text-[#c8d3ce]",
+  },
+} as const;
+
+const EYEBROW = "text-xs uppercase tracking-[0.24em] text-[#c08a3e]/70 mb-3 font-bold";
 
 // The green dashboard header (eyebrow + title + sub) shared across pages.
 export default function PageHeader({
@@ -20,19 +30,19 @@ export default function PageHeader({
   title,
   sub,
   actions,
-  className = "bg-[#13241d] pb-12 px-8 pt-8 border-t border-white/5",
-  innerClassName = "max-w-7xl mx-auto",
-  titleClassName = "text-4xl md:text-5xl font-black tracking-tight text-[#c08a3e]",
-  subClassName = "text-[#f5f0e8]/50 mt-2 text-sm",
-  eyebrowClassName = "text-xs uppercase tracking-[0.24em] text-[#c08a3e]/70 mb-3 font-bold",
+  variant = "default",
 }: PageHeaderProps) {
+  const styles = STYLES[variant];
+  const inner = actions
+    ? "max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-4"
+    : "max-w-7xl mx-auto";
   return (
-    <header className={className}>
-      <div className={innerClassName}>
+    <header className={styles.shell}>
+      <div className={inner}>
         <div>
-          {eyebrow ? <p className={eyebrowClassName}>{eyebrow}</p> : null}
-          <h1 className={titleClassName}>{title}</h1>
-          {sub ? <p className={subClassName}>{sub}</p> : null}
+          {eyebrow ? <p className={EYEBROW}>{eyebrow}</p> : null}
+          <h1 className={styles.title}>{title}</h1>
+          {sub ? <p className={styles.sub}>{sub}</p> : null}
         </div>
         {actions}
       </div>

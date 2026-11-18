@@ -39,7 +39,6 @@ export default async function MyDogsPage({ searchParams }: { searchParams: Promi
         eyebrow="Shelter"
         title="My Dogs"
         sub={<>{count || 0} dog{count !== 1 ? 's' : ''} listed</>}
-        innerClassName="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-4"
         actions={<Button href="/dashboard/dogs/new">+ Add a Dog</Button>}
       />
 
