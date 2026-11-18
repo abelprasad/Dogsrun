@@ -37,8 +37,6 @@ export interface ShelterAdapter {
   shelterName: string
   /** Paginate until empty, polite delay. Throws AdapterBlockedError on a block. */
   listDogs(): Promise<ScrapedDog[]>
-  /** Single-ID re-check (stale handling). Returns null when the dog is gone (404). */
-  fetchDog(id: string): Promise<ScrapedDog | null>
 }
 
 /**
@@ -65,14 +63,4 @@ export class AdapterBlockedError extends Error {
     this.source = source
     this.reason = reason
   }
-}
-
-export interface SyncRunSummary {
-  source: string
-  startedAt: string
-  finishedAt: string
-  dogsSeen: number
-  dogsNew: number
-  status: 'ok' | 'failed' | 'blocked'
-  error?: string
 }

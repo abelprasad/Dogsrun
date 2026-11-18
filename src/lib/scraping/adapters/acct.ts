@@ -116,8 +116,8 @@ export function normalizeShelterluvPhotos(photos: unknown): string[] {
  * into a ScrapedDog. Returns null for non-dogs, non-ACCT IDs, and
  * nameless rows (the latter is logged by the caller, not imported).
  * Note: list-endpoint records carry `weight_group` but no `weight`, so
- * weightLbs is usually null from listDogs(); fetchDog() (detail page)
- * does return a weight.
+ * weightLbs is usually null from listDogs(); the detail-page path
+ * (fetchDogOnPage) does return a weight.
  */
 export function mapShelterluvAnimal(raw: unknown, scrapedAt?: string): ScrapedDog | null {
   if (!isRecord(raw)) return null
@@ -461,18 +461,6 @@ export class AcctShelterluvAdapter implements ShelterAdapter {
       )
     }
     return dogs
-  }
-
-  async fetchDog(id: string): Promise<ScrapedDog | null> {
-    if (!ACCT_SOURCE_ID_PATTERN.test(id.trim())) return null
-    const browser = await chromium.launch({ headless: true })
-    try {
-      const context = await browser.newContext({ userAgent: REALISTIC_USER_AGENT })
-      const page = await context.newPage()
-      return await this.fetchDogOnPage(page, id.trim())
-    } finally {
-      await browser.close()
-    }
   }
 
   private async fetchDogOnPage(page: Page, id: string): Promise<ScrapedDog | null> {
