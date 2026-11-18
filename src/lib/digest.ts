@@ -3,7 +3,7 @@ import { escapeHtml } from '@/lib/html'
 import { brandedEmail, emailButton } from '@/lib/email'
 import { dogMatchesCriteria, type MatchCriteria, type MatchDog } from '@/lib/matching'
 import { supabaseAdmin } from '@/lib/supabase-server'
-import { ALERT_STATUS } from '@/lib/alert-status'
+import { ALERT_STATUS, type AlertStatus } from '@/lib/alert-status'
 import { resend } from '@/lib/resend'
 
 export interface DigestDog extends MatchDog {
@@ -41,20 +41,51 @@ export async function findDigestMatches(rescueId: string, criteria: DigestCriter
   }
 }
 
-export async function recordDigestAlerts(matches: DigestDog[], rescueId: string, criteriaId: string) {
+async function recordDigestAlerts(matches: DigestDog[], rescueId: string, criteriaId: string) {
   for (const dog of matches) {
     await supabaseAdmin.from('alerts').upsert({
       dog_id: dog.id,
       rescue_id: rescueId,
       criteria_id: criteriaId,
-      status: ALERT_STATUS.SENT,
+      status: ALERT_STATUS.SENDING,
       sent_at: new Date().toISOString(),
     }, { onConflict: 'dog_id,rescue_id', ignoreDuplicates: true })
   }
 }
 
-/** `introHtml` must already be escaped. */
-export async function sendDigestEmail(to: string, matches: DigestDog[], introHtml: string) {
+// Only rows still 'sending' are touched, so existing responded/declined rows survive.
+async function settleDigestAlerts(matches: DigestDog[], rescueId: string, status: AlertStatus) {
+  await supabaseAdmin
+    .from('alerts')
+    .update({ status })
+    .in('dog_id', matches.map(dog => dog.id))
+    .eq('rescue_id', rescueId)
+    .eq('status', ALERT_STATUS.SENDING)
+}
+
+/**
+ * Records the alert rows as 'sending', emails the digest, then marks them
+ * 'sent' (or 'failed', rethrowing) — same lifecycle as /api/alerts.
+ * `introHtml` must already be escaped.
+ */
+export async function deliverDigest(
+  rescueId: string,
+  criteria: DigestCriteria,
+  matches: DigestDog[],
+  to: string,
+  introHtml: string,
+) {
+  await recordDigestAlerts(matches, rescueId, criteria.id)
+  try {
+    await sendDigestEmail(to, matches, introHtml)
+  } catch (error) {
+    await settleDigestAlerts(matches, rescueId, ALERT_STATUS.FAILED)
+    throw error
+  }
+  await settleDigestAlerts(matches, rescueId, ALERT_STATUS.SENT)
+}
+
+async function sendDigestEmail(to: string, matches: DigestDog[], introHtml: string) {
   const dogRows = matches.map(dog => {
     const shelter = dog.organizations
     const details = [

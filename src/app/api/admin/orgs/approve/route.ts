@@ -3,7 +3,7 @@ import { getAdminUser } from '@/lib/auth-context'
 import { NextRequest, NextResponse } from 'next/server'
 import { escapeHtml } from '@/lib/html'
 import { brandedEmail, emailButton } from '@/lib/email'
-import { findDigestMatches, getActiveCriteria, recordDigestAlerts, sendDigestEmail } from '@/lib/digest'
+import { deliverDigest, findDigestMatches, getActiveCriteria } from '@/lib/digest'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { adminEmailRatelimit, getClientIp } from '@/lib/ratelimit'
 import { resend } from '@/lib/resend'
@@ -97,10 +97,11 @@ async function sendRescueApprovalDigest(rescueId: string, rescueName: string, re
   const { matches } = await findDigestMatches(rescueId, criteria)
   if (matches.length === 0) return
 
-  await recordDigestAlerts(matches, rescueId, criteria.id)
-  await sendDigestEmail(
-    rescueEmail,
+  await deliverDigest(
+    rescueId,
+    criteria,
     matches,
+    rescueEmail,
     `Welcome to DOGSRUN, <strong style="color:#13241d;">${escapeHtml(rescueName)}</strong>. Here are the dogs currently available that match your rescue criteria.`,
   )
 }

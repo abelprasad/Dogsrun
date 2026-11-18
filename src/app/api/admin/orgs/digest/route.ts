@@ -2,7 +2,7 @@ import { getAdminUser } from '@/lib/auth-context'
 import { NextRequest, NextResponse } from 'next/server'
 import { escapeHtml } from '@/lib/html'
 import { supabaseAdmin } from '@/lib/supabase-server'
-import { findDigestMatches, getActiveCriteria, recordDigestAlerts, sendDigestEmail } from '@/lib/digest'
+import { deliverDigest, findDigestMatches, getActiveCriteria } from '@/lib/digest'
 import { adminEmailRatelimit, getClientIp } from '@/lib/ratelimit'
 
 // Idempotency (M-D5): in-memory debounce to prevent duplicate digest emails
@@ -61,10 +61,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: "No matching dogs found for this rescue's criteria", matches: 0 })
   }
 
-  await recordDigestAlerts(matches, org_id, criteria.id)
-  await sendDigestEmail(
-    org.email,
+  await deliverDigest(
+    org_id,
+    criteria,
     matches,
+    org.email,
     `Hi <strong style="color:#13241d;">${escapeHtml(org.name)}</strong>, here are the dogs currently available on DOGSRUN that match your rescue criteria.`,
   )
 
