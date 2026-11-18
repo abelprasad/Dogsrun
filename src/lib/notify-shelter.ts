@@ -1,9 +1,7 @@
-import { Resend } from 'resend'
 import { CONTACT_EMAIL, SITE_URL } from '@/lib/constants'
 import { escapeHtml, sanitizeSubject } from '@/lib/html'
 import { supabaseAdmin } from '@/lib/supabase-server'
-
-const resend = new Resend(process.env.RESEND_API_KEY!)
+import { resend } from '@/lib/resend'
 
 interface InterestAlert {
   dogs: { name: string; shelter_id: string }

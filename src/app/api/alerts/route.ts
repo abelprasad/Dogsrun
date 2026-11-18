@@ -1,14 +1,12 @@
 import { CONTACT_EMAIL, SITE_URL } from '@/lib/constants'
-import { Resend } from 'resend'
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient, supabaseAdmin } from '@/lib/supabase-server'
 import { escapeHtml, escapeHtmlOrDash, sanitizeSubject } from '@/lib/html'
 import { dogMatchesCriteria, type MatchCriteria } from '@/lib/matching'
 import { alertsRatelimit, getClientIp } from '@/lib/ratelimit'
 import { ALERT_STATUS } from '@/lib/alert-status'
+import { resend } from '@/lib/resend'
 
-
-const resend = new Resend(process.env.RESEND_API_KEY!)
 
 interface RescueOrg {
   id: string;

@@ -1,12 +1,10 @@
-import { Resend } from 'resend'
 import { CONTACT_EMAIL, SITE_URL } from '@/lib/constants'
 import { escapeHtml } from '@/lib/html'
 import { brandedEmail, emailButton } from '@/lib/email'
 import { dogMatchesCriteria, type MatchCriteria, type MatchDog } from '@/lib/matching'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { ALERT_STATUS } from '@/lib/alert-status'
-
-const resend = new Resend(process.env.RESEND_API_KEY!)
+import { resend } from '@/lib/resend'
 
 export interface DigestDog extends MatchDog {
   id: string

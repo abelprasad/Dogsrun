@@ -1,12 +1,13 @@
 import { Ratelimit } from '@upstash/ratelimit'
 import { Redis } from '@upstash/redis'
 import { NextRequest } from 'next/server'
+import { env } from './env'
 
 type LimitResult = Awaited<ReturnType<Ratelimit['limit']>>
 type RateLimiter = Pick<Ratelimit, 'limit'>
 
 const hasRedisConfig = Boolean(
-  process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+  env.UPSTASH_REDIS_REST_URL && env.UPSTASH_REDIS_REST_TOKEN
 )
 
 // M-S3: fail closed-ish. If Upstash is not configured, fall back to an
@@ -43,8 +44,8 @@ if (!hasRedisConfig) {
 
 const redis = hasRedisConfig
   ? new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL!,
-      token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+      url: env.UPSTASH_REDIS_REST_URL!,
+      token: env.UPSTASH_REDIS_REST_TOKEN!,
     })
   : null
 

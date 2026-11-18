@@ -1,14 +1,12 @@
 import { CONTACT_EMAIL, ADMIN_EMAIL, SITE_URL } from '@/lib/constants'
 import { getAdminUser } from '@/lib/auth-context'
 import { NextRequest, NextResponse } from 'next/server'
-import { Resend } from 'resend'
 import { escapeHtml } from '@/lib/html'
 import { brandedEmail, emailButton } from '@/lib/email'
 import { findDigestMatches, getActiveCriteria, recordDigestAlerts, sendDigestEmail } from '@/lib/digest'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { adminEmailRatelimit, getClientIp } from '@/lib/ratelimit'
-
-const resend = new Resend(process.env.RESEND_API_KEY!)
+import { resend } from '@/lib/resend'
 
 export async function POST(req: NextRequest) {
   const adminEmailRatelimit_result = await adminEmailRatelimit.limit(getClientIp(req))

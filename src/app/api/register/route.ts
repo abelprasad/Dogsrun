@@ -1,12 +1,10 @@
 import { CONTACT_EMAIL, SITE_URL, STORAGE_BUCKETS } from '@/lib/constants'
 import { NextRequest, NextResponse } from 'next/server'
-import { Resend } from 'resend'
 import { registerRatelimit, getClientIp } from '@/lib/ratelimit'
 import { escapeHtml } from '@/lib/html'
 import { brandedEmail, emailButton, emailDetailRow } from '@/lib/email'
 import { createSupabaseServerClient, supabaseAdmin } from '@/lib/supabase-server'
-
-const resend = new Resend(process.env.RESEND_API_KEY!)
+import { resend } from '@/lib/resend'
 
 export async function POST(req: NextRequest) {
   const ip = getClientIp(req)
