@@ -38,7 +38,11 @@ export async function POST(req: NextRequest) {
 
   const wasResponded = alert.status === ALERT_STATUS.RESPONDED
 
-  await supabaseAdmin.from('alerts').update({ status }).eq('id', alert_id)
+  const { error: updateError } = await supabaseAdmin.from('alerts').update({ status }).eq('id', alert_id)
+  if (updateError) {
+    console.error('Alert status update failed:', updateError.message)
+    return NextResponse.json({ error: 'Failed to update alert' }, { status: 500 })
+  }
 
   // Idempotency (M-D2): only notify the shelter on transition into 'responded',
   // not on repeat POSTs or the dashboard Undo -> Interested flow.

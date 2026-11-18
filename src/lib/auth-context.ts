@@ -17,7 +17,7 @@ export async function getAuthContext() {
     return { supabase, user: null, org: null, isAdmin: false }
   }
 
-  const [{ data: org }, { data: admin }] = await Promise.all([
+  const [{ data: org, error: orgError }, { data: admin, error: adminError }] = await Promise.all([
     supabase
       .from('organizations')
       .select('id, name, email, type, approval_status')
@@ -29,6 +29,11 @@ export async function getAuthContext() {
       .eq('email', user.email)
       .maybeSingle(),
   ])
+
+  // A failed lookup must not look like "no org" (which redirects real orgs to /register).
+  if (orgError || adminError) {
+    throw new Error(`Auth context lookup failed: ${(orgError ?? adminError)?.message}`)
+  }
 
   const normalizedOrg = org
     ? {
@@ -63,11 +68,12 @@ export async function getAdminUser() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { user: null, isAdmin: false }
 
-  const { data: admin } = await supabase
+  const { data: admin, error } = await supabase
     .from('admins')
     .select('id')
     .eq('email', user.email)
     .maybeSingle()
+  if (error) throw new Error(`Admin lookup failed: ${error.message}`)
 
   return { user, isAdmin: Boolean(admin) }
 }

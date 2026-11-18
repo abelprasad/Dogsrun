@@ -32,7 +32,8 @@ export async function DELETE(req: NextRequest) {
   const { dog_id } = await req.json()
   if (!dog_id) return NextResponse.json({ error: 'dog_id required' }, { status: 400 })
 
-  await supabaseAdmin.from('alerts').delete().eq('dog_id', dog_id)
+  const { error: alertsError } = await supabaseAdmin.from('alerts').delete().eq('dog_id', dog_id)
+  if (alertsError) return NextResponse.json({ error: alertsError.message }, { status: 500 })
   const { error } = await supabaseAdmin.from('dogs').delete().eq('id', dog_id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ success: true })

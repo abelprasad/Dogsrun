@@ -10,7 +10,11 @@ export async function GET(request: NextRequest) {
 
   if (code) {
     const supabase = await createSupabaseServerClient()
-    await supabase.auth.exchangeCodeForSession(code)
+    const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+    if (exchangeError) {
+      console.error('Auth code exchange failed:', exchangeError.message)
+      return NextResponse.redirect(new URL('/auth/login', request.url))
+    }
 
     if (next === '/dashboard/welcome') {
       const { data: { user } } = await supabase.auth.getUser()

@@ -125,7 +125,8 @@ export default async function BrowsePage({
     if (stateFilter) dbQuery = dbQuery.eq('organizations.state', stateFilter)
     if (query) dbQuery = dbQuery.or(`name.ilike.%${query}%,breed.ilike.%${query}%`)
 
-    const { data, count } = await dbQuery
+    const { data, count, error } = await dbQuery
+    if (error) console.error('Dogs query failed:', error.message)
     const rows = (data || []) as DogCard[]
     dogs = rows
       .map((d) => {
@@ -151,7 +152,8 @@ export default async function BrowsePage({
       .order('name')
     if (stateFilter) shelterQuery = shelterQuery.eq('state', stateFilter)
     if (query) shelterQuery = shelterQuery.ilike('name', `%${query}%`)
-    const { data } = await shelterQuery
+    const { data, error } = await shelterQuery
+    if (error) console.error('Shelters query failed:', error.message)
     const shelterOrgs = (data || []) as OrganizationSummary[]
 
     const counts = await Promise.all(
@@ -180,7 +182,8 @@ export default async function BrowsePage({
       .order('name')
     if (stateFilter) rescueQuery = rescueQuery.eq('state', stateFilter)
     if (query) rescueQuery = rescueQuery.ilike('name', `%${query}%`)
-    const { data } = await rescueQuery
+    const { data, error } = await rescueQuery
+    if (error) console.error('Rescues query failed:', error.message)
     const orgs = (data || []) as OrganizationSummary[]
 
     const criteria = await Promise.all(

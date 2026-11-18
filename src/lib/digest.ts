@@ -43,13 +43,14 @@ export async function findDigestMatches(rescueId: string, criteria: DigestCriter
 
 async function recordDigestAlerts(matches: DigestDog[], rescueId: string, criteriaId: string) {
   for (const dog of matches) {
-    await supabaseAdmin.from('alerts').upsert({
+    const { error } = await supabaseAdmin.from('alerts').upsert({
       dog_id: dog.id,
       rescue_id: rescueId,
       criteria_id: criteriaId,
       status: ALERT_STATUS.SENDING,
       sent_at: new Date().toISOString(),
     }, { onConflict: 'dog_id,rescue_id', ignoreDuplicates: true })
+    if (error) console.error('Digest alert record failed:', error.message)
   }
 }
 

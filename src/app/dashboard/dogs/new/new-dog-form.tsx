@@ -72,7 +72,8 @@ export default function NewDogForm({ shelterId }: { shelterId: string }) {
           if (!alertRes.ok) {
             toast.error('Dog posted, but rescue alerts failed to send — please retry from the dog page.')
           }
-        } catch {
+        } catch (alertError) {
+          console.error('Rescue alert request failed:', alertError)
           toast.error('Dog posted, but rescue alerts failed to send — please retry from the dog page.')
         }
       }

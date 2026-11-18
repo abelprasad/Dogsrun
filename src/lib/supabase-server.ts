@@ -22,7 +22,9 @@ export async function createSupabaseServerClient() {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options))
-          } catch {}
+          } catch {
+            // Server Components cannot set cookies; the session refresh is retried on the next request that can.
+          }
         },
       },
     }
