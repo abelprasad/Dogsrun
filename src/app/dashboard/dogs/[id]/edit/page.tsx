@@ -1,7 +1,5 @@
 import { requireAuthContext } from '@/lib/auth-context'
 import { redirect, notFound } from 'next/navigation'
-import Link from 'next/link'
-import SignOutButton from '@/components/sign-out-button'
 import EditDogForm from './edit-form'
 import ResendAlertsButton from './resend-alerts-button'
 import EuthanasiaCountdown from '@/components/euthanasia-countdown'
@@ -19,25 +17,10 @@ export default async function EditDogPage({ params }: { params: Promise<{ id: st
   if (!dog) notFound()
   if (!org || org.type !== 'shelter' || org.id !== dog.shelter_id) redirect('/dashboard')
 
-  // REVIEW: the second nav bar with SignOutButton below duplicates DashboardNav from the layout; delete it.
   const { data: alerts } = await fetchDogAlertsWithRescue(id)
 
   return (
     <div className="min-h-screen bg-[#f8f1e8]">
-      <div className="bg-[#13241d] border-t border-[#c08a3e]/20 py-2 px-8">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex gap-6">
-            <Link href="/dashboard" className="text-xs font-bold text-[#d8cfc2] hover:text-[#f8f1e8] uppercase tracking-widest transition-colors">Dashboard</Link>
-            <Link href="/dashboard/dogs" className="text-xs font-bold text-[#d8cfc2] hover:text-[#f8f1e8] uppercase tracking-widest transition-colors">My Dogs</Link>
-            <span className="text-xs font-bold text-[#c08a3e] uppercase tracking-widest">{dog.name}</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-xs font-bold text-[#d8cfc2] uppercase tracking-widest">{org.name}</span>
-            <SignOutButton />
-          </div>
-        </div>
-      </div>
-
       <header className="bg-[#13241d] border-b border-[#c08a3e]/30 py-8 px-8 text-[#f8f1e8]">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div>
