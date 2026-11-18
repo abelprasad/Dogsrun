@@ -64,16 +64,19 @@ export default function AdminOrgTable() {
         setTotal(data.total)
         setAlertStats(data.alertStats ?? {})
         setCounts(data.counts ?? { all: 0, shelter: 0, rescue: 0 })
+      } else {
+        toast.error(reportError({ endpoint: '/api/admin/orgs', status: res.status }, "Couldn't load organizations — try again."))
       }
     } finally {
       setTableLoading(false)
     }
-  }, [])
+  }, [toast])
 
   const fetchPending = useCallback(async () => {
     const res = await fetch('/api/admin/orgs?page=1&pageSize=100&approval_status=pending')
     if (res.ok) setPendingOrgs((await res.json()).orgs)
-  }, [])
+    else toast.error(reportError({ endpoint: '/api/admin/orgs', status: res.status }, "Couldn't load pending approvals — try again."))
+  }, [toast])
 
   useEffect(() => { fetchPage(page, filter) }, [page, filter, fetchPage])
   useEffect(() => { fetchPending() }, [fetchPending])
@@ -161,6 +164,8 @@ export default function AdminOrgTable() {
     if (res.ok) {
       const { url } = await res.json()
       window.open(url, '_blank')
+    } else {
+      toast.error(reportError({ endpoint: '/api/admin/orgs/signed-url', status: res.status }, "Couldn't open document — try again."))
     }
   }
 

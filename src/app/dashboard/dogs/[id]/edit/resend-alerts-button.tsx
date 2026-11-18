@@ -15,8 +15,8 @@ export default function ResendAlertsButton({ dogId }: { dogId: string }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ dog_id: dogId }),
       })
-      const data = await res.json()
-      setResult(data.message || 'Done')
+      const data = await res.json().catch(() => ({}))
+      setResult(res.ok ? (data.message || 'Done') : (data.error || 'Could not resend alerts. Try again.'))
     } catch {
       setResult('Something went wrong. Try again.')
     }

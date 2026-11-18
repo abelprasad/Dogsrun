@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useRef, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from 'react'
 
 type ToastKind = 'success' | 'error'
 interface Toast { id: number; kind: ToastKind; message: string }
@@ -17,14 +17,17 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([])
   const idRef = useRef(0)
 
-  function push(kind: ToastKind, message: string) {
+  const push = useCallback((kind: ToastKind, message: string) => {
     const id = ++idRef.current
     setToasts(prev => [...prev.slice(-2), { id, kind, message }])
     setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000)
-  }
+  }, [])
+
+  // Stable identity so consumers can list `toast` in hook deps without refetch loops.
+  const api = useMemo(() => ({ success: (m: string) => push('success', m), error: (m: string) => push('error', m) }), [push])
 
   return (
-    <ToastCtx.Provider value={{ success: m => push('success', m), error: m => push('error', m) }}>
+    <ToastCtx.Provider value={api}>
       {children}
       <div aria-live="polite" className="fixed bottom-6 right-6 z-[100] flex w-[calc(100%-3rem)] max-w-sm flex-col gap-2">
         {toasts.map(t => (

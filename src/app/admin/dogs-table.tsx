@@ -48,11 +48,13 @@ export default function AdminDogsTable() {
         setDogs(data.dogs)
         setTotal(data.total)
         setCounts(data.counts ?? { all: 0, atRisk: 0, urgent: 0 })
+      } else {
+        toast.error(reportError({ endpoint: '/api/admin/dogs', status: res.status }, "Couldn't load dogs — try again."))
       }
     } finally {
       setTableLoading(false)
     }
-  }, [])
+  }, [toast])
 
   useEffect(() => { fetchPage(page, filter) }, [page, filter, fetchPage])
 
