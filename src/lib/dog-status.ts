@@ -24,6 +24,9 @@ export const DOG_STATUSES: readonly DogStatus[] = [
   'transferred',
 ]
 
+/** Statuses shown on public pages (browse, detail, home/about counts). */
+export const PUBLIC_VISIBLE_STATUSES: DogStatus[] = ['available', 'urgent']
+
 export const DOG_STATUS_LABELS: Record<DogStatus, string> = {
   available: 'Available',
   urgent: 'Urgent',

@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { daysUntilEuthanasia, daysLeftLabel, isDogUrgent } from '@/lib/urgency'
+import { PUBLIC_VISIBLE_STATUSES } from '@/lib/dog-status'
 
 export default async function PublicDogProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -11,7 +12,7 @@ export default async function PublicDogProfilePage({ params }: { params: Promise
     .from('dogs')
     .select('*, organizations(*)')
     .eq('id', id)
-    .in('status', ['available', 'urgent'])
+    .in('status', PUBLIC_VISIBLE_STATUSES)
     .single()
 
   if (!dog) notFound()

@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { ORG } from "@/lib/site-content";
+import { PUBLIC_VISIBLE_STATUSES } from "@/lib/dog-status";
 
 const heroPhoto =
   "https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg?auto=compress&cs=tinysrgb&w=1600";
@@ -56,7 +57,7 @@ export default async function AboutPage() {
   const { count } = await supabaseAdmin
     .from("dogs")
     .select("id", { count: "exact", head: true })
-    .in("status", ["available", "urgent"])
+    .in("status", PUBLIC_VISIBLE_STATUSES)
     .not("euthanasia_date", "is", null);
 
   const onTheClock = count ?? 0;

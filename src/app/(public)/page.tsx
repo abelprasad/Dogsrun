@@ -4,6 +4,7 @@ import { supabaseAdmin } from "@/lib/supabase-server";
 import { daysUntilEuthanasia, daysLeftLabel } from "@/lib/urgency";
 import UrgentTicker from "@/components/urgent-ticker";
 import { heroPhoto, rescuePhoto, NETWORK_STATS } from "@/lib/site-content";
+import { PUBLIC_VISIBLE_STATUSES } from "@/lib/dog-status";
 
 const dogPhotos = {
   hero: heroPhoto(2000),
@@ -36,7 +37,7 @@ export default async function Home() {
   const { data } = await supabaseAdmin
     .from("dogs")
     .select("id, name, breed, photo_url, status, euthanasia_date")
-    .in("status", ["available", "urgent"])
+    .in("status", PUBLIC_VISIBLE_STATUSES)
     .not("euthanasia_date", "is", null)
     .order("euthanasia_date", { ascending: true })
     .limit(8);

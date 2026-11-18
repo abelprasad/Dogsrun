@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase-server'
 import { daysUntilEuthanasia, daysLeftLabel, isDogUrgent } from '@/lib/urgency'
 import Pagination from '@/components/ui/pagination'
 import BrowseFilters, { type UrgencyFilter } from '@/components/browse-filters'
+import { PUBLIC_VISIBLE_STATUSES } from '@/lib/dog-status'
 
 const PAGE_SIZE = 12
 
@@ -118,11 +119,11 @@ export default async function BrowsePage({
       .range(from, to)
 
     if (urgency === 'urgent') {
-      dbQuery = dbQuery.in('status', ['available', 'urgent']).or('status.eq.urgent,euthanasia_date.not.is.null')
+      dbQuery = dbQuery.in('status', PUBLIC_VISIBLE_STATUSES).or('status.eq.urgent,euthanasia_date.not.is.null')
     } else if (urgency === 'available') {
       dbQuery = dbQuery.eq('status', 'available').is('euthanasia_date', null)
     } else {
-      dbQuery = dbQuery.in('status', ['available', 'urgent'])
+      dbQuery = dbQuery.in('status', PUBLIC_VISIBLE_STATUSES)
     }
 
     if (stateFilter) dbQuery = dbQuery.eq('organizations.state', stateFilter)
@@ -163,7 +164,7 @@ export default async function BrowsePage({
           .from('dogs')
           .select('id', { count: 'exact', head: true })
           .eq('shelter_id', s.id)
-          .in('status', ['available', 'urgent'])
+          .in('status', PUBLIC_VISIBLE_STATUSES)
       )
     )
     shelters = shelterOrgs.map((s, i) => ({ ...s, dog_count: counts[i].count || 0 }))
