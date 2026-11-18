@@ -1,5 +1,5 @@
 import { CONTACT_EMAIL, SITE_URL } from '@/lib/constants'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { getAdminUser } from '@/lib/auth-context'
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { escapeHtml } from '@/lib/html'
@@ -31,17 +31,9 @@ export async function POST(req: NextRequest) {
   if (!adminEmailRatelimit_result.success) {
     return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 })
   }
-  const supabase = await createSupabaseServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { user, isAdmin } = await getAdminUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  const { data: admin } = await supabase
-    .from('admins')
-    .select('id')
-    .eq('email', user.email)
-    .maybeSingle()
-
-  if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  if (!isAdmin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { org_id, action } = await req.json()
   if (!org_id || !['approve', 'reject'].includes(action)) {

@@ -57,3 +57,17 @@ export function dashboardPathFor(org: AuthOrg | null, isAdmin: boolean) {
   if (isAdmin) return '/admin'
   return '/register'
 }
+
+export async function getAdminUser() {
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { user: null, isAdmin: false }
+
+  const { data: admin } = await supabase
+    .from('admins')
+    .select('id')
+    .eq('email', user.email)
+    .maybeSingle()
+
+  return { user, isAdmin: Boolean(admin) }
+}

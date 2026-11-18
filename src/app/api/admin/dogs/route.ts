@@ -1,21 +1,11 @@
-import { createSupabaseServerClient, supabaseAdmin } from '@/lib/supabase-server'
+import { supabaseAdmin } from '@/lib/supabase-server'
+import { getAdminUser } from '@/lib/auth-context'
 import { VALID_DOG_STATUSES } from '@/lib/dog-status'
 import { NextRequest, NextResponse } from 'next/server'
 
-// REVIEW: the same admin check is hand-rolled in admin/orgs, approve, digest and signed-url; move this to lib/auth-context.ts and reuse it.
-async function verifyAdmin() {
-  const supabase = await createSupabaseServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
-  const { data: admin } = await supabase.from('admins').select('id').eq('email', user.email).maybeSingle()
-  return admin ? user : null
-}
-
-
-
 export async function PATCH(req: NextRequest) {
-  const user = await verifyAdmin()
-  if (!user) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const { user, isAdmin } = await getAdminUser()
+  if (!user || !isAdmin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { dog_id, ...fields } = await req.json()
   if (!dog_id) return NextResponse.json({ error: 'dog_id required' }, { status: 400 })
@@ -35,8 +25,8 @@ export async function PATCH(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const user = await verifyAdmin()
-  if (!user) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const { user, isAdmin } = await getAdminUser()
+  if (!user || !isAdmin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { dog_id } = await req.json()
   if (!dog_id) return NextResponse.json({ error: 'dog_id required' }, { status: 400 })
@@ -62,8 +52,8 @@ function parsePageSizeParam(value: string | null): number {
 }
 
 export async function GET(req: NextRequest) {
-  const user = await verifyAdmin()
-  if (!user) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const { user, isAdmin } = await getAdminUser()
+  if (!user || !isAdmin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const params = req.nextUrl.searchParams
   const page = parsePageParam(params.get('page'))

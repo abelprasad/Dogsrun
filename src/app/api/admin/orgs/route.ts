@@ -1,19 +1,11 @@
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { getAdminUser } from '@/lib/auth-context'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 
 export async function PATCH(req: NextRequest) {
-  const supabase = await createSupabaseServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { user, isAdmin } = await getAdminUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  const { data: admin } = await supabase
-    .from('admins')
-    .select('id')
-    .eq('email', user.email)
-    .maybeSingle()
-
-  if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  if (!isAdmin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { org_id, is_active } = await req.json()
   if (!org_id || typeof is_active !== 'boolean') {
@@ -46,17 +38,9 @@ function parsePageSizeParam(value: string | null): number {
 }
 
 export async function GET(req: NextRequest) {
-  const supabase = await createSupabaseServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { user, isAdmin } = await getAdminUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  const { data: admin } = await supabase
-    .from('admins')
-    .select('id')
-    .eq('email', user.email)
-    .maybeSingle()
-
-  if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  if (!isAdmin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const params = req.nextUrl.searchParams
   const page = parsePageParam(params.get('page'))
