@@ -213,16 +213,6 @@ async function triggerAlerts(page: Page, dogId: string) {
   ok(`${data.matches} match(es) found`)
 }
 
-async function countAlerts(rescueId: string) {
-  const { data, error } = await supabase
-    .from('alerts')
-    .select('id')
-    .eq('rescue_id', rescueId)
-
-  if (error) fail(`Failed to count alerts: ${error.message}`)
-  return data?.length ?? 0
-}
-
 async function latestSentAlert(rescueId: string) {
   const { data, error } = await supabase
     .from('alerts')
@@ -270,48 +260,8 @@ async function testPassResponse(alertId: string) {
   ok('Anonymous response rejected, alert still sent')
 }
 
-// REVIEW: testNonMatchingDog/testSpecialNeedsBlocking duplicate src/lib/matching.test.ts; testSecurityRejections duplicates tests/api-security.spec.ts.
-async function testNonMatchingDog(ctx: SeedContext) {
-  section('Test 3: non-matching dog produces no alert')
-  const before = await countAlerts(ctx.rescueId)
-  const dog = await createDog(ctx.shelterId, {
-    name: '[TEST] Non-Matching Dog',
-    breed: 'Chihuahua',
-    state: 'CA',
-  })
-
-  const res = await ctx.shelterPage.request.post('/api/alerts', {
-    data: { dog_id: dog.id },
-  })
-
-  if (!res.ok()) fail(`/api/alerts non-match returned ${res.status()}: ${await res.text()}`)
-
-  const after = await countAlerts(ctx.rescueId)
-  if (after > before) fail('Non-matching dog incorrectly created an alert')
-  ok('No alert created')
-}
-
-async function testSpecialNeedsBlocking(ctx: SeedContext) {
-  section('Test 4: special-needs criteria block works')
-  const before = await countAlerts(ctx.rescueId)
-  const dog = await createDog(ctx.shelterId, {
-    name: '[TEST] Parvo Dog',
-    parvo: true,
-  })
-
-  const res = await ctx.shelterPage.request.post('/api/alerts', {
-    data: { dog_id: dog.id },
-  })
-
-  if (!res.ok()) fail(`/api/alerts special-needs returned ${res.status()}: ${await res.text()}`)
-
-  const after = await countAlerts(ctx.rescueId)
-  if (after > before) fail('Parvo dog matched a rescue that does not accept parvo')
-  ok('Parvo dog blocked')
-}
-
 async function testStatusUpdate(ctx: SeedContext, dog: TestDog) {
-  section('Test 5: authenticated status update preserves numeric fields')
+  section('Test 3: authenticated status update preserves numeric fields')
 
   const res = await ctx.shelterPage.request.post('/api/dogs/update', {
     data: { dog_id: dog.id, status: 'urgent' },
@@ -331,15 +281,8 @@ async function testStatusUpdate(ctx: SeedContext, dog: TestDog) {
   ok('Status updated and numeric fields preserved')
 }
 
-async function testSecurityRejections(ctx: SeedContext, dog: TestDog) {
-  section('Test 6: protected endpoints reject anonymous calls')
-
-  const alertRes = await fetch(`${BASE}/api/alerts`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ dog_id: dog.id }),
-  })
-  if (alertRes.status !== 401) fail(`Anonymous /api/alerts returned ${alertRes.status}; expected 401`)
+async function testDogUpdateRejectsAnonymous(dog: TestDog) {
+  section('Test 4: /api/dogs/update rejects anonymous calls')
 
   const updateRes = await fetch(`${BASE}/api/dogs/update`, {
     method: 'POST',
@@ -348,7 +291,7 @@ async function testSecurityRejections(ctx: SeedContext, dog: TestDog) {
   })
   if (updateRes.status !== 401) fail(`Anonymous /api/dogs/update returned ${updateRes.status}; expected 401`)
 
-  ok('Anonymous calls rejected')
+  ok('Anonymous call rejected')
 }
 
 async function main() {
@@ -363,10 +306,8 @@ async function main() {
 
     const { dog, alertId } = await testAlertMatching(ctx)
     await testPassResponse(alertId)
-    await testNonMatchingDog(ctx)
-    await testSpecialNeedsBlocking(ctx)
     await testStatusUpdate(ctx, dog)
-    await testSecurityRejections(ctx, dog)
+    await testDogUpdateRejectsAnonymous(dog)
 
     console.log('\n============================================')
     console.log('All integration smoke tests passed')
