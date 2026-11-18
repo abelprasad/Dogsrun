@@ -11,7 +11,7 @@ export default async function Navbar() {
   const signedInLabel = isAdmin && !org ? "Admin" : "Dashboard";
 
   return (
-    <nav className="bg-[#111] border-b border-white/5 sticky top-0 z-50" style={{ backgroundColor: '#111' }}>
+    <nav className="bg-[#111] border-b border-white/5 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-8 h-16 flex items-center justify-between">
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2 group">

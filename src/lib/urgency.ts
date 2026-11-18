@@ -1,4 +1,4 @@
-// Shared urgency helpers + the dog-status source of truth.
+// Shared urgency helpers. Dog statuses live in lib/dog-status.
 
 export function daysUntilEuthanasia(euthanasiaDate: string | null | undefined): number | null {
   if (!euthanasiaDate) return null;
@@ -13,5 +13,5 @@ export function daysLeftLabel(days: number | null): string | null {
 
 /** True when a dog needs dramatic urgent treatment on cards and pages. */
 export function isDogUrgent(status: string | null | undefined, euthanasiaDate: string | null | undefined): boolean {
-  return status === 'urgent' || (euthanasiaDate != null && daysUntilEuthanasia(euthanasiaDate) !== null);
+  return status === 'urgent' || Boolean(euthanasiaDate);
 }
