@@ -7,7 +7,7 @@ import PaginationControls from './pagination-controls'
 import { useToast } from '@/components/toaster'
 import { reportError } from '@/lib/friendly-error'
 
-import { DOG_STATUSES, getRiskLevel } from '@/lib/dog-status'
+import { DOG_STATUSES, DOG_STATUS_LABELS, getRiskLevel } from '@/lib/dog-status'
 
 interface Dog {
   id: string
@@ -176,7 +176,7 @@ export default function AdminDogsTable() {
                         onChange={e => updateDog(dog.id, { status: e.target.value })}
                         className="border border-white/15 bg-[#0b140e] px-2 py-1.5 text-xs font-bold text-[#f8f1e8] outline-none [color-scheme:dark] disabled:opacity-50"
                       >
-                        {DOG_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                        {DOG_STATUSES.map(s => <option key={s} value={s}>{DOG_STATUS_LABELS[s]}</option>)}
                       </select>
                     </div>
                   </td>

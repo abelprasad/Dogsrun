@@ -4,9 +4,6 @@ import { useSyncExternalStore } from "react";
 import Badge, { type BadgeVariant } from "@/components/ui/badge";
 import { dogStatusLabel, getRiskLevel } from '@/lib/dog-status';
 
-// Kept for existing importers; the status prop accepts any string.
-export type DogStatus = string;
-
 interface StatusBadgeProps {
   status: string;
   euthanasiaDate?: string | null;
