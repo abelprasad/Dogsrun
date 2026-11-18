@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import ContactForm from './contact-form';
 import { ADMIN_EMAIL } from '@/lib/constants'
 import { ORG } from '@/lib/site-content'

@@ -6,7 +6,6 @@ import { useToast } from '@/components/toaster';
 import { reportError } from '@/lib/friendly-error';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import imageCompression from 'browser-image-compression';
 import Image from 'next/image';
 import BreedSelect from '@/components/breed-select';
 import ColorPicker from '@/components/color-picker';

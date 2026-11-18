@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
-import imageCompression from 'browser-image-compression'
 import BreedSelect from '@/components/breed-select'
 import ColorPicker from '@/components/color-picker'
 import StateSelect from '@/components/state-select'
