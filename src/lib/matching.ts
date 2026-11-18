@@ -13,7 +13,7 @@ export function dogSizeClass(weight: number): string {
   return 'xlarge'
 }
 
-interface MatchDog {
+export interface MatchDog {
   breed?: string | null
   color?: string[] | null
   age_years?: number | null
@@ -27,7 +27,7 @@ interface MatchDog {
   other_issues?: boolean | null
 }
 
-interface MatchCriteria {
+export interface MatchCriteria {
   breeds?: string[] | null
   colors?: string[] | null
   age_ranges?: string[] | null

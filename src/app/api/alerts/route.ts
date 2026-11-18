@@ -3,7 +3,7 @@ import { Resend } from 'resend'
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient, supabaseAdmin } from '@/lib/supabase-server'
 import { escapeHtml, escapeHtmlOrDash, sanitizeSubject } from '@/lib/html'
-import { dogMatchesCriteria } from '@/lib/matching'
+import { dogMatchesCriteria, type MatchCriteria } from '@/lib/matching'
 import { alertsRatelimit, getClientIp } from '@/lib/ratelimit'
 
 
@@ -18,21 +18,17 @@ interface RescueOrg {
   is_active: boolean;
 }
 
-interface RescueCriteria {
+interface RescueCriteria extends MatchCriteria {
   id: string;
   rescue_id: string;
-  breeds: string[] | null;
-  colors: string[] | null;
-  age_ranges: string[] | null;
-  size_classes: string[] | null;
-  sex_preference: string | null;
-  accepts_mixes: boolean | null;
-  states_served: string[] | null;
   organizations: RescueOrg | null;
-  accepts_parvo: boolean | null;
-  accepts_tripod: boolean | null;
-  accepts_blind: boolean | null;
-  accepts_other: boolean | null;
+}
+
+interface ShelterOrg {
+  name: string;
+  city: string;
+  state: string;
+  is_test: boolean;
 }
 
 interface Match {
@@ -90,7 +86,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Don't fire real alerts for dogs belonging to test shelters
-  const shelterOrg = dog.organizations as unknown as { name: string; city: string; state: string; is_test: boolean } | null
+  const shelterOrg = dog.organizations as ShelterOrg | null
   if (shelterOrg?.is_test) {
     return NextResponse.json({ message: 'Skipped: test shelter dog does not trigger alerts', matches: 0 })
   }
@@ -110,7 +106,8 @@ export async function POST(req: NextRequest) {
     .eq('is_active', true)
     .eq('organizations.is_active', true)
 
-  if (!criteriaList || (criteriaList as unknown as RescueCriteria[]).length === 0) {
+  const rescueCriteria = (criteriaList ?? []) as RescueCriteria[]
+  if (rescueCriteria.length === 0) {
     return NextResponse.json({ message: 'No active rescue criteria found' })
   }
 
@@ -126,7 +123,7 @@ export async function POST(req: NextRequest) {
 
   const matches: Match[] = []
 
-  for (const criteria of (criteriaList as unknown as RescueCriteria[])) {
+  for (const criteria of rescueCriteria) {
     const org = criteria.organizations
     if (!org) continue
 
@@ -147,7 +144,7 @@ export async function POST(req: NextRequest) {
 
   const results = await Promise.allSettled(
     matches.map(async ({ criteria, org }) => {
-      const shelter = dog.organizations as unknown as { name: string; city: string; state: string; is_test: boolean }
+      const shelter = dog.organizations as ShelterOrg
 
       const specialNeeds = []
       if (dog.parvo) specialNeeds.push('Parvo')

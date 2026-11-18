@@ -2,29 +2,19 @@ import { Resend } from 'resend'
 import { CONTACT_EMAIL } from '@/lib/constants'
 import { escapeHtml } from '@/lib/html'
 import { brandedEmail, emailButton } from '@/lib/email'
-import { dogMatchesCriteria } from '@/lib/matching'
+import { dogMatchesCriteria, type MatchCriteria, type MatchDog } from '@/lib/matching'
 import { supabaseAdmin } from '@/lib/supabase-server'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
-export interface DigestDog {
+export interface DigestDog extends MatchDog {
   id: string
   name: string | null
-  breed: string | null
-  mix: boolean | null
-  age_years: number | null
-  weight_lbs: number | null
   sex: string | null
-  color: string[] | null
-  state: string | null
-  parvo: boolean | null
-  tripod: boolean | null
-  blind: boolean | null
-  other_issues: boolean | null
   organizations: { name: string } | null
 }
 
-type DigestCriteria = Parameters<typeof dogMatchesCriteria>[1] & { id: string }
+type DigestCriteria = MatchCriteria & { id: string }
 
 /** Active rescue_criteria row for a rescue, or null if it has none. */
 export async function getActiveCriteria(rescueId: string) {
