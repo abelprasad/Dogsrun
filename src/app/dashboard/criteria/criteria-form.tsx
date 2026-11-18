@@ -9,6 +9,7 @@ import BreedSelect from '@/components/breed-select';
 import ColorPicker from '@/components/color-picker';
 import StateMultiSelect from '@/components/state-multi-select';
 import Button from '@/components/ui/button';
+import { AGE_BANDS, SIZE_BANDS, bandOptions } from '@/lib/matching';
 
 interface RescueCriteria {
   id?: string;
@@ -35,21 +36,8 @@ interface CriteriaFormProps {
 const inputClass = "w-full border border-[#13241d]/20 bg-[#fffaf2] px-4 py-3 text-sm text-[#13241d] placeholder-[#5d6a64]/50 transition-all focus:border-[#c08a3e] focus:outline-none focus:ring-1 focus:ring-[#c08a3e]"
 const labelClass = "mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-[#5d6a64]"
 
-// REVIEW: the age and size picker blocks in the form are the same markup twice; map over both option lists.
-const AGE_RANGES = [
-  { value: 'puppy', label: 'Puppy', sub: '0–1 yr' },
-  { value: 'youth', label: 'Youth', sub: '1–2 yrs' },
-  { value: 'adult', label: 'Adult', sub: '2–8 yrs' },
-  { value: 'senior', label: 'Senior', sub: '8+ yrs' },
-]
-
-const SIZE_CLASSES = [
-  { value: 'xsmall', label: 'XSmall', sub: '<20 lbs' },
-  { value: 'small', label: 'Small', sub: '20–30 lbs' },
-  { value: 'medium', label: 'Medium', sub: '30–50 lbs' },
-  { value: 'large', label: 'Large', sub: '50–90 lbs' },
-  { value: 'xlarge', label: 'XLarge', sub: '90+ lbs' },
-]
+const AGE_RANGES = bandOptions(AGE_BANDS, { one: 'yr', many: 'yrs' })
+const SIZE_CLASSES = bandOptions(SIZE_BANDS, { one: 'lb', many: 'lbs', openBelow: true })
 
 function toggleItem(arr: string[], val: string): string[] {
   return arr.includes(val) ? arr.filter(v => v !== val) : [...arr, val]

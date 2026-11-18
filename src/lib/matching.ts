@@ -1,16 +1,49 @@
+interface Band {
+  value: string
+  label: string
+  /** Exclusive upper bound; the last band is open-ended. */
+  upTo: number
+}
+
+export const AGE_BANDS: readonly Band[] = [
+  { value: 'puppy', label: 'Puppy', upTo: 1 },
+  { value: 'youth', label: 'Youth', upTo: 2 },
+  { value: 'adult', label: 'Adult', upTo: 8 },
+  { value: 'senior', label: 'Senior', upTo: Infinity },
+]
+
+export const SIZE_BANDS: readonly Band[] = [
+  { value: 'xsmall', label: 'XSmall', upTo: 20 },
+  { value: 'small', label: 'Small', upTo: 30 },
+  { value: 'medium', label: 'Medium', upTo: 50 },
+  { value: 'large', label: 'Large', upTo: 90 },
+  { value: 'xlarge', label: 'XLarge', upTo: Infinity },
+]
+
+function bandValue(bands: readonly Band[], n: number): string {
+  return (bands.find(b => n < b.upTo) ?? bands[bands.length - 1]).value
+}
+
+/** Picker options for a band list, with the range text derived from the thresholds. */
+export function bandOptions(bands: readonly Band[], unit: { one: string; many: string; openBelow?: boolean }) {
+  return bands.map((band, i) => {
+    const lo = i === 0 ? 0 : bands[i - 1].upTo
+    const hi = band.upTo
+    const sub = hi === Infinity
+      ? `${lo}+ ${unit.many}`
+      : i === 0 && unit.openBelow
+        ? `<${hi} ${unit.many}`
+        : `${lo}–${hi} ${hi === 1 ? unit.one : unit.many}`
+    return { value: band.value, label: band.label, sub }
+  })
+}
+
 export function dogAgeRange(age: number): string {
-  if (age < 1) return 'puppy'
-  if (age < 2) return 'youth'
-  if (age < 8) return 'adult'
-  return 'senior'
+  return bandValue(AGE_BANDS, age)
 }
 
 export function dogSizeClass(weight: number): string {
-  if (weight < 20) return 'xsmall'
-  if (weight < 30) return 'small'
-  if (weight < 50) return 'medium'
-  if (weight < 90) return 'large'
-  return 'xlarge'
+  return bandValue(SIZE_BANDS, weight)
 }
 
 export interface MatchDog {
