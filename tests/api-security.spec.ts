@@ -187,7 +187,6 @@ test.describe('API security', () => {
     const endpoints: Array<{ path: string; body: Record<string, string> }> = [
       { path: '/api/alerts', body: { dog_id: randomUUID() } },
       { path: '/api/alerts/respond', body: { alert_id: randomUUID(), status: 'responded' } },
-      { path: '/api/notify-shelter', body: { alert_id: randomUUID() } },
     ]
 
     for (const endpoint of endpoints) {
@@ -218,14 +217,14 @@ test.describe('API security', () => {
     expect(response.status()).toBe(404)
   })
 
-  test('registration rejects mismatched user id and email', async ({ request }) => {
+  test('registration rejects callers whose session does not match the user id', async ({ request }) => {
     const response = await postRegistration(request, {
       user_id: '00000000-0000-0000-0000-000000000000',
       email: `mismatch-${randomUUID()}@dogsrun-test.local`,
     })
 
-    expect(response.status()).toBe(403)
-    expectJsonError(await response.json(), /invalid registration user/)
+    expect(response.status()).toBe(401)
+    expectJsonError(await response.json(), /unauthorized/)
   })
 
   test('rescues cannot trigger alerts for arbitrary dogs', async ({ page }) => {
@@ -322,7 +321,7 @@ test.describe('API security', () => {
     expect(dog?.status).toBe('adopted')
   })
 
-  test('notify-shelter rejects rescues that do not own the alert', async ({ page }) => {
+  test('alert respond rejects rescues that do not own the alert', async ({ page }) => {
     const alertOwner = await createAuthOrg('rescue')
     const otherRescue = await createAuthOrg('rescue')
     const shelterId = await createOrgOnly('shelter')
@@ -331,12 +330,12 @@ test.describe('API security', () => {
 
     await login(page, otherRescue.email, otherRescue.password)
 
-    const response = await page.request.post('/api/notify-shelter', {
-      data: { alert_id: alertId },
+    const response = await page.request.post('/api/alerts/respond', {
+      data: { alert_id: alertId, status: 'responded' },
     })
 
-    expect(response.status()).toBe(403)
-    expectJsonError(await response.json(), /forbidden/)
+    expect(response.status()).toBe(404)
+    expectJsonError(await response.json(), /alert not found/)
   })
 
   test('admin-only users go to admin instead of registration', async ({ page }) => {
@@ -345,7 +344,7 @@ test.describe('API security', () => {
     await login(page, admin.email, admin.password)
 
     await expect(page).toHaveURL(/\/admin$/)
-    await expect(page.getByRole('heading', { name: 'Admin Panel' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /command center/i })).toBeVisible()
 
     await page.goto('/dashboard')
     await expect(page).toHaveURL(/\/admin$/)
@@ -374,19 +373,16 @@ async function postRegistration(
   request: APIRequestContext,
   overrides: Partial<Record<'user_id' | 'email', string>> = {}
 ) {
+  const userId = overrides.user_id ?? randomUUID()
   return request.post('/api/register', {
-    multipart: {
-      user_id: overrides.user_id ?? randomUUID(),
+    data: {
+      user_id: userId,
       name: '[TEST] Registration Security Org',
       email: overrides.email ?? `registration-${randomUUID()}@dogsrun-test.local`,
       city: 'Philadelphia',
       state: 'PA',
       type: 'shelter',
-      tax_doc: {
-        name: '501c3.pdf',
-        mimeType: 'application/pdf',
-        buffer: Buffer.from('%PDF-1.4\n% test pdf\n'),
-      },
+      tax_doc_path: `${userId}/501c3.pdf`,
     },
   })
 }

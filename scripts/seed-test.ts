@@ -138,8 +138,6 @@ async function seedData() {
   const { error: criteriaError } = await supabase.from('rescue_criteria').insert({
     rescue_id: rescueId,
     breeds: ['Labrador', 'Golden Retriever'],
-    max_age_years: 10,
-    max_weight_lbs: 100,
     sex_preference: 'any',
     accepts_mixes: true,
     states_served: ['PA', 'NJ', 'DE'],
@@ -250,14 +248,16 @@ async function testAlertMatching(ctx: SeedContext) {
 }
 
 async function testPassResponse(alertId: string) {
-  section('Test 2: public Pass link updates alert to declined')
+  section('Test 2: /api/respond rejects anonymous callers and leaves the alert untouched')
 
-  const res = await fetch(`${BASE}/api/respond?alert_id=${alertId}&action=pass`, {
-    redirect: 'manual',
+  const res = await fetch(`${BASE}/api/respond`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ alert_id: alertId, action: 'pass' }),
   })
 
-  if (![200, 302, 307, 308].includes(res.status)) {
-    fail(`/api/respond pass returned ${res.status}: ${await res.text()}`)
+  if (res.status !== 401) {
+    fail(`Anonymous /api/respond returned ${res.status}: ${await res.text()}`)
   }
 
   const { data } = await supabase
@@ -266,8 +266,8 @@ async function testPassResponse(alertId: string) {
     .eq('id', alertId)
     .single()
 
-  if (data?.status !== 'declined') fail(`Alert status is ${data?.status}; expected declined`)
-  ok('Alert status updated to declined')
+  if (data?.status !== 'sent') fail(`Alert status is ${data?.status}; expected sent (unchanged)`)
+  ok('Anonymous response rejected, alert still sent')
 }
 
 // REVIEW: testNonMatchingDog/testSpecialNeedsBlocking duplicate src/lib/matching.test.ts; testSecurityRejections duplicates tests/api-security.spec.ts.

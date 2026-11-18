@@ -107,12 +107,12 @@ test.describe('Register Page', () => {
 
   test('shelter tab is active by default', async ({ page }) => {
     await page.goto(`${BASE}/register`)
-    await expect(page.locator('button:text("Shelter")').first()).toHaveCSS('background-color', 'rgb(244, 185, 66)')
+    await expect(page.locator('button:text("Shelter")').first()).toHaveCSS('background-color', 'rgb(192, 138, 62)')
   })
 
   test('?type=rescue pre-selects rescue tab', async ({ page }) => {
     await page.goto(`${BASE}/register?type=rescue`)
-    await expect(page.locator('button:text("Rescue")').first()).toHaveCSS('background-color', 'rgb(244, 185, 66)')
+    await expect(page.locator('button:text("Rescue")').first()).toHaveCSS('background-color', 'rgb(168, 88, 63)')
   })
 
   test('shows all required fields', async ({ page }) => {
@@ -248,7 +248,7 @@ test.describe('Auth Guards', () => {
   })
 
   test('admin panel blocked when logged out', async ({ page }) => {
-    await assertBlocked(page, `${BASE}/dashboard/admin`, 'Admin Panel')
+    await assertBlocked(page, `${BASE}/admin`, 'Admin Panel')
   })
 })
 
@@ -257,7 +257,7 @@ test.describe('Auth Guards', () => {
 test.describe('Responded Page', () => {
   test('loads with success message', async ({ page }) => {
     await page.goto(`${BASE}/responded`)
-    await expect(page.locator('text=You\'re Interested')).toBeVisible()
+    await expect(page.getByRole('heading', { name: /You're in\./ })).toBeVisible()
     await expect(page.locator('a[href="/auth/login"]').first()).toBeVisible()
   })
 })
