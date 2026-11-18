@@ -4,28 +4,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { escapeHtml } from '@/lib/html'
 import { brandedEmail, emailButton } from '@/lib/email'
-import { dogMatchesCriteria } from '@/lib/matching'
+import { findDigestMatches, getActiveCriteria, recordDigestAlerts, sendDigestEmail } from '@/lib/digest'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { adminEmailRatelimit, getClientIp } from '@/lib/ratelimit'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
-
-interface Dog {
-  id: string
-  name: string | null
-  breed: string | null
-  mix: boolean | null
-  age_years: number | null
-  weight_lbs: number | null
-  sex: string | null
-  color: string[] | null
-  state: string | null
-  parvo: boolean | null
-  tripod: boolean | null
-  blind: boolean | null
-  other_issues: boolean | null
-  organizations: { name: string } | null
-}
 
 export async function POST(req: NextRequest) {
   const adminEmailRatelimit_result = await adminEmailRatelimit.limit(getClientIp(req))
@@ -100,7 +83,7 @@ export async function POST(req: NextRequest) {
   // If a rescue just got approved, send them a digest of all currently matching dogs
   if (action === 'approve' && org.type === 'rescue') {
     try {
-      await sendRescueApprovalDigest(supabaseAdmin, org_id, org.name, org.email)
+      await sendRescueApprovalDigest(org_id, org.name, org.email)
     } catch (e) {
       console.error('Rescue approval digest failed:', e)
     }
@@ -109,97 +92,17 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ success: true, approval_status: newStatus })
 }
 
-async function sendRescueApprovalDigest(
-  supabaseAdmin: typeof import('@/lib/supabase-server').supabaseAdmin,
-  rescueId: string,
-  rescueName: string,
-  rescueEmail: string
-) {
-  const { data: criteria } = await supabaseAdmin
-    .from('rescue_criteria')
-    .select('*')
-    .eq('rescue_id', rescueId)
-    .eq('is_active', true)
-    .maybeSingle()
-
+async function sendRescueApprovalDigest(rescueId: string, rescueName: string, rescueEmail: string) {
+  const criteria = await getActiveCriteria(rescueId)
   if (!criteria) return
 
-  const { data: dogs } = await supabaseAdmin
-    .from('dogs')
-    .select('*, organizations(name)')
-    .eq('status', 'available')
-    .neq('shelter_id', rescueId)
-
-  if (!dogs || dogs.length === 0) return
-
-  const matches: Dog[] = []
-
-  for (const dog of dogs as Dog[]) {
-    if (dog.parvo && !criteria.accepts_parvo) continue
-    if (dog.tripod && !criteria.accepts_tripod) continue
-    if (dog.blind && !criteria.accepts_blind) continue
-    if (dog.other_issues && !criteria.accepts_other) continue
-
-    if (dogMatchesCriteria(dog, criteria)) {
-      matches.push(dog)
-    }
-  }
-
+  const { matches } = await findDigestMatches(rescueId, criteria)
   if (matches.length === 0) return
 
-  for (const dog of matches) {
-    await supabaseAdmin.from('alerts').upsert({
-      dog_id: dog.id,
-      rescue_id: rescueId,
-      criteria_id: criteria.id,
-      status: 'sent',
-      sent_at: new Date().toISOString(),
-    }, { onConflict: 'dog_id,rescue_id', ignoreDuplicates: true })
-  }
-
-  const dogRows = matches.map(dog => {
-    const shelter = dog.organizations as { name: string } | null
-    const details = [
-      dog.breed ? `${escapeHtml(dog.breed)}${dog.mix ? ' mix' : ''}` : null,
-      dog.age_years ? `${dog.age_years} yr` : null,
-      dog.weight_lbs ? `${dog.weight_lbs} lbs` : null,
-      dog.sex ?? null,
-      dog.state ?? null,
-    ].filter(Boolean).join(' · ')
-
-    return `
-      <tr>
-        <td style="padding:12px 16px;border-bottom:1px solid #f3f4f6;">
-          <strong style="color:#13241d;font-size:15px;">${escapeHtml(dog.name ?? 'Unnamed')}</strong>
-          <div style="color:#6b7280;font-size:13px;margin-top:2px;">${details}</div>
-          ${shelter ? `<div style="color:#9ca3af;font-size:12px;margin-top:2px;">${escapeHtml(shelter.name)}</div>` : ''}
-        </td>
-        <td style="padding:12px 16px;border-bottom:1px solid #f3f4f6;text-align:right;vertical-align:middle;">
-          <a href="https://dogsrun.org/dogs/${dog.id}" style="color:#c08a3e;font-size:13px;font-weight:700;text-decoration:none;">View →</a>
-        </td>
-      </tr>
-    `
-  }).join('')
-
-  const digestHtml = brandedEmail({
-    title: `${matches.length} Dog${matches.length === 1 ? '' : 's'} Waiting`,
-    footerNote: "You'll receive individual alerts as new matching dogs are added.",
-    bodyHtml: `
-          <p style="color:#5d6a64;font-size:15px;line-height:26px;margin:0 0 28px 0;">
-            Welcome to DOGSRUN, <strong style="color:#13241d;">${escapeHtml(rescueName)}</strong>. Here are the dogs currently available that match your rescue criteria.
-          </p>
-          <table style="width:100%;border-collapse:collapse;margin-bottom:28px;background:#fff;border:1px solid rgba(19,36,29,0.08);">
-            ${dogRows}
-          </table>
-          <div style="text-align:center;margin-bottom:16px;">
-            ${emailButton('https://dogsrun.org/dashboard/rescue', 'View All on Dashboard')}
-          </div>`,
-  })
-
-  await resend.emails.send({
-    from: `DOGSRUN Alerts <${CONTACT_EMAIL}>`,
-    to: rescueEmail,
-    subject: `${matches.length} dog${matches.length === 1 ? '' : 's'} matching your criteria on DOGSRUN`,
-    html: digestHtml,
-  })
+  await recordDigestAlerts(matches, rescueId, criteria.id)
+  await sendDigestEmail(
+    rescueEmail,
+    matches,
+    `Welcome to DOGSRUN, <strong style="color:#13241d;">${escapeHtml(rescueName)}</strong>. Here are the dogs currently available that match your rescue criteria.`,
+  )
 }

@@ -1,31 +1,9 @@
-import { CONTACT_EMAIL, SITE_URL } from '@/lib/constants'
 import { getAdminUser } from '@/lib/auth-context'
 import { NextRequest, NextResponse } from 'next/server'
-import { Resend } from 'resend'
 import { escapeHtml } from '@/lib/html'
-import { brandedEmail, emailButton } from '@/lib/email'
-import { dogMatchesCriteria } from '@/lib/matching'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { findDigestMatches, getActiveCriteria, recordDigestAlerts, sendDigestEmail } from '@/lib/digest'
 import { adminEmailRatelimit, getClientIp } from '@/lib/ratelimit'
-
-const resend = new Resend(process.env.RESEND_API_KEY!)
-
-interface Dog {
-  id: string
-  name: string | null
-  breed: string | null
-  mix: boolean | null
-  age_years: number | null
-  weight_lbs: number | null
-  sex: string | null
-  color: string[] | null
-  state: string | null
-  parvo: boolean | null
-  tripod: boolean | null
-  blind: boolean | null
-  other_issues: boolean | null
-  organizations: { name: string } | null
-}
 
 // Idempotency (M-D5): in-memory debounce to prevent duplicate digest emails
 // from double-clicks. 5-minute window per org. Note: does not survive
@@ -70,97 +48,25 @@ export async function POST(req: NextRequest) {
   if (org.approval_status !== 'approved') return NextResponse.json({ error: 'Org is not approved' }, { status: 400 })
   if (org.is_active === false) return NextResponse.json({ error: 'Org is deactivated' }, { status: 403 })
 
-  const { data: criteria } = await supabaseAdmin
-    .from('rescue_criteria')
-    .select('*')
-    .eq('rescue_id', org_id)
-    .eq('is_active', true)
-    .maybeSingle()
-
+  const criteria = await getActiveCriteria(org_id)
   if (!criteria) return NextResponse.json({ error: 'Rescue has no active criteria set' }, { status: 400 })
 
-  const { data: dogs } = await supabaseAdmin
-    .from('dogs')
-    .select('*, organizations(name)')
-    .eq('status', 'available')
-    .neq('shelter_id', org_id)
+  const { availableCount, matches } = await findDigestMatches(org_id, criteria)
 
-  if (!dogs || dogs.length === 0) {
+  if (availableCount === 0) {
     return NextResponse.json({ message: 'No available dogs found', matches: 0 })
-  }
-
-  const matches: Dog[] = []
-
-  for (const dog of dogs as Dog[]) {
-    if (dog.parvo && !criteria.accepts_parvo) continue
-    if (dog.tripod && !criteria.accepts_tripod) continue
-    if (dog.blind && !criteria.accepts_blind) continue
-    if (dog.other_issues && !criteria.accepts_other) continue
-
-    if (dogMatchesCriteria(dog, criteria)) {
-      matches.push(dog)
-    }
   }
 
   if (matches.length === 0) {
     return NextResponse.json({ message: "No matching dogs found for this rescue's criteria", matches: 0 })
   }
 
-  for (const dog of matches) {
-    await supabaseAdmin.from('alerts').upsert({
-      dog_id: dog.id,
-      rescue_id: org_id,
-      criteria_id: criteria.id,
-      status: 'sent',
-      sent_at: new Date().toISOString(),
-    }, { onConflict: 'dog_id,rescue_id', ignoreDuplicates: true })
-  }
-
-  const dogRows = matches.map(dog => {
-    const shelter = dog.organizations as { name: string } | null
-    const details = [
-      dog.breed ? `${escapeHtml(dog.breed)}${dog.mix ? ' mix' : ''}` : null,
-      dog.age_years ? `${dog.age_years} yr` : null,
-      dog.weight_lbs ? `${dog.weight_lbs} lbs` : null,
-      dog.sex ?? null,
-      dog.state ?? null,
-    ].filter(Boolean).join(' · ')
-
-    return `
-      <tr>
-        <td style="padding:12px 16px;border-bottom:1px solid #f3f4f6;">
-          <strong style="color:#13241d;font-size:15px;">${escapeHtml(dog.name ?? 'Unnamed')}</strong>
-          <div style="color:#6b7280;font-size:13px;margin-top:2px;">${details}</div>
-          ${shelter ? `<div style="color:#9ca3af;font-size:12px;margin-top:2px;">${escapeHtml(shelter.name)}</div>` : ''}
-        </td>
-        <td style="padding:12px 16px;border-bottom:1px solid #f3f4f6;text-align:right;vertical-align:middle;">
-          <a href="https://dogsrun.org/dogs/${dog.id}" style="color:#c08a3e;font-size:13px;font-weight:700;text-decoration:none;">View →</a>
-        </td>
-      </tr>
-    `
-  }).join('')
-
-  const digestHtml = brandedEmail({
-    title: `${matches.length} Dog${matches.length === 1 ? '' : 's'} Waiting`,
-    footerNote: "You'll receive individual alerts as new matching dogs are added.",
-    bodyHtml: `
-          <p style="color:#5d6a64;font-size:15px;line-height:26px;margin:0 0 28px 0;">
-            Hi <strong style="color:#13241d;">${escapeHtml(org.name)}</strong>, here are the dogs currently available on DOGSRUN that match your rescue criteria.
-          </p>
-          <table style="width:100%;border-collapse:collapse;margin-bottom:28px;background:#fff;border:1px solid rgba(19,36,29,0.08);">
-            ${dogRows}
-          </table>
-          <div style="text-align:center;margin-bottom:16px;">
-            ${emailButton('https://dogsrun.org/dashboard/rescue', 'View All on Dashboard')}
-          </div>`,
-  })
-
-  await resend.emails.send({
-    from: `DOGSRUN Alerts <${CONTACT_EMAIL}>`,
-    to: org.email,
-    subject: `${matches.length} dog${matches.length === 1 ? '' : 's'} matching your criteria on DOGSRUN`,
-    html: digestHtml,
-  })
+  await recordDigestAlerts(matches, org_id, criteria.id)
+  await sendDigestEmail(
+    org.email,
+    matches,
+    `Hi <strong style="color:#13241d;">${escapeHtml(org.name)}</strong>, here are the dogs currently available on DOGSRUN that match your rescue criteria.`,
+  )
 
   recentDigests.set(org_id, Date.now())
 
