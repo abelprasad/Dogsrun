@@ -9,7 +9,6 @@ interface AuthShellProps {
   eyebrow: string;
   headline: ReactNode;
   copy: string;
-  stats?: Array<[string, string]>;
   urgentNote?: string;
   children: ReactNode;
 }
@@ -34,7 +33,6 @@ export default function AuthShell({
   eyebrow,
   headline,
   copy,
-  stats = networkStats,
   urgentNote,
   children,
 }: AuthShellProps) {
@@ -66,7 +64,7 @@ export default function AuthShell({
             {copy}
           </p>
           <div className="mt-8 flex flex-wrap gap-x-10 gap-y-4">
-            {stats.map(([big, small]) => (
+            {networkStats.map(([big, small]) => (
               <div key={small}>
                 <p className="text-3xl font-black tracking-tight text-[#c08a3e] lg:text-4xl">
                   {big}

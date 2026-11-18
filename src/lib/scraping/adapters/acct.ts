@@ -310,38 +310,28 @@ export function parseShelterluvDetailHtml(html: string, sourceUrl: string): Scra
 }
 
 export type AcctAdapterOptions = {
-  listUrl?: string
   maxPages?: number
-  politeDelayMs?: number
   maxDetailFetches?: number
-  headless?: boolean
 }
 
 export class AcctShelterluvAdapter implements ShelterAdapter {
   readonly source: ScrapingSource = ACCT_SOURCE
   readonly shelterName = ACCT_SHELTER_NAME
 
-  private readonly listUrl: string
   private readonly maxPages: number
-  private readonly politeDelayMs: number
   private readonly maxDetailFetches: number
-  private readonly headless: boolean
 
   constructor(options: AcctAdapterOptions = {}) {
-    this.listUrl = options.listUrl ?? ACCT_LIST_URL
     this.maxPages = options.maxPages ?? MAX_PAGES_PER_RUN
-    // Never below 1s between pages (plan section 4).
-    this.politeDelayMs = Math.max(1000, options.politeDelayMs ?? POLITE_DELAY_MS)
     this.maxDetailFetches = options.maxDetailFetches ?? MAX_DETAIL_FETCHES
-    this.headless = options.headless ?? true
   }
 
   async listDogs(): Promise<ScrapedDog[]> {
-    const browser = await chromium.launch({ headless: this.headless })
+    const browser = await chromium.launch({ headless: true })
     try {
       const context = await browser.newContext({ userAgent: REALISTIC_USER_AGENT })
       const page = await context.newPage()
-      const response = await page.goto(this.listUrl, {
+      const response = await page.goto(ACCT_LIST_URL, {
         waitUntil: 'domcontentloaded',
         timeout: 30000,
       })
@@ -417,9 +407,9 @@ export class AcctShelterluvAdapter implements ShelterAdapter {
   private async listDogsViaDom(page: Page): Promise<ScrapedDog[]> {
     const entries: ShelterluvListEntry[] = []
     const seenIds = new Set<string>()
-    let url: string | null = this.listUrl
+    let url: string | null = ACCT_LIST_URL
     for (let pageIndex = 0; pageIndex < this.maxPages && url; pageIndex++) {
-      if (pageIndex > 0) await sleep(this.politeDelayMs)
+      if (pageIndex > 0) await sleep(POLITE_DELAY_MS)
       const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 })
       const status = response?.status() ?? 0
       const html = await page.content()
@@ -459,7 +449,7 @@ export class AcctShelterluvAdapter implements ShelterAdapter {
     const limited = entries.slice(0, this.maxDetailFetches)
     const dogs: ScrapedDog[] = []
     for (const entry of limited) {
-      await sleep(this.politeDelayMs)
+      await sleep(POLITE_DELAY_MS)
       const dog = await this.fetchDogOnPage(page, entry.sourceId)
       if (dog) dogs.push(dog)
     }
@@ -475,7 +465,7 @@ export class AcctShelterluvAdapter implements ShelterAdapter {
 
   async fetchDog(id: string): Promise<ScrapedDog | null> {
     if (!ACCT_SOURCE_ID_PATTERN.test(id.trim())) return null
-    const browser = await chromium.launch({ headless: this.headless })
+    const browser = await chromium.launch({ headless: true })
     try {
       const context = await browser.newContext({ userAgent: REALISTIC_USER_AGENT })
       const page = await context.newPage()
