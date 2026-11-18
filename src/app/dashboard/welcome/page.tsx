@@ -1,14 +1,11 @@
 import { redirect } from 'next/navigation'
-import { requireAuthContext } from '@/lib/auth-context'
+import { requireAuthContext, dashboardPathFor } from '@/lib/auth-context'
 import WelcomeChecklist from './welcome-checklist'
 
 export default async function WelcomePage() {
   const { supabase, org, isAdmin } = await requireAuthContext()
 
-  if (!org) {
-    if (isAdmin) redirect('/admin')
-    redirect('/register')
-  }
+  if (!org) redirect(dashboardPathFor(org, isAdmin))
 
   let hasDogs = false
   if (org.type === 'shelter') {
@@ -28,8 +25,7 @@ export default async function WelcomePage() {
     hasCriteria = (count ?? 0) > 0
   }
 
-  // REVIEW: dashboardPathFor(org, isAdmin) already does this.
-  const dashboardHref = org.type === 'rescue' ? '/dashboard/rescue' : '/dashboard'
+  const dashboardHref = dashboardPathFor(org, isAdmin)
 
   if ((org.type === 'shelter' && hasDogs) || (org.type === 'rescue' && hasCriteria)) {
     redirect(dashboardHref)

@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import { redirect } from 'next/navigation'
-import { requireAuthContext } from '@/lib/auth-context'
+import { requireAuthContext, dashboardPathFor } from '@/lib/auth-context'
 import StatusBadge from '@/components/status-badge'
 import ApprovalWall from '@/components/approval-wall'
 import { supabaseAdmin } from '@/lib/supabase-server'
@@ -10,10 +10,7 @@ import Button from '@/components/ui/button'
 export default async function DashboardPage() {
   const { org, isAdmin } = await requireAuthContext()
 
-  if (!org) {
-    if (isAdmin) redirect('/admin')
-    redirect('/register')
-  }
+  if (!org) redirect(dashboardPathFor(org, isAdmin))
   if (org.type === 'rescue') redirect('/dashboard/rescue')
   if (org.approval_status !== 'approved') return <ApprovalWall org={org} />
 

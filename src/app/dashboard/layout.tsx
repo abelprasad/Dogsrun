@@ -1,15 +1,11 @@
 import { redirect } from 'next/navigation'
-import { requireAuthContext } from '@/lib/auth-context'
+import { requireAuthContext, dashboardPathFor } from '@/lib/auth-context'
 import DashboardNav from './dashboard-nav'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { org, isAdmin } = await requireAuthContext()
 
-  // REVIEW: same no-org redirect in dashboard/page.tsx and welcome/page.tsx; use redirect(dashboardPathFor(org, isAdmin)).
-  if (!org) {
-    if (isAdmin) redirect('/admin')
-    redirect('/register')
-  }
+  if (!org) redirect(dashboardPathFor(org, isAdmin))
 
   return (
     <>
