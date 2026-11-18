@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ToastProvider } from "@/components/toaster";
 import "./globals.css";
+import { SITE_URL } from '@/lib/constants'
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -13,9 +14,9 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'DOGSRUN — Every dog deserves a run to safety.',
     description: 'Real-time matching between shelters and rescue organizations. Instant alerts, seamless communication.',
-    url: 'https://dogsrun.org',
+    url: SITE_URL,
     siteName: 'DOGSRUN',
-    images: [{ url: 'https://dogsrun.org/dogsrun_og_image.png', width: 1200, height: 630 }],
+    images: [{ url: `${SITE_URL}/dogsrun_og_image.png`, width: 1200, height: 630 }],
     type: 'website',
   },
   twitter: { card: 'summary_large_image', title: 'DOGSRUN', description: 'Real-time dog matching between shelters and rescues.' }

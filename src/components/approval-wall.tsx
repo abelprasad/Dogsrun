@@ -1,4 +1,5 @@
 import SignOutButton from '@/app/dashboard/sign-out-button'
+import { ADMIN_EMAIL } from '@/lib/constants'
 
 interface Org {
   name: string
@@ -47,7 +48,7 @@ export default function ApprovalWall({ org }: { org: Org }) {
           </p>
           {isRejected && (
             <a
-              href="mailto:admin@dogsrun.org"
+              href={`mailto:${ADMIN_EMAIL}`}
               className="inline-flex items-center justify-center bg-[#c08a3e] px-6 py-3 text-sm font-black uppercase tracking-[0.16em] text-[#1a2e1a] transition hover:bg-[#d4a050]"
             >
               Contact Us

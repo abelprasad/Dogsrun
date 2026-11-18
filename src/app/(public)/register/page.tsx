@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { US_STATES } from '@/lib/us-states'
 import { Button } from '@/components/ui'
+import { STORAGE_BUCKETS } from '@/lib/constants'
 
 type Step = 'idle' | 'creating-account' | 'uploading-doc' | 'saving'
 
@@ -102,7 +103,7 @@ function RegisterForm() {
     setStep('uploading-doc')
     const filePath = `${authData.user.id}/501c3.pdf`
     const { error: uploadError } = await supabase.storage
-      .from('tax-docs')
+      .from(STORAGE_BUCKETS.TAX_DOCS)
       .upload(filePath, taxDoc, { contentType: 'application/pdf', upsert: true })
 
     if (uploadError) {

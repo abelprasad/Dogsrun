@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { requireAuthContext } from '@/lib/auth-context'
 import CriteriaForm from './criteria-form'
 import PageHeader from '@/components/ui/page-header'
+import { ADMIN_EMAIL } from '@/lib/constants'
 
 export default async function CriteriaPage() {
   const { supabase, org } = await requireAuthContext()
@@ -28,7 +29,7 @@ export default async function CriteriaPage() {
         <CriteriaForm rescueId={org.id} initialCriteria={criteria} />
         {!criteria && (
           <p className="mt-8 text-center text-xs text-[#5d6a64] uppercase tracking-[0.24em] font-bold">
-            Need help? Contact <Link href="mailto:admin@dogsrun.org" className="text-[#13241d] hover:text-[#c08a3e] transition-colors">admin@dogsrun.org</Link>
+            Need help? Contact <Link href={`mailto:${ADMIN_EMAIL}`} className="text-[#13241d] hover:text-[#c08a3e] transition-colors">{ADMIN_EMAIL}</Link>
           </p>
         )}
       </main>

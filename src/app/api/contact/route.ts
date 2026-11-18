@@ -2,7 +2,7 @@ import { Resend } from 'resend'
 import { NextRequest, NextResponse } from 'next/server'
 import { contactRatelimit, getClientIp } from '@/lib/ratelimit'
 import { escapeHtml } from '@/lib/html'
-import { CONTACT_EMAIL } from '@/lib/constants'
+import { CONTACT_EMAIL, ADMIN_EMAIL } from '@/lib/constants'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
@@ -26,8 +26,8 @@ export async function POST(req: NextRequest) {
     const safeMessage = escapeHtml(message)
 
     await resend.emails.send({
-      from: 'alerts@dogsrun.org',
-      to: 'admin@dogsrun.org',
+      from: CONTACT_EMAIL,
+      to: ADMIN_EMAIL,
       replyTo: email,
       subject: `[DOGSRUN Contact] ${safeSubject} — from ${safeName}`,
       html: `

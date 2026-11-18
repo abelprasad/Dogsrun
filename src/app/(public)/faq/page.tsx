@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ADMIN_EMAIL } from '@/lib/constants'
 
 interface FAQItemProps {
   index: number;
@@ -65,7 +66,7 @@ const faqs = [
   {
     question: "Who do I contact for help?",
     answer:
-      "Reach out via our contact page at dogsrun.org/contact or email us at admin@dogsrun.org. We're a small nonprofit team and will get back to you as soon as possible.",
+      `Reach out via our contact page at dogsrun.org/contact or email us at ${ADMIN_EMAIL}. We're a small nonprofit team and will get back to you as soon as possible.`,
   },
 ];
 
@@ -122,10 +123,10 @@ export default function FAQPage() {
                 Contact us
               </Link>
               <a
-                href="mailto:admin@dogsrun.org"
+                href={`mailto:${ADMIN_EMAIL}`}
                 className="mt-4 block text-center text-sm font-bold text-[#c08a3e] hover:underline"
               >
-                admin@dogsrun.org
+                {ADMIN_EMAIL}
               </a>
             </div>
           </aside>

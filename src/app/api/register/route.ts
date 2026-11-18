@@ -1,4 +1,4 @@
-import { CONTACT_EMAIL, SITE_URL } from '@/lib/constants'
+import { CONTACT_EMAIL, SITE_URL, STORAGE_BUCKETS } from '@/lib/constants'
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { registerRatelimit, getClientIp } from '@/lib/ratelimit'
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
 
   // Check the file actually exists in storage (proves the client-side upload completed)
   const { data: fileData, error: fileCheckError } = await supabaseAdmin.storage
-    .from('tax-docs')
+    .from(STORAGE_BUCKETS.TAX_DOCS)
     .list(user_id)
 
   const fileExists = !fileCheckError && fileData?.some((f) => `${user_id}/${f.name}` === tax_doc_path)
@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
               }
               </table>
               <div style="text-align:center;">
-                ${emailButton('https://dogsrun.org/admin', 'Review in Admin Panel')}
+                ${emailButton(`${SITE_URL}/admin`, 'Review in Admin Panel')}
               </div>`,
       }),
     })

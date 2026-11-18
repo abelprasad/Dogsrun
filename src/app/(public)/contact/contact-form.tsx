@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui';
+import { ADMIN_EMAIL } from '@/lib/constants'
 
 const subjectOptions = [
   'General question',
@@ -51,7 +52,7 @@ export default function ContactForm() {
 
       setSuccess(true);
     } catch (err) {
-      setError((err as Error).message || 'Something went wrong. Please try again or email us at admin@dogsrun.org');
+      setError((err as Error).message || 'Something went wrong. Please try again or email us at ' + ADMIN_EMAIL);
     } finally {
       setLoading(false);
     }

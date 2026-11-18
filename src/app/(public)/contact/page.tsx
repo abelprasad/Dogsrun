@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import ContactForm from './contact-form';
+import { ADMIN_EMAIL } from '@/lib/constants'
 
 // M-F10: server component for static hero + info rail; interactive form is a client island.
 export default function ContactPage() {
@@ -37,8 +38,8 @@ export default function ContactPage() {
               <div className="space-y-8">
                 <div>
                   <h3 className="mb-2 text-[10px] font-black uppercase tracking-[0.24em] text-[#c08a3e]">Email</h3>
-                  <a href="mailto:admin@dogsrun.org" className="text-lg font-black text-[#f8f1e8] hover:text-[#c08a3e] hover:underline">
-                    admin@dogsrun.org
+                  <a href={`mailto:${ADMIN_EMAIL}`} className="text-lg font-black text-[#f8f1e8] hover:text-[#c08a3e] hover:underline">
+                    {ADMIN_EMAIL}
                   </a>
                 </div>
                 <div>

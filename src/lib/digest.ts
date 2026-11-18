@@ -1,5 +1,5 @@
 import { Resend } from 'resend'
-import { CONTACT_EMAIL } from '@/lib/constants'
+import { CONTACT_EMAIL, SITE_URL } from '@/lib/constants'
 import { escapeHtml } from '@/lib/html'
 import { brandedEmail, emailButton } from '@/lib/email'
 import { dogMatchesCriteria, type MatchCriteria, type MatchDog } from '@/lib/matching'
@@ -74,7 +74,7 @@ export async function sendDigestEmail(to: string, matches: DigestDog[], introHtm
           ${shelter ? `<div style="color:#9ca3af;font-size:12px;margin-top:2px;">${escapeHtml(shelter.name)}</div>` : ''}
         </td>
         <td style="padding:12px 16px;border-bottom:1px solid #f3f4f6;text-align:right;vertical-align:middle;">
-          <a href="https://dogsrun.org/dogs/${dog.id}" style="color:#c08a3e;font-size:13px;font-weight:700;text-decoration:none;">View →</a>
+          <a href="${SITE_URL}/dogs/${dog.id}" style="color:#c08a3e;font-size:13px;font-weight:700;text-decoration:none;">View →</a>
         </td>
       </tr>
     `
@@ -92,7 +92,7 @@ export async function sendDigestEmail(to: string, matches: DigestDog[], introHtm
             ${dogRows}
           </table>
           <div style="text-align:center;margin-bottom:16px;">
-            ${emailButton('https://dogsrun.org/dashboard/rescue', 'View All on Dashboard')}
+            ${emailButton(`${SITE_URL}/dashboard/rescue`, 'View All on Dashboard')}
           </div>`,
   })
 

@@ -1,4 +1,4 @@
-import { CONTACT_EMAIL, SITE_URL } from '@/lib/constants'
+import { CONTACT_EMAIL, ADMIN_EMAIL, SITE_URL } from '@/lib/constants'
 import { getAdminUser } from '@/lib/auth-context'
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
@@ -63,14 +63,14 @@ export async function POST(req: NextRequest) {
     bodyHtml: `
           <p style="color:#5d6a64;font-size:15px;line-height:26px;margin:0 0 32px 0;">Hi <strong style="color:#13241d;">${safeOrgName}</strong>, your 501(c)(3) verification has been reviewed and your organization is now approved on DOGSRUN. Welcome to the network.</p>
           <div style="text-align:center;margin-bottom:32px;">
-            ${emailButton('https://dogsrun.org/dashboard', 'Go to Your Dashboard')}
+            ${emailButton(`${SITE_URL}/dashboard`, 'Go to Your Dashboard')}
           </div>
-          <p style="color:#5d6a64;font-size:13px;text-align:center;line-height:20px;margin:0;">Questions? Reach us at <a href="mailto:admin@dogsrun.org" style="color:#13241d;font-weight:700;">admin@dogsrun.org</a></p>`,
+          <p style="color:#5d6a64;font-size:13px;text-align:center;line-height:20px;margin:0;">Questions? Reach us at <a href="mailto:${ADMIN_EMAIL}" style="color:#13241d;font-weight:700;">${ADMIN_EMAIL}</a></p>`,
   }) : brandedEmail({
     title: 'Application Update',
     bodyHtml: `
           <p style="color:#5d6a64;font-size:15px;line-height:26px;margin:0 0 24px 0;">Hi <strong style="color:#13241d;">${safeOrgName}</strong>, we were unable to verify your 501(c)(3) status at this time.</p>
-          <p style="color:#5d6a64;font-size:15px;line-height:26px;margin:0 0 32px 0;">Please contact us at <a href="mailto:admin@dogsrun.org" style="color:#13241d;font-weight:700;">admin@dogsrun.org</a> to resubmit your documentation or ask any questions.</p>`,
+          <p style="color:#5d6a64;font-size:15px;line-height:26px;margin:0 0 32px 0;">Please contact us at <a href="mailto:${ADMIN_EMAIL}" style="color:#13241d;font-weight:700;">${ADMIN_EMAIL}</a> to resubmit your documentation or ask any questions.</p>`,
   })
 
   await resend.emails.send({

@@ -1,5 +1,5 @@
 import { Resend } from 'resend'
-import { CONTACT_EMAIL } from '@/lib/constants'
+import { CONTACT_EMAIL, SITE_URL } from '@/lib/constants'
 import { escapeHtml, sanitizeSubject } from '@/lib/html'
 import { supabaseAdmin } from '@/lib/supabase-server'
 
@@ -39,7 +39,7 @@ export async function notifyShelterOfInterest(alert: InterestAlert, { viaEmailMa
         <p style="margin: 5px 0 0 0;"><strong>Email:</strong> <a href="mailto:${safeRescueEmail}">${safeRescueEmail}</a></p>
         </div>
         <p>You can view the dog&apos;s profile and alert history on your dashboard:</p>
-        <a href="https://dogsrun.org/dashboard" style="display: inline-block; background: #c08a3e; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">Go to Dashboard</a>
+        <a href="${SITE_URL}/dashboard" style="display: inline-block; background: #c08a3e; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">Go to Dashboard</a>
         <p style="color: #666; font-size: 12px; margin-top: 30px;">This is an automated notification from DOGSRUN.</p>
         </div>
         ` : `
@@ -50,7 +50,7 @@ export async function notifyShelterOfInterest(alert: InterestAlert, { viaEmailMa
               <p style="margin:0;"><strong>Rescue:</strong> ${safeRescueName}</p>
               <p style="margin:5px 0 0;"><strong>Email:</strong> <a href="mailto:${safeRescueEmail}">${safeRescueEmail}</a></p>
             </div>
-            <a href="https://dogsrun.org/dashboard" style="display:inline-block;background:#c08a3e;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:bold;">Go to Dashboard</a>
+            <a href="${SITE_URL}/dashboard" style="display:inline-block;background:#c08a3e;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:bold;">Go to Dashboard</a>
           </div>
         `
 

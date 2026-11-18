@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { getAdminUser } from '@/lib/auth-context'
+import { STORAGE_BUCKETS } from '@/lib/constants'
 
 export async function POST(req: NextRequest) {
   const { user, isAdmin } = await getAdminUser()
@@ -12,7 +13,7 @@ export async function POST(req: NextRequest) {
 
 
   const { data, error } = await supabaseAdmin.storage
-    .from('tax-docs')
+    .from(STORAGE_BUCKETS.TAX_DOCS)
     .createSignedUrl(file_path, 120)
 
   if (error || !data) {

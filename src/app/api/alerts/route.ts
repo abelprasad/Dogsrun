@@ -238,18 +238,18 @@ export async function POST(req: NextRequest) {
                   </tr>
                 </table>
                 <div style="text-align: center; margin-bottom: 32px;">
-                  <a href="https://dogsrun.org/dashboard/rescue"
+                  <a href="${SITE_URL}/dashboard/rescue"
                      style="background-color: #c08a3e; color: #ffffff; padding: 16px 32px; border-radius: 12px; text-decoration: none; display: inline-block; font-weight: 700; font-size: 16px;">
                     View Match &amp; Respond
                   </a>
                 </div>
                 <div style="text-align: center;">
-                  <a href="https://dogsrun.org/dashboard/rescue" style="color: #c08a3e; text-decoration: underline; font-size: 14px; font-weight: 600;">View all matches on your dashboard</a>
+                  <a href="${SITE_URL}/dashboard/rescue" style="color: #c08a3e; text-decoration: underline; font-size: 14px; font-weight: 600;">View all matches on your dashboard</a>
                 </div>
               </div>
               <div style="background-color: #f9fafb; padding: 24px 40px; border-top: 1px solid #e5e7eb; text-align: center;">
                 <p style="color: #9ca3af; font-size: 12px; line-height: 18px; margin: 0;">
-                  You received this alert because your rescue organization has active matching criteria on DOGSRUN. To update your criteria, <a href="https://dogsrun.org/dashboard/rescue" style="color: #c08a3e; text-decoration: underline;">log in to your rescue portal</a>.
+                  You received this alert because your rescue organization has active matching criteria on DOGSRUN. To update your criteria, <a href="${SITE_URL}/dashboard/rescue" style="color: #c08a3e; text-decoration: underline;">log in to your rescue portal</a>.
                 </p>
               </div>
             </div>
