@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import SignOutButton from './sign-out-button'
+import SignOutButton from '@/components/sign-out-button'
 
 interface DashboardNavProps {
   orgName: string

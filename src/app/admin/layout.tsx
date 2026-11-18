@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { requireAuthContext, dashboardPathFor } from '@/lib/auth-context'
 import Link from 'next/link'
-import SignOutButton from '@/app/dashboard/sign-out-button'
+import SignOutButton from '@/components/sign-out-button'
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, org, isAdmin } = await requireAuthContext()

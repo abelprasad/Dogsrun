@@ -1,4 +1,4 @@
-import SignOutButton from '@/app/dashboard/sign-out-button'
+import SignOutButton from '@/components/sign-out-button'
 import { ADMIN_EMAIL } from '@/lib/constants'
 
 interface Org {

@@ -1,7 +1,7 @@
 import { requireAuthContext } from '@/lib/auth-context'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
-import SignOutButton from '../../../sign-out-button'
+import SignOutButton from '@/components/sign-out-button'
 import EditDogForm from './edit-form'
 import ResendAlertsButton from './resend-alerts-button'
 import EuthanasiaCountdown from '@/components/euthanasia-countdown'
