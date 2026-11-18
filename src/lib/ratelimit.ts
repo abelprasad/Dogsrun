@@ -49,20 +49,18 @@ const redis = hasRedisConfig
     })
   : null
 
-function makeLimiter(maxRequests: number, window: string, prefix: string): RateLimiter {
+type LimiterWindow = `${number} ${'m' | 'h'}`
+
+function makeLimiter(maxRequests: number, window: LimiterWindow, prefix: string): RateLimiter {
   if (redis) {
     return new Ratelimit({
       redis,
-      limiter: Ratelimit.slidingWindow(maxRequests, window as `${number} ${'s' | 'm' | 'h' | 'd'}`),
+      limiter: Ratelimit.slidingWindow(maxRequests, window),
       prefix,
     })
   }
   const num = parseInt(window)
-  const ms = window.endsWith('s')
-    ? num * 1000
-    : window.endsWith('m')
-      ? num * 60 * 1000
-      : num * 60 * 60 * 1000
+  const ms = window.endsWith('m') ? num * 60 * 1000 : num * 60 * 60 * 1000
   return new MemoryRatelimit(num, ms)
 }
 

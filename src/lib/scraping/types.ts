@@ -9,7 +9,7 @@
 
 export type ScrapingSource = 'acct-shelterluv' | 'pspca-petango' | 'petfinder-api'
 
-export type ScrapedDogStatus = 'available' | 'adopted' | 'unavailable'
+export type ScrapedDogStatus = 'available' | 'adopted'
 
 export type ScrapedSex = 'male' | 'female' | 'unknown'
 
