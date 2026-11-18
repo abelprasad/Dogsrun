@@ -47,7 +47,12 @@ export async function POST(req: NextRequest) {
   // Idempotency (M-D2): only notify the shelter on transition into 'responded',
   // not on repeat POSTs or the dashboard Undo -> Interested flow.
   if (status === ALERT_STATUS.RESPONDED && !wasResponded) {
-    await notifyShelterOfInterest(alert)
+    try {
+      await notifyShelterOfInterest(alert)
+    } catch (notifyError) {
+      // Status is already saved; a failed email must not turn the response into an error.
+      console.error('Shelter interest email failed:', notifyError)
+    }
   }
 
   return NextResponse.json({ success: true, status })

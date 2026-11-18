@@ -5,7 +5,7 @@ import { escapeHtml, escapeHtmlOrDash, sanitizeSubject } from '@/lib/html'
 import { dogMatchesCriteria, type MatchCriteria } from '@/lib/matching'
 import { alertsRatelimit, getClientIp } from '@/lib/ratelimit'
 import { ALERT_STATUS } from '@/lib/alert-status'
-import { resend } from '@/lib/resend'
+import { sendEmail } from '@/lib/resend'
 
 
 interface RescueOrg {
@@ -187,7 +187,7 @@ export async function POST(req: NextRequest) {
       if (alertError || !alertData) throw alertError
 
       try {
-        await resend.emails.send({
+        await sendEmail({
         from: `DOGSRUN Alerts <${CONTACT_EMAIL}>`,
         to: org.email,
         subject: `New dog match: ${sanitizeSubject(dog.name ?? 'Unnamed')} (${sanitizeSubject(dog.breed ?? 'Unknown breed')})`,

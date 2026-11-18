@@ -4,7 +4,7 @@ import { registerRatelimit, getClientIp } from '@/lib/ratelimit'
 import { escapeHtml } from '@/lib/html'
 import { brandedEmail, emailButton, emailDetailRow } from '@/lib/email'
 import { createSupabaseServerClient, supabaseAdmin } from '@/lib/supabase-server'
-import { resend } from '@/lib/resend'
+import { sendEmail } from '@/lib/resend'
 import { isOwnTaxDocPath } from '@/lib/tax-doc'
 
 export async function POST(req: NextRequest) {
@@ -115,7 +115,7 @@ export async function POST(req: NextRequest) {
     const safeType = type === 'shelter' ? 'Shelter' : 'Rescue'
 
     try {
-    await resend.emails.send({
+    await sendEmail({
       from: `DOGSRUN <${CONTACT_EMAIL}>`,
       to: adminEmails,
       subject: `New ${safeType} Registration — ${safeName}`,

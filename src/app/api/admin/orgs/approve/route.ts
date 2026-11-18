@@ -6,7 +6,7 @@ import { brandedEmail, emailButton } from '@/lib/email'
 import { deliverDigest, findDigestMatches, getActiveCriteria } from '@/lib/digest'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { adminEmailRatelimit, getClientIp } from '@/lib/ratelimit'
-import { resend } from '@/lib/resend'
+import { sendEmail } from '@/lib/resend'
 
 export async function POST(req: NextRequest) {
   const adminEmailRatelimit_result = await adminEmailRatelimit.limit(getClientIp(req))
@@ -71,12 +71,17 @@ export async function POST(req: NextRequest) {
           <p style="color:#5d6a64;font-size:15px;line-height:26px;margin:0 0 32px 0;">Please contact us at <a href="mailto:${ADMIN_EMAIL}" style="color:#13241d;font-weight:700;">${ADMIN_EMAIL}</a> to resubmit your documentation or ask any questions.</p>`,
   })
 
-  await resend.emails.send({
-    from: `DOGSRUN <${CONTACT_EMAIL}>`,
-    to: org.email,
-    subject,
-    html,
-  })
+  try {
+    await sendEmail({
+      from: `DOGSRUN <${CONTACT_EMAIL}>`,
+      to: org.email,
+      subject,
+      html,
+    })
+  } catch (emailError) {
+    // Status is already written; don't fail the approval over the notification email.
+    console.error('Org status email failed:', emailError)
+  }
 
   // If a rescue just got approved, send them a digest of all currently matching dogs
   if (action === 'approve' && org.type === 'rescue') {

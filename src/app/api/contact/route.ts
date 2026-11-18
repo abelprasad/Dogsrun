@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { contactRatelimit, getClientIp } from '@/lib/ratelimit'
 import { escapeHtml } from '@/lib/html'
 import { CONTACT_EMAIL, ADMIN_EMAIL } from '@/lib/constants'
-import { resend } from '@/lib/resend'
+import { sendEmail } from '@/lib/resend'
 
 export async function POST(req: NextRequest) {
   const ip = getClientIp(req)
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     const safeSubject = escapeHtml(subject)
     const safeMessage = escapeHtml(message)
 
-    await resend.emails.send({
+    await sendEmail({
       from: CONTACT_EMAIL,
       to: ADMIN_EMAIL,
       replyTo: email,

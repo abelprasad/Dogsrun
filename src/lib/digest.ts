@@ -4,7 +4,7 @@ import { brandedEmail, emailButton } from '@/lib/email'
 import { dogMatchesCriteria, type MatchCriteria, type MatchDog } from '@/lib/matching'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { ALERT_STATUS, type AlertStatus } from '@/lib/alert-status'
-import { resend } from '@/lib/resend'
+import { sendEmail } from '@/lib/resend'
 
 export interface DigestDog extends MatchDog {
   id: string
@@ -127,7 +127,7 @@ async function sendDigestEmail(to: string, matches: DigestDog[], introHtml: stri
           </div>`,
   })
 
-  await resend.emails.send({
+  await sendEmail({
     from: `DOGSRUN Alerts <${CONTACT_EMAIL}>`,
     to,
     subject: `${matches.length} dog${plural} matching your criteria on DOGSRUN`,

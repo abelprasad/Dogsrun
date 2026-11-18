@@ -1,7 +1,7 @@
 import { CONTACT_EMAIL, SITE_URL } from '@/lib/constants'
 import { escapeHtml, sanitizeSubject } from '@/lib/html'
 import { supabaseAdmin } from '@/lib/supabase-server'
-import { resend } from '@/lib/resend'
+import { sendEmail } from '@/lib/resend'
 
 interface InterestAlert {
   dogs: { name: string; shelter_id: string }
@@ -52,7 +52,7 @@ export async function notifyShelterOfInterest(alert: InterestAlert, { viaEmailMa
           </div>
         `
 
-  await resend.emails.send({
+  await sendEmail({
     from: `DOGSRUN <${CONTACT_EMAIL}>`,
     to: shelter.email,
     subject: `${sanitizeSubject(rescue.name)} is interested in ${sanitizeSubject(dog.name)}`,
