@@ -3,6 +3,7 @@ import { getAdminUser } from '@/lib/auth-context'
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { escapeHtml } from '@/lib/html'
+import { brandedEmail, emailButton } from '@/lib/email'
 import { dogMatchesCriteria } from '@/lib/matching'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { adminEmailRatelimit, getClientIp } from '@/lib/ratelimit'
@@ -139,14 +140,10 @@ export async function POST(req: NextRequest) {
     `
   }).join('')
 
-  const digestHtml = `
-    <div style="background-color:#f5f0e8;padding:40px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
-      <div style="max-width:600px;margin:0 auto;background-color:#fff9ef;border:1px solid rgba(19,36,29,0.1);">
-        <div style="background-color:#13241d;padding:32px 40px;text-align:center;">
-          <p style="color:rgba(244,185,66,0.7);font-size:11px;font-weight:700;letter-spacing:0.24em;text-transform:uppercase;margin:0 0 8px 0;">DOGSRUN</p>
-          <h1 style="color:#c08a3e;font-size:28px;font-weight:900;letter-spacing:-0.025em;margin:0;">${matches.length} Dog${matches.length === 1 ? '' : 's'} Waiting</h1>
-        </div>
-        <div style="padding:40px;">
+  const digestHtml = brandedEmail({
+    title: `${matches.length} Dog${matches.length === 1 ? '' : 's'} Waiting`,
+    footerNote: "You'll receive individual alerts as new matching dogs are added.",
+    bodyHtml: `
           <p style="color:#5d6a64;font-size:15px;line-height:26px;margin:0 0 28px 0;">
             Hi <strong style="color:#13241d;">${escapeHtml(org.name)}</strong>, here are the dogs currently available on DOGSRUN that match your rescue criteria.
           </p>
@@ -154,23 +151,9 @@ export async function POST(req: NextRequest) {
             ${dogRows}
           </table>
           <div style="text-align:center;margin-bottom:16px;">
-            <a href="https://dogsrun.org/dashboard/rescue"
-               style="background-color:#13241d;color:#c08a3e;padding:14px 32px;text-decoration:none;display:inline-block;font-weight:700;font-size:11px;letter-spacing:0.24em;text-transform:uppercase;">
-              View All on Dashboard
-            </a>
-          </div>
-        </div>
-        <div style="background-color:#13241d;padding:20px 40px;text-align:center;">
-          <p style="color:rgba(244,185,66,0.5);font-size:11px;letter-spacing:0.1em;margin:0 0 4px 0;text-transform:uppercase;">Loyalty Repaid</p>
-          <p style="color:rgba(245,240,232,0.4);font-size:11px;margin:0;">
-            You'll receive individual alerts as new matching dogs are added. &nbsp;|&nbsp;
-            &copy; ${new Date().getFullYear()} DOGSRUN &nbsp;|&nbsp;
-            <a href="https://dogsrun.org" style="color:rgba(244,185,66,0.6);text-decoration:none;">dogsrun.org</a>
-          </p>
-        </div>
-      </div>
-    </div>
-  `
+            ${emailButton('https://dogsrun.org/dashboard/rescue', 'View All on Dashboard')}
+          </div>`,
+  })
 
   await resend.emails.send({
     from: `DOGSRUN Alerts <${CONTACT_EMAIL}>`,

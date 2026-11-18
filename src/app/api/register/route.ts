@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { registerRatelimit, getClientIp } from '@/lib/ratelimit'
 import { escapeHtml } from '@/lib/html'
+import { brandedEmail, emailButton, emailDetailRow } from '@/lib/email'
 import { createSupabaseServerClient, supabaseAdmin } from '@/lib/supabase-server'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
@@ -100,7 +101,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Registration failed. Please try again.' }, { status: 500 })
   }
 
-  // REVIEW: email chrome and <tr> rows duplicate the other templates; use lib/email.ts helpers.
   // Notify all admins
   const { data: admins } = await supabaseAdmin
     .from('admins')
@@ -120,44 +120,23 @@ export async function POST(req: NextRequest) {
       from: `DOGSRUN <${CONTACT_EMAIL}>`,
       to: adminEmails,
       subject: `New ${safeType} Registration — ${safeName}`,
-      html: `
-        <div style="background-color:#f5f0e8;padding:40px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
-          <div style="max-width:600px;margin:0 auto;background-color:#fff9ef;border:1px solid rgba(19,36,29,0.1);">
-            <div style="background-color:#13241d;padding:32px 40px;text-align:center;">
-              <p style="color:rgba(244,185,66,0.7);font-size:11px;font-weight:700;letter-spacing:0.24em;text-transform:uppercase;margin:0 0 8px 0;">DOGSRUN Admin</p>
-              <h1 style="color:#c08a3e;font-size:26px;font-weight:900;letter-spacing:-0.025em;margin:0;">New ${safeType} Registration</h1>
-            </div>
-            <div style="padding:40px;">
+      html: brandedEmail({
+        eyebrow: 'DOGSRUN Admin',
+        title: `New ${safeType} Registration`,
+        titleSize: 26,
+        bodyHtml: `
               <p style="color:#5d6a64;font-size:15px;line-height:26px;margin:0 0 24px 0;">A new organization has registered and is pending your review.</p>
-              <table style="width:100%;border-collapse:collapse;margin-bottom:32px;">
-                <tr style="border-bottom:1px solid rgba(19,36,29,0.08);">
-                  <td style="padding:10px 0;font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#5d6a64;width:120px;">Org Name</td>
-                  <td style="padding:10px 0;font-size:15px;font-weight:700;color:#13241d;">${safeName}</td>
-                </tr>
-                <tr style="border-bottom:1px solid rgba(19,36,29,0.08);">
-                  <td style="padding:10px 0;font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#5d6a64;">Type</td>
-                  <td style="padding:10px 0;font-size:15px;color:#13241d;">${safeType}</td>
-                </tr>
-                <tr style="border-bottom:1px solid rgba(19,36,29,0.08);">
-                  <td style="padding:10px 0;font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#5d6a64;">Email</td>
-                  <td style="padding:10px 0;font-size:15px;color:#13241d;"><a href="mailto:${safeEmail}" style="color:#13241d;">${safeEmail}</a></td>
-                </tr>
-                <tr>
-                  <td style="padding:10px 0;font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#5d6a64;">Location</td>
-                  <td style="padding:10px 0;font-size:15px;color:#13241d;">${safeCity}, ${safeState}</td>
-                </tr>
+              <table style="width:100%;border-collapse:collapse;margin-bottom:32px;">${
+                emailDetailRow('Org Name', safeName, { bold: true, labelWidth: true }) +
+                emailDetailRow('Type', safeType) +
+                emailDetailRow('Email', `<a href="mailto:${safeEmail}" style="color:#13241d;">${safeEmail}</a>`) +
+                emailDetailRow('Location', `${safeCity}, ${safeState}`, { last: true })
+              }
               </table>
               <div style="text-align:center;">
-                <a href="https://dogsrun.org/admin" style="background-color:#13241d;color:#c08a3e;padding:14px 32px;text-decoration:none;display:inline-block;font-weight:700;font-size:11px;letter-spacing:0.24em;text-transform:uppercase;">Review in Admin Panel</a>
-              </div>
-            </div>
-            <div style="background-color:#13241d;padding:20px 40px;text-align:center;">
-              <p style="color:rgba(244,185,66,0.5);font-size:11px;letter-spacing:0.1em;margin:0 0 4px 0;text-transform:uppercase;">Loyalty Repaid</p>
-              <p style="color:rgba(245,240,232,0.4);font-size:11px;margin:0;">&copy; ${new Date().getFullYear()} DOGSRUN &nbsp;|&nbsp;<a href="https://dogsrun.org" style="color:rgba(244,185,66,0.6);text-decoration:none;">dogsrun.org</a></p>
-            </div>
-          </div>
-        </div>
-      `,
+                ${emailButton('https://dogsrun.org/admin', 'Review in Admin Panel')}
+              </div>`,
+      }),
     })
     } catch (emailError) {
       // M-D6: org is already inserted — don't 500, just flag for retry

@@ -3,6 +3,7 @@ import { getAdminUser } from '@/lib/auth-context'
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { escapeHtml } from '@/lib/html'
+import { brandedEmail, emailButton } from '@/lib/email'
 import { dogMatchesCriteria } from '@/lib/matching'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { adminEmailRatelimit, getClientIp } from '@/lib/ratelimit'
@@ -74,44 +75,20 @@ export async function POST(req: NextRequest) {
   const subject = action === 'approve' ? `You're approved on DOGSRUN!` : `DOGSRUN — Application Update`
   const safeOrgName = escapeHtml(org.name)
 
-  const html = action === 'approve' ? `
-    <div style="background-color:#f5f0e8;padding:40px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
-      <div style="max-width:600px;margin:0 auto;background-color:#fff9ef;border:1px solid rgba(19,36,29,0.1);">
-        <div style="background-color:#13241d;padding:32px 40px;text-align:center;">
-          <p style="color:rgba(244,185,66,0.7);font-size:11px;font-weight:700;letter-spacing:0.24em;text-transform:uppercase;margin:0 0 8px 0;">DOGSRUN</p>
-          <h1 style="color:#c08a3e;font-size:28px;font-weight:900;letter-spacing:-0.025em;margin:0;">You're Approved!</h1>
-        </div>
-        <div style="padding:40px;">
+  const html = action === 'approve' ? brandedEmail({
+    title: `You're Approved!`,
+    bodyHtml: `
           <p style="color:#5d6a64;font-size:15px;line-height:26px;margin:0 0 32px 0;">Hi <strong style="color:#13241d;">${safeOrgName}</strong>, your 501(c)(3) verification has been reviewed and your organization is now approved on DOGSRUN. Welcome to the network.</p>
           <div style="text-align:center;margin-bottom:32px;">
-            <a href="https://dogsrun.org/dashboard" style="background-color:#13241d;color:#c08a3e;padding:14px 32px;text-decoration:none;display:inline-block;font-weight:700;font-size:11px;letter-spacing:0.24em;text-transform:uppercase;">Go to Your Dashboard</a>
+            ${emailButton('https://dogsrun.org/dashboard', 'Go to Your Dashboard')}
           </div>
-          <p style="color:#5d6a64;font-size:13px;text-align:center;line-height:20px;margin:0;">Questions? Reach us at <a href="mailto:admin@dogsrun.org" style="color:#13241d;font-weight:700;">admin@dogsrun.org</a></p>
-        </div>
-        <div style="background-color:#13241d;padding:20px 40px;text-align:center;">
-          <p style="color:rgba(244,185,66,0.5);font-size:11px;letter-spacing:0.1em;margin:0 0 4px 0;text-transform:uppercase;">Loyalty Repaid</p>
-          <p style="color:rgba(245,240,232,0.4);font-size:11px;margin:0;">&copy; ${new Date().getFullYear()} DOGSRUN &nbsp;|&nbsp;<a href="https://dogsrun.org" style="color:rgba(244,185,66,0.6);text-decoration:none;">dogsrun.org</a></p>
-        </div>
-      </div>
-    </div>
-  ` : `
-    <div style="background-color:#f5f0e8;padding:40px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
-      <div style="max-width:600px;margin:0 auto;background-color:#fff9ef;border:1px solid rgba(19,36,29,0.1);">
-        <div style="background-color:#13241d;padding:32px 40px;text-align:center;">
-          <p style="color:rgba(244,185,66,0.7);font-size:11px;font-weight:700;letter-spacing:0.24em;text-transform:uppercase;margin:0 0 8px 0;">DOGSRUN</p>
-          <h1 style="color:#c08a3e;font-size:28px;font-weight:900;letter-spacing:-0.025em;margin:0;">Application Update</h1>
-        </div>
-        <div style="padding:40px;">
+          <p style="color:#5d6a64;font-size:13px;text-align:center;line-height:20px;margin:0;">Questions? Reach us at <a href="mailto:admin@dogsrun.org" style="color:#13241d;font-weight:700;">admin@dogsrun.org</a></p>`,
+  }) : brandedEmail({
+    title: 'Application Update',
+    bodyHtml: `
           <p style="color:#5d6a64;font-size:15px;line-height:26px;margin:0 0 24px 0;">Hi <strong style="color:#13241d;">${safeOrgName}</strong>, we were unable to verify your 501(c)(3) status at this time.</p>
-          <p style="color:#5d6a64;font-size:15px;line-height:26px;margin:0 0 32px 0;">Please contact us at <a href="mailto:admin@dogsrun.org" style="color:#13241d;font-weight:700;">admin@dogsrun.org</a> to resubmit your documentation or ask any questions.</p>
-        </div>
-        <div style="background-color:#13241d;padding:20px 40px;text-align:center;">
-          <p style="color:rgba(244,185,66,0.5);font-size:11px;letter-spacing:0.1em;margin:0 0 4px 0;text-transform:uppercase;">Loyalty Repaid</p>
-          <p style="color:rgba(245,240,232,0.4);font-size:11px;margin:0;">&copy; ${new Date().getFullYear()} DOGSRUN &nbsp;|&nbsp;<a href="https://dogsrun.org" style="color:rgba(244,185,66,0.6);text-decoration:none;">dogsrun.org</a></p>
-        </div>
-      </div>
-    </div>
-  `
+          <p style="color:#5d6a64;font-size:15px;line-height:26px;margin:0 0 32px 0;">Please contact us at <a href="mailto:admin@dogsrun.org" style="color:#13241d;font-weight:700;">admin@dogsrun.org</a> to resubmit your documentation or ask any questions.</p>`,
+  })
 
   await resend.emails.send({
     from: `DOGSRUN <${CONTACT_EMAIL}>`,
@@ -204,14 +181,10 @@ async function sendRescueApprovalDigest(
     `
   }).join('')
 
-  const digestHtml = `
-    <div style="background-color:#f5f0e8;padding:40px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
-      <div style="max-width:600px;margin:0 auto;background-color:#fff9ef;border:1px solid rgba(19,36,29,0.1);">
-        <div style="background-color:#13241d;padding:32px 40px;text-align:center;">
-          <p style="color:rgba(244,185,66,0.7);font-size:11px;font-weight:700;letter-spacing:0.24em;text-transform:uppercase;margin:0 0 8px 0;">DOGSRUN</p>
-          <h1 style="color:#c08a3e;font-size:28px;font-weight:900;letter-spacing:-0.025em;margin:0;">${matches.length} Dog${matches.length === 1 ? '' : 's'} Waiting</h1>
-        </div>
-        <div style="padding:40px;">
+  const digestHtml = brandedEmail({
+    title: `${matches.length} Dog${matches.length === 1 ? '' : 's'} Waiting`,
+    footerNote: "You'll receive individual alerts as new matching dogs are added.",
+    bodyHtml: `
           <p style="color:#5d6a64;font-size:15px;line-height:26px;margin:0 0 28px 0;">
             Welcome to DOGSRUN, <strong style="color:#13241d;">${escapeHtml(rescueName)}</strong>. Here are the dogs currently available that match your rescue criteria.
           </p>
@@ -219,23 +192,9 @@ async function sendRescueApprovalDigest(
             ${dogRows}
           </table>
           <div style="text-align:center;margin-bottom:16px;">
-            <a href="https://dogsrun.org/dashboard/rescue"
-               style="background-color:#13241d;color:#c08a3e;padding:14px 32px;text-decoration:none;display:inline-block;font-weight:700;font-size:11px;letter-spacing:0.24em;text-transform:uppercase;">
-              View All on Dashboard
-            </a>
-          </div>
-        </div>
-        <div style="background-color:#13241d;padding:20px 40px;text-align:center;">
-          <p style="color:rgba(244,185,66,0.5);font-size:11px;letter-spacing:0.1em;margin:0 0 4px 0;text-transform:uppercase;">Loyalty Repaid</p>
-          <p style="color:rgba(245,240,232,0.4);font-size:11px;margin:0;">
-            You'll receive individual alerts as new matching dogs are added. &nbsp;|&nbsp;
-            &copy; ${new Date().getFullYear()} DOGSRUN &nbsp;|&nbsp;
-            <a href="https://dogsrun.org" style="color:rgba(244,185,66,0.6);text-decoration:none;">dogsrun.org</a>
-          </p>
-        </div>
-      </div>
-    </div>
-  `
+            ${emailButton('https://dogsrun.org/dashboard/rescue', 'View All on Dashboard')}
+          </div>`,
+  })
 
   await resend.emails.send({
     from: `DOGSRUN Alerts <${CONTACT_EMAIL}>`,
