@@ -23,11 +23,10 @@ test.describe('Public Pages', () => {
     await page.goto(`${BASE}/dogs`)
     await page.waitForLoadState('networkidle')
     const cards = page.locator('a[href^="/dogs/"]')
-    if (await cards.count() > 0) {
-      await cards.first().click()
-      await expect(page).toHaveURL(/\/dogs\/[a-z0-9-]+/)
-      await expect(page.locator('h1').first()).toBeVisible()
-    }
+    test.skip(await cards.count() === 0, 'No public dogs in this environment; seed data to run this test')
+    await cards.first().click()
+    await expect(page).toHaveURL(/\/dogs\/[a-z0-9-]+/)
+    await expect(page.locator('h1').first()).toBeVisible()
   })
 
   test('about page loads with mission and nonprofit info', async ({ page }) => {
@@ -222,9 +221,8 @@ test.describe('Auth Guards', () => {
   async function assertBlocked(page: Page, url: string, sensitiveText: string) {
     await page.goto(url)
     await page.waitForLoadState('networkidle')
-    const redirected = page.url().includes('login') || page.url().includes('register')
-    const hasContent = await page.locator(`text=${sensitiveText}`).isVisible()
-    expect(redirected || !hasContent).toBeTruthy()
+    await expect(page).toHaveURL(/\/auth\/login/)
+    await expect(page.locator(`text=${sensitiveText}`)).toHaveCount(0)
   }
 
   test('shelter dashboard blocked when logged out', async ({ page }) => {
