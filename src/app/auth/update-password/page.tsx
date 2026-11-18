@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
-import { Button } from '@/components/ui'
+import Button from '@/components/ui/button'
 import { heroPhoto } from '@/lib/site-content'
 import AuthShell, {
   authInputClass,

@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { US_STATES } from '@/lib/us-states'
-import { Button } from '@/components/ui'
+import Button from '@/components/ui/button'
 import { STORAGE_BUCKETS } from '@/lib/constants'
 import { taxDocPath } from '@/lib/tax-doc'
 

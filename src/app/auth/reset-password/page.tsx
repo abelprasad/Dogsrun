@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
-import { Button } from '@/components/ui'
+import Button from '@/components/ui/button'
 import { rescuePhoto } from '@/lib/site-content'
 import AuthShell, {
   authInputClass,
