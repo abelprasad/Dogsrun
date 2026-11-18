@@ -12,6 +12,7 @@ import BreedSelect from '@/components/breed-select';
 import ColorPicker from '@/components/color-picker';
 import StateSelect from '@/components/state-select';
 import { uploadDogPhoto } from '@/lib/upload-photo';
+import { normalizedOptionalFields, validateDogForm, type DogFormValues } from '@/lib/dog-form';
 
 interface Dog {
   id: string;
@@ -45,14 +46,14 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
   const [photo, setPhoto] = useState<File | null>(null);
   const [fieldErrors, setFieldErrors] = useState<{ age_years?: string; weight_lbs?: string }>({});
   const toast = useToast();
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<DogFormValues>({
     name: dog.name || '',
     breed: dog.breed || '',
     mix: dog.mix || false,
     age_years: dog.age_years?.toString() || '',
     weight_lbs: dog.weight_lbs?.toString() || '',
     sex: dog.sex || 'unknown',
-    color: dog.color || [] as string[],
+    color: dog.color || [],
     state: dog.state || '',
     description: dog.description || '',
     parvo: dog.parvo || false,
@@ -70,12 +71,9 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (form.age_years && parseFloat(form.age_years) < 0) {
-      setFieldErrors({ age_years: 'Age cannot be negative' });
-      return;
-    }
-    if (form.weight_lbs && parseFloat(form.weight_lbs) < 0) {
-      setFieldErrors({ weight_lbs: 'Weight cannot be negative' });
+    const validationErrors = validateDogForm(form);
+    if (validationErrors) {
+      setFieldErrors(validationErrors);
       return;
     }
     setFieldErrors({});
@@ -101,10 +99,7 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
       body: JSON.stringify({
         dog_id: dog.id,
         ...form,
-        color: form.color.length > 0 ? form.color : null,
-        state: form.state || null,
-        intake_date: form.intake_date || null,
-        euthanasia_date: form.euthanasia_date || null,
+        ...normalizedOptionalFields(form),
         photo_url,
       }),
     });
@@ -225,7 +220,7 @@ export default function EditDogForm({ dog }: EditDogFormProps) {
             { key: 'other_issues', label: 'Other Issues' },
           ].map(({ key, label }) => (
             <label key={key} className="flex items-center gap-3 p-3 border border-[#13241d]/10 rounded-lg cursor-pointer hover:bg-[#f8f1e8] transition-colors">
-              <input type="checkbox" checked={form[key as keyof typeof form] as boolean}
+              <input type="checkbox" checked={form[key as keyof DogFormValues] as boolean}
                 onChange={e => setForm(f => ({
                   ...f,
                   [key]: e.target.checked,

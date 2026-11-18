@@ -10,25 +10,7 @@ import StateSelect from '@/components/state-select'
 import { useToast } from '@/components/toaster'
 import { reportError } from '@/lib/friendly-error'
 import { uploadDogPhoto } from '@/lib/upload-photo'
-
-interface DogForm {
-  name: string;
-  breed: string;
-  mix: boolean;
-  age_years: string;
-  weight_lbs: string;
-  sex: string;
-  color: string[];
-  state: string;
-  description: string;
-  parvo: boolean;
-  tripod: boolean;
-  blind: boolean;
-  other_issues: boolean;
-  other_issues_notes: string;
-  intake_date: string;
-  euthanasia_date: string;
-}
+import { normalizedOptionalFields, validateDogForm, type DogFormValues } from '@/lib/dog-form'
 
 export default function NewDogForm() {
   const router = useRouter()
@@ -37,7 +19,7 @@ export default function NewDogForm() {
   const [photo, setPhoto] = useState<File | null>(null)
   const [fieldErrors, setFieldErrors] = useState<{ age_years?: string; weight_lbs?: string }>({})
   const [showSpecialNeeds, setShowSpecialNeeds] = useState(false)
-  const [form, setForm] = useState<DogForm>({
+  const [form, setForm] = useState<DogFormValues>({
     name: '', breed: '', mix: false, age_years: '', weight_lbs: '',
     sex: 'unknown', color: [], state: '', description: '',
     parvo: false, tripod: false, blind: false, other_issues: false, other_issues_notes: '',
@@ -49,8 +31,8 @@ export default function NewDogForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (form.age_years !== '' && parseFloat(form.age_years) < 0) { setFieldErrors({ age_years: 'Age cannot be negative' }); return }
-    if (form.weight_lbs !== '' && parseFloat(form.weight_lbs) < 0) { setFieldErrors({ weight_lbs: 'Weight cannot be negative' }); return }
+    const validationErrors = validateDogForm(form)
+    if (validationErrors) { setFieldErrors(validationErrors); return }
     setFieldErrors({})
     setLoading(true)
 
@@ -72,12 +54,10 @@ export default function NewDogForm() {
       name: form.name, breed: form.breed, mix: form.mix,
       age_years: form.age_years ? parseFloat(form.age_years) : null,
       weight_lbs: form.weight_lbs ? parseFloat(form.weight_lbs) : null,
-      sex: form.sex, color: form.color.length > 0 ? form.color : null,
-      state: form.state || null, description: form.description,
+      sex: form.sex, description: form.description,
       parvo: form.parvo, tripod: form.tripod, blind: form.blind,
       other_issues: form.other_issues, other_issues_notes: form.other_issues_notes,
-      intake_date: form.intake_date || null,
-      euthanasia_date: form.euthanasia_date || null,
+      ...normalizedOptionalFields(form),
       shelter_id: org.id, status: 'available', photo_url,
     }).select().single()
 
@@ -243,7 +223,7 @@ export default function NewDogForm() {
                     { key: 'other_issues', label: 'Other Issues' },
                   ].map(({ key, label }) => (
                     <label key={key} className="flex items-center gap-3 p-3 border border-[#13241d]/10 bg-[#f5f0e8] cursor-pointer">
-                      <input type="checkbox" checked={form[key as keyof DogForm] as boolean}
+                      <input type="checkbox" checked={form[key as keyof DogFormValues] as boolean}
                         onChange={e => setForm(f => ({ ...f, [key]: e.target.checked, ...(key === 'other_issues' && !e.target.checked ? { other_issues_notes: '' } : {}) }))}
                         className="w-4 h-4 border-[#13241d]/30 text-[#13241d] focus:ring-[#13241d]" />
                       <span className="text-xs uppercase tracking-[0.24em] font-bold text-[#13241d]">{label}</span>
