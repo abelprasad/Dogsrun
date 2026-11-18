@@ -20,7 +20,7 @@
  * Exit codes: 0 ok, 2 blocked/failed run (a failed sync, not an empty
  * import), 1 unexpected error.
  */
-import { ACCT_SOURCE, AcctShelterluvAdapter } from '../src/lib/scraping/adapters/acct'
+import { ACCT_SOURCE, AcctShelterluvAdapter, MAX_DETAIL_FETCHES } from '../src/lib/scraping/adapters/acct'
 import { dedupeExact } from '../src/lib/scraping/dedup'
 import { AdapterBlockedError } from '../src/lib/scraping/types'
 
@@ -50,7 +50,7 @@ async function main(): Promise<void> {
       ? 'Mode: DRY RUN — prints what would be imported, imports nothing.'
       : 'Mode: LIVE — full list. Phase 0–1: still writes NOTHING to Supabase.',
   )
-  const adapter = new AcctShelterluvAdapter({ maxPages, maxDetailFetches: dryRun ? 5 : 200 })
+  const adapter = new AcctShelterluvAdapter({ maxPages, maxDetailFetches: dryRun ? 5 : MAX_DETAIL_FETCHES })
   const startedAt = Date.now()
   let dogs
   try {
