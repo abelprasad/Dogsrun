@@ -5,7 +5,7 @@ import type {
   ReactNode,
 } from "react";
 
-export type ButtonVariant = "primary" | "secondary" | "danger" | "ghost";
+export type ButtonVariant = "primary" | "secondary" | "danger" | "link";
 export type ButtonSize = "md" | "sm";
 
 const sizes: Record<ButtonSize, string> = {
@@ -21,8 +21,8 @@ const variantClasses: Record<ButtonVariant, (size: ButtonSize) => string> = {
   secondary: (size) =>
     `${solidBase(size)} border border-[#13241d]/20 bg-[#fff9ef] text-[#13241d] hover:bg-[#13241d] hover:text-[#c08a3e]`,
   danger: (size) => `${solidBase(size)} bg-red-600 text-white hover:bg-red-700`,
-  // Link-style: callers supply their own size/weight via className.
-  ghost: () => "text-[#d95f4b] transition hover:underline disabled:opacity-50",
+  // Text link in the accent colour. Ignores `size`: callers set text size/weight via className.
+  link: () => "text-[#d95f4b] transition hover:underline disabled:opacity-50",
 };
 
 type ButtonAsButton = ButtonHTMLAttributes<HTMLButtonElement> & {

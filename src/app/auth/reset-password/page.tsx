@@ -57,7 +57,7 @@ export default function ResetPasswordPage() {
           <p className="mb-8 text-sm text-[#f8f1e8]/60">
             Click the link in your email to set a new password.
           </p>
-          <Button href="/auth/login" variant="ghost" className="text-xs font-bold uppercase tracking-[0.2em]">
+          <Button href="/auth/login" variant="link" className="text-xs font-bold uppercase tracking-[0.2em]">
             Back to Login
           </Button>
         </div>

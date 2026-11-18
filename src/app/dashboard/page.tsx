@@ -61,7 +61,7 @@ export default async function DashboardPage() {
         {/* Recent dogs */}
         <div className="mb-6 flex items-center justify-between border-y border-[#13241d]/10 py-4">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#436154]">Recent Dogs</p>
-          <Button variant="ghost" href="/dashboard/dogs" className="text-xs font-bold uppercase tracking-[0.18em]">
+          <Button variant="link" href="/dashboard/dogs" className="text-xs font-bold uppercase tracking-[0.18em]">
             Manage all dogs →
           </Button>
         </div>
@@ -97,7 +97,7 @@ export default async function DashboardPage() {
           ) : (
             <div className="col-span-full border border-dashed border-[#13241d]/20 bg-[#fff9ef] px-6 py-20 text-center">
               <p className="text-[#5d6a64] mb-4">No dogs listed yet.</p>
-              <Button variant="ghost" href="/dashboard/dogs/new" className="text-sm font-black uppercase tracking-widest">
+              <Button variant="link" href="/dashboard/dogs/new" className="text-sm font-black uppercase tracking-widest">
                 Add your first dog
               </Button>
             </div>

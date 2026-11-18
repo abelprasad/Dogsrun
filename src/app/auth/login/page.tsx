@@ -139,7 +139,7 @@ export default function LoginPage() {
               <label htmlFor="login-password" className={authLabelClass}>Password</label>
               <Button
                 href="/auth/reset-password"
-                variant="ghost"
+                variant="link"
                 className="mb-2 text-xs font-bold uppercase tracking-wider"
               >
                 Forgot?

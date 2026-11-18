@@ -117,7 +117,7 @@ export default function CriteriaForm({ rescueId, initialCriteria }: CriteriaForm
             <div className="h-2 w-2 rounded-full bg-green-500" />
             <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#7a877f]">Active</span>
           </div>
-          <Button variant="ghost" onClick={() => setIsEditing(true)} className="text-xs font-black uppercase tracking-[0.18em]">
+          <Button variant="link" onClick={() => setIsEditing(true)} className="text-xs font-black uppercase tracking-[0.18em]">
             Edit Criteria
           </Button>
         </div>
