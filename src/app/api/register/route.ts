@@ -5,6 +5,7 @@ import { escapeHtml } from '@/lib/html'
 import { brandedEmail, emailButton, emailDetailRow } from '@/lib/email'
 import { createSupabaseServerClient, supabaseAdmin } from '@/lib/supabase-server'
 import { resend } from '@/lib/resend'
+import { isOwnTaxDocPath } from '@/lib/tax-doc'
 
 export async function POST(req: NextRequest) {
   const ip = getClientIp(req)
@@ -46,7 +47,7 @@ export async function POST(req: NextRequest) {
 
   // Validate path ownership — must start with the user's own UUID
   // Prevents one user from claiming another user's uploaded document
-  if (!tax_doc_path.startsWith(`${user_id}/`)) {
+  if (!isOwnTaxDocPath(user_id, tax_doc_path)) {
     return NextResponse.json({ error: 'Invalid document path' }, { status: 403 })
   }
 

@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase'
 import { US_STATES } from '@/lib/us-states'
 import { Button } from '@/components/ui'
 import { STORAGE_BUCKETS } from '@/lib/constants'
+import { taxDocPath } from '@/lib/tax-doc'
 
 type Step = 'idle' | 'creating-account' | 'uploading-doc' | 'saving'
 
@@ -101,7 +102,7 @@ function RegisterForm() {
     // Step 2 — upload PDF directly from browser to Supabase Storage.
     // Doing this client-side avoids Vercel's 10s function timeout on slow mobile connections.
     setStep('uploading-doc')
-    const filePath = `${authData.user.id}/501c3.pdf`
+    const filePath = taxDocPath(authData.user.id)
     const { error: uploadError } = await supabase.storage
       .from(STORAGE_BUCKETS.TAX_DOCS)
       .upload(filePath, taxDoc, { contentType: 'application/pdf', upsert: true })
